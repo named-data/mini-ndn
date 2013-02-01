@@ -1,0 +1,20 @@
+[hosts]
+h7: ./h7.sh ccnx:/,s5
+h9: _ ccnx:/,s3
+h6: ./h6.sh ccnx:/,s4
+h8: _ ccnx:/,s2
+[routers]
+s2: ccnx:/music,s1
+s3: ccnx:/music,s1
+s5: ccnx:/music/moveis,h7
+s4: ccnx:/music/skank,h6
+s1: ccnx:/music/skank,s4 ccnx:/music/moveis,s5
+[links]
+h6:s4 bw=1
+s4:s1 bw=1
+s1:s5 bw=1000
+s5:h7 bw=1000 loss=50
+s1:s3 bw=1
+s3:h9 bw=1
+s1:s2 bw=1
+s2:h8 bw=1

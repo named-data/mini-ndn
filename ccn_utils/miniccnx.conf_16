@@ -1,0 +1,68 @@
+[hosts]
+c1: _ ccnx:/,s1
+c2: _ ccnx:/,s1
+c3: _ ccnx:/,s1
+c4: _ ccnx:/,s1
+c5: _ ccnx:/,s1
+c6: _ ccnx:/,s1
+c7: _ ccnx:/,s1
+c8: _ ccnx:/,s1
+c9: _ ccnx:/,s1
+c10: _ ccnx:/,s1
+c11: _ ccnx:/,s1
+c12: _ ccnx:/,s1
+c13: _ ccnx:/,s1
+c14: _ ccnx:/,s1
+c15: _ ccnx:/,s1
+c16: _ ccnx:/,s1
+h1: _ 
+h2: _
+h3: _
+h4: _
+h5: _
+h6: _
+h7: _
+h8: _
+h9: _
+h10: _
+h11: _
+h12: _
+h13: _
+h14: _
+h15: _
+h16: _
+[routers]
+s1: ccnx:/s/1,h1 ccnx:/s/2,h2 ccnx:/s/3,h3 ccnx:/s/4,h4 ccnx:/s/5,h5 ccnx:/s/6,h6 ccnx:/s/7,h7 ccnx:/s/8,h8 ccnx:/s/9,h9 ccnx:/s/10,h10 ccnx:/s/11,h11 ccnx:/s/12,h12 ccnx:/s/13,h13 ccnx:/s/14,h14 ccnx:/s/15,h15 ccnx:/s/16,h16
+[links]
+c1:s1
+c2:s1
+c3:s1
+c4:s1
+c5:s1
+c6:s1
+c7:s1
+c8:s1
+c9:s1
+c10:s1
+c11:s1
+c12:s1
+c13:s1
+c14:s1
+c15:s1
+c16:s1
+s1:h1
+s1:h2
+s1:h3
+s1:h4
+s1:h5
+s1:h6
+s1:h7
+s1:h8
+s1:h9
+s1:h10
+s1:h11
+s1:h12
+s1:h13
+s1:h14
+s1:h15
+s1:h16

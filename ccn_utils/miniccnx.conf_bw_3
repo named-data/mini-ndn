@@ -1,0 +1,16 @@
+[hosts]
+c1: _ ccnx:/,s1
+c2: _ ccnx:/,s1
+c3: _ ccnx:/,s1
+h1: _
+h2: _
+h3: _ 
+[routers]
+s1: ccnx:/1,h1 ccnx:/2,h2 ccnx:/3,h3
+[links]
+c1:s1
+c2:s1
+c3:s1
+s1:h1
+s1:h2
+s1:h3

@@ -1,0 +1,40 @@
+[hosts]
+h1: _ ccnx:/,s1
+h2: _ ccnx:/,s1
+h3: _ ccnx:/,s1
+h4: _ ccnx:/,s1
+h5: _ ccnx:/,s1
+h6: _ ccnx:/,s1
+h7: _ ccnx:/,s1
+h8: _ ccnx:/,s1
+r1: _
+r2: _
+r3: _ 
+r4: _
+r5: _
+r6: _
+r7: _
+r8: _
+[routers]
+s1: ccnx:/,s2
+s2: ccnx:/,s3
+s3: ccnx:/s/1,r1 ccnx:/s/2,r2 ccnx:/s/3,r3 ccnx:/s/4,r4 ccnx:/s/5,r5 ccnx:/s/6,r6 ccnx:/s/7,r7 ccnx:/s/8,r8
+[links]
+h1:s1
+h2:s1
+h3:s1
+h4:s1
+h5:s1
+h6:s1
+h7:s1
+h8:s1
+s1:s2
+s2:s3
+r1:s3
+r2:s3
+r3:s3
+r4:s3
+r5:s3
+r6:s3
+r7:s3
+r8:s3

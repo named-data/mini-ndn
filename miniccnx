@@ -1,0 +1,97 @@
+#!/usr/bin/python
+
+from mininet.topo import Topo
+from mininet.net import Mininet
+from mininet.util import dumpNodeConnections
+from mininet.log import setLogLevel, output, info
+from mininet.cli import CLI
+from mininet.node import CPULimitedCCNHost, CCNHost
+from mininet.link import TCLink
+from conf_parser import extrai_hosts,extrai_routers, extrai_links
+import os.path
+import optparse
+import datetime
+
+def parse_args():
+    usage="""Usage: miniccnx [template_file]
+    If no template_file is given, will try to load template 
+    from file miniccnx.conf in the current directory.
+    """
+
+    parser = optparse.OptionParser(usage)
+
+    _, arg = parser.parse_args()
+    
+    if len(arg) != 1:
+        arg = ''
+    else:
+        arg = arg[0]
+    
+    return arg
+
+
+class CCNTopo(Topo):
+    def __init__(self, conf_arq, **opts):
+        Topo.__init__(self, **opts)
+        
+        hosts_conf = extrai_hosts(conf_arq)
+        routers_conf = extrai_routers(conf_arq)
+        links_conf = extrai_links(conf_arq)
+
+        self.isTCLink = False
+        
+        for host in hosts_conf:
+            self.addHost(host.name, app=host.app, fib=host.uri_tuples,cpu=.025)
+            
+        for router in routers_conf:
+            self.addHost(router.name,fib=router.uri_tuples)
+            
+        for link in links_conf:
+            if len(link.linkDict) == 0:
+                self.addLink(link.h1, link.h2)
+            else:
+                self.addLink(link.h1, link.h2, **link.linkDict)
+                self.isTCLink = True        
+                
+        info('Parse of ' + conf_arq + ' done.\n')
+
+def execute(template_file='miniccnx.conf'):
+    "Create a network based on template_file"
+
+    if template_file == '':
+        template_file='miniccnx.conf'
+        
+    if os.path.exists(template_file) == False:
+        info('No template file given and default template file miniccnx.conf not found. Exiting...\n')
+        quit()
+        
+    topo = CCNTopo(template_file)
+    
+    t = datetime.datetime.now()
+    
+    if topo.isTCLink == True:
+        net = Mininet(topo,host=CPULimitedCCNHost,link=TCLink)
+    else:
+        net = Mininet(topo,host=CCNHost)
+    
+    t2 = datetime.datetime.now()
+    
+    delta = t2 - t
+    
+    info('Setup time: ' + str(delta.seconds) + '\n')
+    
+    net.start()
+
+    for host in net.hosts:
+        if 'app' in host.params:
+            if host.params['app'] != '_':
+                host.cmd(host.params['app'])
+    
+    CLI(net)
+    net.stop()
+
+if __name__ == '__main__':
+    
+    template = parse_args()
+    setLogLevel('info')
+    execute(template)

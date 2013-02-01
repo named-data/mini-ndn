@@ -1,0 +1,18 @@
+[hosts]
+h7: _ ccnx:/,s2
+h4: _ ccnx:/,s3
+h6: _ ccnx:/,s1
+h8: _ ccnx:/,s2
+h5: _ ccnx:/,s1
+[routers]
+s3: ccnx:/music,s1 ccnx:/video,s2
+s1: ccnx:/,s3 ccnx:/music,h5
+s2: ccnx:/,s3 ccnx:/video,h7
+[links]
+h5:s1 bw=1000 
+h6:s1 bw=1000
+s2:h7 bw=1000
+s2:h8 bw=1000
+s1:s3 bw=1000 
+s2:s3 bw=1000 
+h4:s3 bw=1000

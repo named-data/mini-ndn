@@ -1,0 +1,16 @@
+*.pyc
+mnexec
+*.pyc
+*~
+*.1
+*.xcodeproj
+*.xcworkspace
+\#*\#
+mininet.egg-info
+build
+dist
+doc/html
+doc/latex
+trunk
+data
+trash
