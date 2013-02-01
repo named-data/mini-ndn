@@ -14,3 +14,8 @@ doc/latex
 trunk
 data
 trash
+measures
+debian
+.fuse*
+.project
+.pydev*
