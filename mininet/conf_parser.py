@@ -1,14 +1,15 @@
-import ConfigParser
+import ConfigParser, re
 
 class confCCNHost():
     
-    def __init__(self, name, app='', uri_tuples=''):
+    def __init__(self, name, app='', uri_tuples='', cpu=None):
         self.name = name
         self.app = app
         self.uri_tuples = uri_tuples
+        self.cpu = cpu
         
     def __repr__(self):
-        return 'Name: ' + self.name + ' App: ' + self.app + ' URIS: ' + str(self.uri_tuples) 
+        return 'Name: ' + self.name + ' App: ' + self.app + ' URIS: ' + str(self.uri_tuples) + ' CPU:' + str(self.cpu)
 
 class confCCNLink():
     
@@ -20,8 +21,8 @@ class confCCNLink():
     def __repr__(self):
         return 'h1: ' + self.h1 + ' h2: ' + self.h2 + ' params: ' + str(self.linkDict)
     
-def extrai_hosts(conf_arq):
-    'Extrai hosts da secao hosts do arquivo de configuracao'
+def parse_hosts(conf_arq):
+    'Parse hosts section from the conf file.'
     config = ConfigParser.RawConfigParser()
     config.read(conf_arq)
     
@@ -39,15 +40,19 @@ def extrai_hosts(conf_arq):
         
         uris = rest
         uri_list=[]
+        cpu = None
         for uri in uris:
-            uri_list.append((uri.split(',')[0],uri.split(',')[1]))
+            if re.match("cpu",uri):
+                cpu = float(uri.split('=')[1])
+            else:
+                uri_list.append((uri.split(',')[0],uri.split(',')[1]))
         
-        hosts.append(confCCNHost(name , app, uri_list))
+        hosts.append(confCCNHost(name , app, uri_list,cpu))
     
     return hosts
 
-def extrai_routers(conf_arq):
-    'Extrai routers da secao routers do arquivo de configuracao'
+def parse_routers(conf_arq):
+    'Parse routers section from the conf file.'
     config = ConfigParser.RawConfigParser()
     config.read(conf_arq)
 
@@ -62,15 +67,20 @@ def extrai_routers(conf_arq):
 
         uris = rest
         uri_list=[]
-        for uri in uris:
-            uri_list.append((uri.split(',')[0],uri.split(',')[1]))
+        cpu = None
         
-        routers.append(confCCNHost(name=name , uri_tuples=uri_list))
+        for uri in uris:
+            if re.match("cpu",uri):
+                cpu = float(uri.split('=')[1])
+            else:
+                uri_list.append((uri.split(',')[0],uri.split(',')[1]))
+        
+        routers.append(confCCNHost(name=name , uri_tuples=uri_list, cpu=cpu))
     
     return routers
 
-def extrai_links(conf_arq):
-    'Extrai links da secao links do arquivo de configuracao'
+def parse_links(conf_arq):
+    'Parse links section from the conf file.'
     arq = open(conf_arq,'r')
     
     links = []

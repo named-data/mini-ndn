@@ -798,7 +798,6 @@ class CPULimitedCCNHost( CPULimitedHost ):
 
         r = CPULimitedHost.config(self,cpu,cores, **params)
         
-        print 'nozess'
         self.setParam( r, 'app', fib=fib )
         self.setParam( r, 'fib', app=app)
         

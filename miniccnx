@@ -2,12 +2,11 @@
 
 from mininet.topo import Topo
 from mininet.net import Mininet
-from mininet.util import dumpNodeConnections
 from mininet.log import setLogLevel, output, info
 from mininet.cli import CLI
 from mininet.node import CPULimitedCCNHost, CCNHost
 from mininet.link import TCLink
-from conf_parser import extrai_hosts,extrai_routers, extrai_links
+from mininet.conf_parser import parse_hosts,parse_routers, parse_links
 import os.path
 import optparse
 import datetime
@@ -34,17 +33,22 @@ class CCNTopo(Topo):
     def __init__(self, conf_arq, **opts):
         Topo.__init__(self, **opts)
         
-        hosts_conf = extrai_hosts(conf_arq)
-        routers_conf = extrai_routers(conf_arq)
-        links_conf = extrai_links(conf_arq)
+        hosts_conf = parse_hosts(conf_arq)
+        routers_conf = parse_routers(conf_arq)
+        links_conf = parse_links(conf_arq)
 
         self.isTCLink = False
+        self.isLimited = False
         
         for host in hosts_conf:
-            self.addHost(host.name, app=host.app, fib=host.uri_tuples,cpu=.025)
+            if host.cpu != None and self.isLimited != True:
+                self.isLimited = True
+            self.addHost(host.name, app=host.app, fib=host.uri_tuples,cpu=host.cpu)
             
         for router in routers_conf:
-            self.addHost(router.name,fib=router.uri_tuples)
+            if router.cpu != None and self.isLimited != True:
+                self.isLimited = True
+            self.addHost(router.name,fib=router.uri_tuples,cpu=router.cpu)
             
         for link in links_conf:
             if len(link.linkDict) == 0:
@@ -69,8 +73,12 @@ def execute(template_file='miniccnx.conf'):
     
     t = datetime.datetime.now()
     
-    if topo.isTCLink == True:
+    if topo.isTCLink == True and topo.isLimited == True:
         net = Mininet(topo,host=CPULimitedCCNHost,link=TCLink)
+    elif topo.isTCLink == True and topo.isLimited == False:
+        net = Mininet(topo,host=CCNHost,link=TCLink)
+    elif topo.isTCLink == False and topo.isLimited == True:
+        net = Mininet(topo,host=CPULimitedCCNHost)
     else:
         net = Mininet(topo,host=CCNHost)
     
