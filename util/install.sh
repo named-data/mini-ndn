@@ -133,13 +133,13 @@ function mn_deps {
 
     # Add sysctl parameters as noted in the INSTALL file to increase kernel
     # limits to support larger setups:
-    sudo su -c "cat $HOME/mininet/util/sysctl_addon >> /etc/sysctl.conf"
+    sudo su -c "cat $HOME/mn-ccnx/util/sysctl_addon >> /etc/sysctl.conf"
 
     # Load new sysctl settings:
     sudo sysctl -p
 
-    echo "Installing Mininet core"
-    pushd ~/mininet
+    echo "Installing Mininet/Mini-CCNx core"
+    pushd ~/mn-ccnx
     sudo make install
     popd
 }
@@ -208,7 +208,7 @@ function wireshark {
 
     # Copy coloring rules: OF is white-on-blue:
     mkdir -p ~/.wireshark
-    cp ~/mininet/util/colorfilters ~/.wireshark
+    cp ~/mn-ccnx/util/colorfilters ~/.wireshark
 }
 
 
@@ -357,9 +357,9 @@ function nox {
 
     # Apply patches
     git checkout -b tutorial-destiny
-    git am ~/mininet/util/nox-patches/*tutorial-port-nox-destiny*.patch
+    git am ~/mn-ccnx/util/nox-patches/*tutorial-port-nox-destiny*.patch
     if [ "$DIST" = "Ubuntu" ] && [ `expr $RELEASE '>=' 12.04` = 1 ]; then
-        git am ~/mininet/util/nox-patches/*nox-ubuntu12-hacks.patch
+        git am ~/mn-ccnx/util/nox-patches/*nox-ubuntu12-hacks.patch
     fi
 
     # Build
