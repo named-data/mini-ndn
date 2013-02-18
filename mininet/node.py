@@ -52,7 +52,7 @@ from subprocess import Popen, PIPE, STDOUT
 
 from mininet.log import info, error, warn, debug
 from mininet.util import ( quietRun, errRun, errFail, moveIntf, isShellBuiltin,
-                           numCores, retry, mountCgroups )
+                           numCores, retry, mountCgroups, run )
 from mininet.moduledeps import moduleDeps, pathCheck, OVS_KMOD, OF_KMOD, TUN
 from mininet.link import Link, Intf, TCIntf
 
@@ -592,7 +592,8 @@ class CPULimitedHost( Host ):
         "Return value of cgroup parameter"
         cmd = 'cgget -r %s.%s /%s' % (
             resource, param, self.name )
-        return int( quietRun( cmd ).split()[ -1 ] )
+        
+        return int(quietRun( cmd ).split()[ -1 ] )
 
     def cgroupDel( self ):
         "Clean up our cgroup"
@@ -724,7 +725,7 @@ class CCNHost( Host ):
         Host.__init__( self, name, **kwargs )
         if not CCNHost.inited:
             CCNHost.init()
-            
+           
         self.cmd("export CCN_LOCAL_SOCKNAME=/tmp/.sock.ccnx.{0}".format(self.name))
         self.cmd("ccndstart")
         self.peerList = {}

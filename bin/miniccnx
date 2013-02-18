@@ -43,12 +43,12 @@ class CCNTopo(Topo):
         for host in hosts_conf:
             if host.cpu != None and self.isLimited != True:
                 self.isLimited = True
-            self.addHost(host.name, app=host.app, fib=host.uri_tuples,cpu=host.cpu)
+            self.addHost(host.name, app=host.app, fib=host.uri_tuples,cpu=host.cpu,cores=host.cores)
             
         for router in routers_conf:
             if router.cpu != None and self.isLimited != True:
                 self.isLimited = True
-            self.addHost(router.name,fib=router.uri_tuples,cpu=router.cpu)
+            self.addHost(router.name,fib=router.uri_tuples,cpu=router.cpu,cores=router.cores)
             
         for link in links_conf:
             if len(link.linkDict) == 0:

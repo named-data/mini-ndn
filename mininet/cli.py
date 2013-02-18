@@ -35,11 +35,12 @@ import time
 from mininet.log import info, output, error
 from mininet.term import makeTerms
 from mininet.util import quietRun, isShellBuiltin, dumpNodeConnections
+from mininet.node import CCNHost
 
 class CLI( Cmd ):
     "Simple command-line interface to talk to nodes."
 
-    prompt = 'mininet> '
+    prompt = 'miniccnx> '
 
     def __init__( self, mininet, stdin=sys.stdin, script=None ):
         self.mn = mininet
@@ -201,6 +202,16 @@ class CLI( Cmd ):
         for node in self.nodelist:
             output( '%s: %s\n' %
                     ( node.name, ','.join( node.intfNames() ) ) )
+            
+    def do_ccndump(self, _line):
+        "Dump FIB entries"
+        for node in self.nodelist:
+            if 'fib' in node.params:
+                output(node.name + ': ')
+                for name in node.params['fib']:
+                    output(str(name) + ' ')
+                output('\n')
+           
 
     def do_dump( self, _line ):
         "Dump node info."

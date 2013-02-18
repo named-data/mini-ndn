@@ -181,6 +181,7 @@ class TCIntf( Intf ):
                 latency_ms=None, enable_ecn=False, enable_red=False ):
         "Return tc commands to set bandwidth"
 
+
         cmds, parent = [], ' root '
 
         if bw and ( bw < 0 or bw > 1000 ):
@@ -232,6 +233,7 @@ class TCIntf( Intf ):
     def delayCmds( parent, delay=None, jitter=None,
                    loss=None, max_queue_size=None ):
         "Internal method: return tc commands for delay and loss"
+
         cmds = []
         if delay and delay < 0:
             error( 'Negative delay', delay, '\n' )

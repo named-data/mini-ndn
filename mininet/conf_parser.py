@@ -2,14 +2,15 @@ import ConfigParser, re
 
 class confCCNHost():
     
-    def __init__(self, name, app='', uri_tuples='', cpu=None):
+    def __init__(self, name, app='', uri_tuples='', cpu=None, cores=None):
         self.name = name
         self.app = app
         self.uri_tuples = uri_tuples
         self.cpu = cpu
+        self.cores = cores
         
     def __repr__(self):
-        return 'Name: ' + self.name + ' App: ' + self.app + ' URIS: ' + str(self.uri_tuples) + ' CPU:' + str(self.cpu)
+        return 'Name: ' + self.name + ' App: ' + self.app + ' URIS: ' + str(self.uri_tuples) + ' CPU:' + str(self.cpu) + ' Cores:' +str(self.cores)
 
 class confCCNLink():
     
@@ -41,13 +42,17 @@ def parse_hosts(conf_arq):
         uris = rest
         uri_list=[]
         cpu = None
+        cores = None
+        
         for uri in uris:
             if re.match("cpu",uri):
                 cpu = float(uri.split('=')[1])
+            elif re.match("cores",uri):
+                cores = uri.split('=')[1]
             else:
                 uri_list.append((uri.split(',')[0],uri.split(',')[1]))
         
-        hosts.append(confCCNHost(name , app, uri_list,cpu))
+        hosts.append(confCCNHost(name , app, uri_list,cpu,cores))
     
     return hosts
 
@@ -68,14 +73,17 @@ def parse_routers(conf_arq):
         uris = rest
         uri_list=[]
         cpu = None
+        cores = None
         
         for uri in uris:
             if re.match("cpu",uri):
                 cpu = float(uri.split('=')[1])
+            elif re.match("cores",uri):
+                cores = uri.split('=')[1]    
             else:
                 uri_list.append((uri.split(',')[0],uri.split(',')[1]))
         
-        routers.append(confCCNHost(name=name , uri_tuples=uri_list, cpu=cpu))
+        routers.append(confCCNHost(name=name , uri_tuples=uri_list, cpu=cpu, cores=cores))
     
     return routers
 
@@ -104,7 +112,7 @@ def parse_links(conf_arq):
             arg_name, arg_value = arg.split('=')
             key = arg_name
             value = arg_value
-            if key in ['loss','bw','jitter']:
+            if key in ['loss','bw','jitter','max_queue_size']:
                 value = int(value)
             
             link_dict[key] = value

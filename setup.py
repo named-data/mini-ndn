@@ -10,7 +10,7 @@ import sys
 sys.path.append( '.' )
 from mininet.net import VERSION
 
-scripts = [ join( 'bin', filename ) for filename in [ 'mn' 'miniccnx' 'miniccnxedit' ] ]
+scripts = [ join( 'bin', filename ) for filename in [ 'mn', 'miniccnx', 'miniccnxedit' ] ]
 
 modname = distname = 'mininet'
 
