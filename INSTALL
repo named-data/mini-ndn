@@ -1,123 +1,32 @@
+In order to install **Mini-CCNx**, follow the steps below. All of them are required!
 
-Mininet Installation/Configuration Notes
-----------------------------------------
+### What equipment will I need ? 
+ 
+Basically, you'll need a laptop/desktop with a recent Linux distro (Ubuntu, Fedora). We recommend Ubuntu. For this guide, the _Ubuntu 12.04 LTS_ was used. Also, note that you'll need administrative privileges in order to download and install extra packages and also to execute **Mini-CCNx**.
 
-Mininet 2.0.0
----
+### Installing CCNx
 
-The supported installation methods for Mininet are 1) using a
-pre-built VM image, and 2) native installation on Ubuntu. You can also
-easily create your own Mininet VM image (4).
+Each node in **Mini-CCNx** will run the official implementation of CCNx. Let's get it.
 
-(Other distributions may be supported in the future - if you would
-like to contribute an installation script, we would welcome it!)
+In the [Project CCNx](www.ccnx.org) webpage, you'll find all the details for installing the CCNx. See [Installing CCNx](https://www.ccnx.org/wiki/CCNx/InstallingCCNx). To use **Mini-CCNx** you won't need to create the init script as outlined in the prior link. But please, pay attention to the necessary pre-requisite packages, as they are, indeed, necessary.
 
-1. Easiest "installation" - use our pre-built VM image!
+Now, to **Mini-CCNx** itself.
 
-   The easiest way to get Mininet running is to start with one of our
-   pre-built virtual machine images from <http://openflow.org/mininet>
+### Downloading and installing **Mini-CCNx**
 
-   Boot up the VM image, log in, and follow the instructions on the
-   Mininet web site.
+ If you don't have it yet, you'll need to have _git_ installed first. In Ubuntu, that would be:
 
-   One advantage of using the VM image is that it doesn't mess with
-   your native OS installation or damage it in any way.
+`sudo apt-get install git`
 
-   Although a single Mininet instance can simulate multiple networks
-   with multiple controllers, only one Mininet instance may currently
-   be run at a time, and Mininet requires root access in the machine
-   it's running on.  Therefore, if you have a multiuser system, you
-   may wish to consider running Mininet in a VM.
+Now, let's get the source code of **Mini-CCNx**.
+Go to your home directory and use the following command:
 
-2. Next-easiest option: use our Ubuntu package!
+`git clone git://github.com/carlosmscabral/mn-ccnx`
 
-   To install Mininet itself (i.e. `mn` and the Python API) on Ubuntu
-   12.10+:
+As result, there will be a directory named _mn-ccnx_ in your home directory, containing all the source code.
 
-        sudo apt-get install mininet
+Still in your home directory, use the utility install script with the _-fnv_ options:
 
-   Note: if you are upgrading from an older version of Mininet, make
-   sure you remove the old OVS from `/usr/local`:
+`sudo ./mn-ccnx/util/install.sh -fnv`
 
-        sudo rm /usr/local/bin/ovs*
-        sudo rm /usr/local/sbin/ovs*
-
-3. Native installation from source on Ubuntu 11.10+
-
-   If you're reading this, you've probably already done so, but the
-   command to download the Mininet source code is:
-
-        git clone git://github.com/mininet/mininet.git
-
-   If you are running Ubuntu, you may be able to use our handy
-   `install.sh` script, which is in `mininet/util`.
-
-   *WARNING: USE AT YOUR OWN RISK!*
-
-   `install.sh` is a bit intrusive and may possibly damage your OS
-   and/or home directory, by creating/modifying several directories
-   such as `mininet`, `openflow`, `oftest`, `pox`, or `noxcosre`.
-   Although we hope it won't do anything completely terrible, you may
-   want to look at the script before you run it, and you should make
-   sure your system and home directory are backed up just in case!
-
-   To install Mininet itself, the OpenFlow reference implementation, and
-   Open vSwitch, you may use:
-
-        mininet/util/install.sh -fnv
-
-   This should be reasonably quick, and the following command should
-   work after the installation:
-
-        sudo mn --test pingall
-
-   To install ALL of the software which we use for OpenFlow tutorials,
-   including POX, the OpenFlow WireShark dissector, the `oftest`
-   framework, and other potentially useful software (and to add some
-   stuff to `/etc/sysctl.conf` which may or may not be useful) you may
-   use:
-
-        mininet/util/install.sh -a
-
-   This takes about 4 minutes on our test system.
-
-4. Creating your own Mininet/OpenFlow tutorial VM
-
-   Creating your own Ubuntu Mininet VM for use with the OpenFlow tutorial
-   is easy! First, create a new Ubuntu VM. Next, run two commands in it:
-
-        wget https://raw.github.com/mininet/mininet/master/util/vm/install-mininet-vm.sh
-        time install-mininet-vm.sh
-
-   Finally, verify that Mininet is installed and working in the VM:
-
-        sudo mn --test pingall
-
-5. Installation on other Linux distributions
-
-   Although we don't support other Linux distributions directly, it
-   should be possible to install and run Mininet with some degree of
-   manual effort.
-
-   In general, you must have:
-
-   * A Linux kernel compiled with network namespace support enabled
-
-   * An OpenFlow implementation (either the reference user or kernel
-     space implementations, or Open vSwitch.) Appropriate kernel
-     modules (e.g. tun and ofdatapath for the reference kernel
-     implementation) must be loaded.
-
-   * Python, `bash`, `ping`, `iperf`, etc.`
-
-   * Root privileges (required for network device access)
-
-   We encourage contribution of patches to the `install.sh` script to
-   support other Linux distributions.
-
-
-Good luck!
-
-Mininet Team
-
----
+Pre-requisite packages will be downloaded and installed during the process. 
