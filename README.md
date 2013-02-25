@@ -14,7 +14,7 @@ See `INSTALL` for installation instructions and details.
 
 ### Documentation
 
-[Mini-CCNx Wiki](https://github.com/carlosmscabral/mn-ccnx).
+[Mini-CCNx Wiki](https://github.com/carlosmscabral/mn-ccnx/wiki).
 
 ### Credits
 
