@@ -1,0 +1,33 @@
+<CCNHost caida-ucsd: caida-ucsd-eth0:1.0.0.9,caida-ucsd-eth1:1.0.0.5,caida-ucsd-eth2:1.0.0.1 pid=7506> 
+
+<CCNHost csu: csu-eth0:1.0.0.13,csu-eth1:1.0.0.25,csu-eth2:1.0.0.17,csu-eth3:1.0.0.21,csu-eth4:1.0.0.29,csu-eth5:1.0.0.33 pid=7515> 
+
+<CCNHost neu: neu-eth0:1.0.0.45,neu-eth1:1.0.0.41,neu-eth2:1.0.0.37 pid=7523> 
+
+<CCNHost parc: parc-eth0:1.0.0.53,parc-eth1:1.0.0.49,parc-eth2:1.0.0.14,parc-eth3:1.0.0.57 pid=7531> 
+
+<CCNHost pku: pku-eth0:1.0.0.61 pid=7539> 
+
+<CCNHost remap: remap-eth0:1.0.0.50,remap-eth1:1.0.0.69,remap-eth2:1.0.0.65 pid=7547> 
+
+<CCNHost spp-atla: spp-atla-eth0:1.0.0.77,spp-atla-eth1:1.0.0.73,spp-atla-eth2:1.0.0.85,spp-atla-eth3:1.0.0.81 pid=7555> 
+
+<CCNHost spp-hous: spp-hous-eth0:1.0.0.93,spp-hous-eth1:1.0.0.97,spp-hous-eth2:1.0.0.89,spp-hous-eth3:1.0.0.74 pid=7563> 
+
+<CCNHost spp-kans: spp-kans-eth0:1.0.0.101,spp-kans-eth1:1.0.0.90,spp-kans-eth2:1.0.0.78,spp-kans-eth3:1.0.0.113,spp-kans-eth4:1.0.0.105,spp-kans-eth5:1.0.0.109 pid=7571> 
+
+<CCNHost spp-salt: spp-salt-eth0:1.0.0.117,spp-salt-eth1:1.0.0.94,spp-salt-eth2:1.0.0.102,spp-salt-eth3:1.0.0.18 pid=7579> 
+
+<CCNHost spp-wash: spp-wash-eth0:1.0.0.106,spp-wash-eth1:1.0.0.82,spp-wash-eth2:1.0.0.38 pid=7587> 
+
+<CCNHost ua: ua-eth0:1.0.0.121,ua-eth1:1.0.0.2,ua-eth2:1.0.0.22,ua-eth3:1.0.0.125,ua-eth4:1.0.0.98 pid=7595> 
+
+<CCNHost uci: uci-eth0:1.0.0.129,uci-eth1:1.0.0.66,uci-eth2:1.0.0.6 pid=7603> 
+
+<CCNHost ucla: ucla-eth0:1.0.0.62,ucla-eth1:1.0.0.54,ucla-eth2:1.0.0.70,ucla-eth3:1.0.0.10,ucla-eth4:1.0.0.130,ucla-eth5:1.0.0.122,ucla-eth6:1.0.0.26,ucla-eth7:1.0.0.118 pid=7611> 
+
+<CCNHost uiuc: uiuc-eth0:1.0.0.58,uiuc-eth1:1.0.0.110,uiuc-eth2:1.0.0.133,uiuc-eth3:1.0.0.42 pid=7619> 
+
+<CCNHost um: um-eth0:1.0.0.126,um-eth1:1.0.0.30,um-eth2:1.0.0.137,um-eth3:1.0.0.46,um-eth4:1.0.0.86 pid=7627> 
+
+<CCNHost washu: washu-eth0:1.0.0.34,washu-eth1:1.0.0.114,washu-eth2:1.0.0.138,washu-eth3:1.0.0.134 pid=7635>

@@ -1,0 +1,74 @@
+1362605134.590307 ccnd[2905]: CCND_DEBUG=6 CCND_CAP=50000
+1362605134.590760 ccnd[2905]: listening on /tmp/.sock.ccnx.pku
+1362605134.590988 ccnd[2905]: accepting ipv4 datagrams on fd 4 rcvbuf 229376
+1362605134.591188 ccnd[2905]: accepting ipv4 connections on fd 5
+1362605134.591385 ccnd[2905]: accepting ipv6 datagrams on fd 6 rcvbuf 229376
+1362605134.591574 ccnd[2905]: accepting ipv6 connections on fd 7
+1362605134.598531 ccnd[2905]: debug.2573 prefix,ff=3 0 ccnx:/ccnx/ping (16 bytes)
+1362605134.599086 ccnd[2905]: debug.2573 prefix,ff=3 0 ccnx:/%C1.M.S.localhost/%C1.M.SRV/ccnd (37 bytes)
+1362605134.599787 ccnd[2905]: debug.2573 prefix,ff=3 0 ccnx:/%C1.M.S.neighborhood (24 bytes)
+1362605134.600188 ccnd[2905]: debug.2573 prefix,ff=3 0 ccnx:/%C1.M.FACE (13 bytes)
+1362605134.600597 ccnd[2905]: debug.2573 prefix,ff=0x17 0 ccnx:/ccnx/H%1D%0E%AF%CE%91%2A%23%D6%1B%CD%D3-%DF%10%F4%03%0DC%E5%20%09%06%99%FD%90%D1%CD%EAn%EE%F0 (45 bytes)
+1362605134.600803 ccnd[2905]: debug.2573 prefix,ff=0x23 0 ccnx:/%C1.M.S.localhost (20 bytes)
+1362605134.601137 ccnd[2905]: accepted client fd=8 id=6
+1362605134.601375 ccnd[2905]: shutdown client fd=8 id=6
+1362605134.601757 ccnd[2905]: recycling face id 6 (slot 6)
+1362605138.427405 ccnd[2905]: accepted client fd=8 id=6
+1362605138.428146 ccnd[2905]: shutdown client fd=8 id=6
+1362605138.428927 ccnd[2905]: recycling face id 6 (slot 6)
+1362605147.034371 ccnd[2905]: accepted datagram client id=6 (flags=0x40012) 1.0.0.62 port 9695
+1362605147.034720 ccnd[2905]: debug.4238 interest_from 6 ccnx:/%C1.M.FACE (95 bytes,aok=0,scope=2) 481D0E-037B-0000-5B08-FA5CAB
+1362605147.035071 ccnd[2905]: debug.4238 interest_from 6 ccnx:/%C1.M.S.neighborhood/%C1.M.SRV/ccnd/KEY (55 bytes,scope=2)
+1362605147.035454 ccnd[2905]: debug.3388 interest_to 0 ccnx:/%C1.M.FACE (95 bytes,aok=0,scope=2,i=1) 481D0E-037B-0000-5B08-FA5CAB
+1362605147.035738 ccnd[2905]: ic.1004 adjstate 6 .S.......... 0x60012
+1362605147.035967 ccnd[2905]: ic.687 adjstate 6 .S.......P.. 0x60012
+1362605147.036153 ccnd[2905]: ic.692 adjstate 6 .So......P.. 0x60012
+1362605147.036453 ccnd[2905]: debug.3388 interest_to 0 ccnx:/%C1.M.S.neighborhood/%C1.M.SRV/ccnd/KEY (71 bytes,scope=2,i=2) 481D0E-0B59-0006-5B08-539692
+1362605147.042080 ccnd[2905]: debug.4238 interest_from 0 ccnx:/%C1.M.FACE/%C1.M.G%00%00%BE%92h%89P%1D%C7%C5%14%0D%A8Z/%C1.M.NODE (110 bytes,aok=0,scope=2)
+1362605147.042562 ccnd[2905]: debug.4524 content_from 0 ccnx:/%C1.M.S.neighborhood/%C1.M.SRV/ccnd/KEY/%C1.M.K%00H%1D%0E%AF%CE%91%2A%23%D6%1B%CD%D3-%DF%10%F4%03%0DC%E5%20%09%06%99%FD%90%D1%CD%EAn%EE%F0/%FD%05%13%7BD%E9r/%00/%18%F6%14%F8%18%0C%CF%E1%D7%E54%06%87%FD%DB%BCy%5CC%C2%1DL%F9%1DSk%C9%E18%DAu%BC (617 bytes)
+1362605147.042950 ccnd[2905]: debug.3388 interest_to 6 ccnx:/%C1.M.FACE/%C1.M.G%00%00%BE%92h%89P%1D%C7%C5%14%0D%A8Z/%C1.M.NODE (121 bytes,aok=0,scope=2,i=3) 481D0E-0B59-0000-5B0A-1F87F8
+1362605147.043547 ccnd[2905]: debug.1505 content_to 6 ccnx:/%C1.M.S.neighborhood/%C1.M.SRV/ccnd/KEY/%C1.M.K%00H%1D%0E%AF%CE%91%2A%23%D6%1B%CD%D3-%DF%10%F4%03%0DC%E5%20%09%06%99%FD%90%D1%CD%EAn%EE%F0/%FD%05%13%7BD%E9r/%00/%18%F6%14%F8%18%0C%CF%E1%D7%E54%06%87%FD%DB%BCy%5CC%C2%1DL%F9%1DSk%C9%E18%DAu%BC (617 bytes)
+1362605151.036301 ccnd[2905]: ic.626 adjstate 6 .So......PR. 0x20012
+1362605151.036691 ccnd[2905]: debug.3582 interest_expiry 6 ccnx:/%C1.M.FACE (79 bytes,aok=0,scope=2,i=1)
+1362605151.037160 ccnd[2905]: debug.4238 interest_from 0 ccnx:/%C1.M.FACE/%C1.M.G%00%00%BE%92h%89P%1D%C7%C5%14%0D%A8Z/%C1.M.NODE (110 bytes,aok=0,scope=2,i=3)
+1362605151.040679 ccnd[2905]: debug.3388 interest_to 6 ccnx:/%C1.M.FACE/%C1.M.G%00%00%BE%92h%89P%1D%C7%C5%14%0D%A8Z/%C1.M.NODE (121 bytes,aok=0,scope=2,i=3) 481D0E-0B59-0000-5F09-FA2E13
+1362605152.044448 ccnd[2905]: debug.4361 stale ccnx:/%C1.M.S.neighborhood/%C1.M.SRV/ccnd/KEY/%C1.M.K%00H%1D%0E%AF%CE%91%2A%23%D6%1B%CD%D3-%DF%10%F4%03%0DC%E5%20%09%06%99%FD%90%D1%CD%EAn%EE%F0/%FD%05%13%7BD%E9r/%00/%18%F6%14%F8%18%0C%CF%E1%D7%E54%06%87%FD%DB%BCy%5CC%C2%1DL%F9%1DSk%C9%E18%DAu%BC (617 bytes)
+1362605155.036439 ccnd[2905]: ic.808 adjstate 6 ........T... 0x20012
+1362605155.037069 ccnd[2905]: debug.3582 interest_expiry 0 ccnx:/%C1.M.FACE/%C1.M.G%00%00%BE%92h%89P%1D%C7%C5%14%0D%A8Z/%C1.M.NODE (105 bytes,aok=0,scope=2,i=3)
+1362605164.855859 ccnd[2905]: ic.789 adjstate 6 ............ 0x20012
+1362605165.128890 ccnd[2905]: ic.490 adjstate 6 s........... 0x20012
+1362605165.129481 ccnd[2905]: debug.4238 interest_from 0 ccnx:/%C1.M.FACE (84 bytes,aok=0,scope=2)
+1362605165.129928 ccnd[2905]: debug.3388 interest_to 6 ccnx:/%C1.M.FACE (95 bytes,aok=0,scope=2,i=4) 481D0E-0B59-0000-6D21-75F8FC
+1362605165.130319 ccnd[2905]: debug.1963 stuff_interest_to 6 ccnx:/%C1.M.S.neighborhood/%C1.M.SRV/ccnd/KEY (55 bytes,scope=2)
+1362605165.132557 ccnd[2905]: debug.4524 content_from 6 ccnx:/%C1.M.S.neighborhood/%C1.M.SRV/ccnd/KEY/%C1.M.K%00H%1D%0E%AF%CE%91%2A%23%D6%1B%CD%D3-%DF%10%F4%03%0DC%E5%20%09%06%99%FD%90%D1%CD%EAn%EE%F0/%FD%05%13%7B%3E%E0%80/%00/%0Cw~U%F5%20%06C%CB%3C%9B%93%CA%B2.%FE%A2%CAQ%8E%1F%DE%AED%99%A1s%80-Q%D4%EF (617 bytes)
+1362605169.130199 ccnd[2905]: ic.808 adjstate 6 ........T... 0x20012
+1362605169.130818 ccnd[2905]: debug.3582 interest_expiry 0 ccnx:/%C1.M.FACE (79 bytes,aok=0,scope=2,i=4)
+1362605170.134193 ccnd[2905]: debug.4361 stale ccnx:/%C1.M.S.neighborhood/%C1.M.SRV/ccnd/KEY/%C1.M.K%00H%1D%0E%AF%CE%91%2A%23%D6%1B%CD%D3-%DF%10%F4%03%0DC%E5%20%09%06%99%FD%90%D1%CD%EAn%EE%F0/%FD%05%13%7B%3E%E0%80/%00/%0Cw~U%F5%20%06C%CB%3C%9B%93%CA%B2.%FE%A2%CAQ%8E%1F%DE%AED%99%A1s%80-Q%D4%EF (617 bytes)
+1362605182.069440 ccnd[2905]: ic.789 adjstate 6 ............ 0x20012
+1362605182.289413 ccnd[2905]: ic.490 adjstate 6 s........... 0x20012
+1362605182.290005 ccnd[2905]: debug.4238 interest_from 0 ccnx:/%C1.M.FACE (84 bytes,aok=0,scope=2)
+1362605182.290453 ccnd[2905]: debug.3388 interest_to 6 ccnx:/%C1.M.FACE (95 bytes,aok=0,scope=2,i=5) 481D0E-0B59-0000-7E4A-5C808D
+1362605182.290844 ccnd[2905]: debug.1963 stuff_interest_to 6 ccnx:/%C1.M.S.neighborhood/%C1.M.SRV/ccnd/KEY (55 bytes,scope=2)
+1362605182.292835 ccnd[2905]: debug.4524 content_from 6 ccnx:/%C1.M.S.neighborhood/%C1.M.SRV/ccnd/KEY/%C1.M.K%00H%1D%0E%AF%CE%91%2A%23%D6%1B%CD%D3-%DF%10%F4%03%0DC%E5%20%09%06%99%FD%90%D1%CD%EAn%EE%F0/%FD%05%13%7B%3E%CF%8F/%00/%1F%1B%AFq%08W%3A%B4%FF%23%A6%BCP%E0%06~q%83y%86%B7%D8b%FA%EF%08o%D77%8C%A4%CC (617 bytes)
+1362605186.290472 ccnd[2905]: ic.808 adjstate 6 ........T... 0x20012
+1362605186.291076 ccnd[2905]: debug.3582 interest_expiry 0 ccnx:/%C1.M.FACE (79 bytes,aok=0,scope=2,i=5)
+1362605187.293856 ccnd[2905]: debug.4361 stale ccnx:/%C1.M.S.neighborhood/%C1.M.SRV/ccnd/KEY/%C1.M.K%00H%1D%0E%AF%CE%91%2A%23%D6%1B%CD%D3-%DF%10%F4%03%0DC%E5%20%09%06%99%FD%90%D1%CD%EAn%EE%F0/%FD%05%13%7B%3E%CF%8F/%00/%1F%1B%AFq%08W%3A%B4%FF%23%A6%BCP%E0%06~q%83y%86%B7%D8b%FA%EF%08o%D77%8C%A4%CC (617 bytes)
+1362605198.648471 ccnd[2905]: releasing face id 6 (slot 6)
+1362606539.505981 ccnd[2905]: accepted client fd=8 id=7
+1362606539.507491 ccnd[2905]: accepted client fd=9 id=8
+1362606539.507556 ccnd[2905]: stopping (/tmp/.sock.ccnx.pku gone)
+1362606539.507591 ccnd[2905]: exiting.
+1362606539.507631 ccnd[2905]: closing fd 3 while finalizing face 1
+1362606539.507662 ccnd[2905]: releasing face id 1 (slot 1)
+1362606539.507698 ccnd[2905]: closing fd 4 while finalizing face 2
+1362606539.507729 ccnd[2905]: releasing face id 2 (slot 2)
+1362606539.507764 ccnd[2905]: closing fd 5 while finalizing face 3
+1362606539.507795 ccnd[2905]: releasing face id 3 (slot 3)
+1362606539.507829 ccnd[2905]: closing fd 6 while finalizing face 4
+1362606539.507859 ccnd[2905]: releasing face id 4 (slot 4)
+1362606539.507893 ccnd[2905]: closing fd 7 while finalizing face 5
+1362606539.507923 ccnd[2905]: releasing face id 5 (slot 5)
+1362606539.508031 ccnd[2905]: closing fd 8 while finalizing face 7
+1362606539.508111 ccnd[2905]: releasing face id 7 (slot 7)
+1362606539.508174 ccnd[2905]: closing fd 9 while finalizing face 8
+1362606539.508226 ccnd[2905]: recycling face id 8 (slot 8)
