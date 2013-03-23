@@ -46,7 +46,6 @@ class CCNTopo(Topo):
         routers_conf = parse_routers(conf_arq)
         links_conf = parse_links(conf_arq)
 
-        print links_conf
 
         self.isTCLink = False
         self.isLimited = False
