@@ -43,7 +43,7 @@ class CCNTopo(Topo):
         Topo.__init__(self, **opts)
 
         hosts_conf = parse_hosts(conf_arq)
-        routers_conf = parse_routers(conf_arq)
+#       routers_conf = parse_routers(conf_arq)
         links_conf = parse_links(conf_arq)
 
 
@@ -51,14 +51,15 @@ class CCNTopo(Topo):
         self.isLimited = False
 
         for host in hosts_conf:
+	    print host
             if host.cpu != None and self.isLimited != True:
                 self.isLimited = True
-            self.addHost(host.name, app=host.app, fib=host.uri_tuples,cpu=host.cpu,cores=host.cores)
+            self.addHost(host.name, app=host.app, fib=host.uri_tuples,cpu=host.cpu,cores=host.cores,cache=host.cache)
 
-        for router in routers_conf:
-            if router.cpu != None and self.isLimited != True:
-                self.isLimited = True
-            self.addHost(router.name,fib=router.uri_tuples,cpu=router.cpu,cores=router.cores)
+#        for router in routers_conf:
+#            if router.cpu != None and self.isLimited != True:
+#                self.isLimited = True
+#            self.addHost(router.name,fib=router.uri_tuples,cpu=router.cpu,cores=router.cores)
 
         for link in links_conf:
             if len(link.linkDict) == 0:

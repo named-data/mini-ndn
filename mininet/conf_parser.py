@@ -2,15 +2,16 @@ import ConfigParser, re
 
 class confCCNHost():
 
-    def __init__(self, name, app='', uri_tuples='', cpu=None, cores=None):
+    def __init__(self, name, app='', uri_tuples='', cpu=None, cores=None, cache=None):
         self.name = name
         self.app = app
         self.uri_tuples = uri_tuples
         self.cpu = cpu
         self.cores = cores
+	self.cache = cache
 
     def __repr__(self):
-        return 'Name: ' + self.name + ' App: ' + self.app + ' URIS: ' + str(self.uri_tuples) + ' CPU:' + str(self.cpu) + ' Cores:' +str(self.cores)
+        return 'Name: ' + self.name + ' App: ' + self.app + ' URIS: ' + str(self.uri_tuples) + ' CPU:' + str(self.cpu) + ' Cores:' +str(self.cores) + ' Cache: ' + str(self.cache)
 
 class confCCNLink():
 
@@ -29,7 +30,7 @@ def parse_hosts(conf_arq):
 
     hosts = []
 
-    items = config.items('hosts')
+    items = config.items('nodes')
 
     for item in items:
 
@@ -43,16 +44,19 @@ def parse_hosts(conf_arq):
         uri_list=[]
         cpu = None
         cores = None
+	cache = None
 
         for uri in uris:
             if re.match("cpu",uri):
                 cpu = float(uri.split('=')[1])
             elif re.match("cores",uri):
                 cores = uri.split('=')[1]
+	    elif re.match("cache",uri):
+		cache = uri.split('=')[1]
             else:
                 uri_list.append((uri.split(',')[0],uri.split(',')[1]))
 
-        hosts.append(confCCNHost(name , app, uri_list,cpu,cores))
+        hosts.append(confCCNHost(name , app, uri_list,cpu,cores,cache))
 
     return hosts
 

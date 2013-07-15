@@ -726,18 +726,23 @@ class CCNHost( Host ):
         if not CCNHost.inited:
             CCNHost.init()
 
-       # self.cmd("export CCND_DEBUG=6")
-       # self.cmd("export CCND_LOG=./log.{0}".format(self.name))
+        self.cmd("export CCND_DEBUG=6")
+        self.cmd("export CCND_LOG=./log.{0}".format(self.name))
+#	print self.params['cache']
+	if self.params['cache'] != None:
+		self.cmd("export CCND_CAP={0}".format(self.params['cache']))
+
         self.cmd("export CCN_LOCAL_SOCKNAME=/tmp/.sock.ccnx.{0}".format(self.name))
         self.cmd("ccndstart")
         self.peerList = {}
 
-    def config( self, fib=None, app=None, **params ):
+    def config( self, fib=None, app=None, cache=None, **params ):
 
         r = Node.config( self, **params )
 
         self.setParam( r, 'app', fib=fib )
         self.setParam( r, 'fib', app=app)
+	self.setParam( r, 'cache', cache=cache )
 
         return r
 
@@ -795,18 +800,22 @@ class CPULimitedCCNHost( CPULimitedHost ):
         if not CCNHost.inited:
             CCNHost.init()
 
-       # self.cmd("export CCND_DEBUG=6")
-       # self.cmd("export CCND_LOG=./log.{0}".format(self.name))
+        self.cmd("export CCND_DEBUG=6")
+        self.cmd("export CCND_LOG=./log.{0}".format(self.name))
+        if self.params['cache'] != None:
+                self.cmd("export CCND_CAP={0}".format(self.params['cache']))
+
 	self.cmd("export CCN_LOCAL_SOCKNAME=/tmp/.sock.ccnx.{0}".format(self.name))
         self.cmd("ccndstart")
         self.peerList = {}
 
-    def config( self, fib=None, app=None, cpu=None, cores=None, **params):
+    def config( self, fib=None, app=None, cpu=None, cores=None, cache=None, **params):
 
         r = CPULimitedHost.config(self,cpu,cores, **params)
 
         self.setParam( r, 'app', fib=fib )
         self.setParam( r, 'fib', app=app)
+	self.setParam( r, 'cache', cache=cache)
 
         return r
 
