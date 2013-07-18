@@ -280,7 +280,7 @@ class MiniEdit( Frame ):
 	template = open(self.template_file, 'w')
 
 	# hosts
-	template.write('[hosts]\n')
+	template.write('[nodes]\n')
 	for widget in self.widgetToItem:
             name = widget[ 'text' ]
             tags = self.canvas.gettags( self.widgetToItem[ widget ] )
@@ -288,7 +288,7 @@ class MiniEdit( Frame ):
 		template.write(name + ':\n')	
 
 	# switches/routers
-	template.write('[routers]\n')
+	# template.write('[routers]\n')
 	for widget in self.widgetToItem:
             name = widget[ 'text' ]
             tags = self.canvas.gettags( self.widgetToItem[ widget ] )
