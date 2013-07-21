@@ -54,7 +54,7 @@ def parse_hosts(conf_arq):
 	    elif re.match("cache",uri):
 		cache = uri.split('=')[1]
 	    elif re.match("mem",uri):
-		continue
+		mem = uri.split('=')[1]	   	
             else:
                 uri_list.append((uri.split(',')[0],uri.split(',')[1]))
 
