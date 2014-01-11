@@ -1,4 +1,3 @@
-
 Mini-CCNx: Rapid Prototyping for CCN networks
 ========================================================
 
@@ -28,5 +27,5 @@ The Mininet Team:
 The Mini-CCNx team:
 
 * Carlos Cabral
-* Christian Esteve
+* Christian Esteve Rothenberg
 
