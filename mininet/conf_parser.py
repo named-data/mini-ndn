@@ -31,7 +31,17 @@ def parse_hosts(conf_arq):
     hosts = []
 
     items = config.items('nodes')
+	
+	#makes a first-pass read to nodes section to find empty nodes sections
+	for item in items:
+		name = item[0]
+		rest = item[1].split()
+		if len(rest) == 0:
+			config.set('nodes', name, '_')
+	#updates 'items' list
+	items = config.items('nodes')
 
+	#makes a second-pass read to nodes section to properly add hosts
     for item in items:
 
         name = item[0]
@@ -110,6 +120,11 @@ def parse_links(conf_arq):
             break
 
         args = line.split()
+	
+	#checks for non-empty line
+	if len(args) == 0:
+		continue
+
         h1, h2 = args.pop(0).split(':')
 
         link_dict = {}
