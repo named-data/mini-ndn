@@ -33,13 +33,13 @@ def parse_hosts(conf_arq):
     items = config.items('nodes')
 	
 	#makes a first-pass read to nodes section to find empty nodes sections
-	for item in items:
-		name = item[0]
-		rest = item[1].split()
-		if len(rest) == 0:
-			config.set('nodes', name, '_')
+    for item in items:
+	name = item[0]
+	rest = item[1].split()
+	if len(rest) == 0:
+		config.set('nodes', name, '_')
 	#updates 'items' list
-	items = config.items('nodes')
+    items = config.items('nodes')
 
 	#makes a second-pass read to nodes section to properly add hosts
     for item in items:
