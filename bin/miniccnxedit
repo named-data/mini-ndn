@@ -3,11 +3,13 @@
 """
 MiniCCNxEdit: a simple network editor for MiniCCNx
 
+Based on miniedit by:
 Bob Lantz, April 2010
 Gregory Gee, July 2013
 
-Controller icon from http://semlabs.co.uk/
-OpenFlow icon from https://www.opennetworking.org/
+Carlos Cabral, Jan 2013
+Caio Elias, Nov 2014
+
 """
 
 MINIEDIT_VERSION = '2.2.0.1'
@@ -1387,23 +1389,32 @@ class MiniEdit( Frame ):
             bg = 'white'
             about = Toplevel( bg='white' )
             about.title( 'About' )
-            info = self.appName + ': a simple network editor for MiniCCNx'
-            version = 'MiniEdit '+MINIEDIT_VERSION
-            author = 'Originally by: Bob Lantz <rlantz@cs>, April 2010'
+            info = self.appName + ': a simple network editor for MiniCCNx - based on Miniedit'
+	    warning = 'Development version - not entirely functional!'
+            #version = 'MiniEdit '+MINIEDIT_VERSION
+	    author = 'Carlos Cabral, Jan 2013'
+	    author2 = 'Caio Elias, Nov 2014'
+            author3 = 'Originally by: Bob Lantz <rlantz@cs>, April 2010'
             enhancements = 'Enhancements by: Gregory Gee, Since July 2013'
             www = 'http://gregorygee.wordpress.com/category/miniedit/'
             line1 = Label( about, text=info, font='Helvetica 10 bold', bg=bg )
-            line2 = Label( about, text=version, font='Helvetica 9', bg=bg )
+            line2 = Label( about, text=warning, font='Helvetica 9', bg=bg )
             line3 = Label( about, text=author, font='Helvetica 9', bg=bg )
-            line4 = Label( about, text=enhancements, font='Helvetica 9', bg=bg )
-            line5 = Entry( about, font='Helvetica 9', bg=bg, width=len(www), justify=CENTER )
-            line5.insert(0, www)
-            line5.configure(state='readonly')
+	    line4 = Label( about, text=author2, font='Helvetica 9', bg=bg )
+	    line5 = Label( about, text=author3, font='Helvetica 9', bg=bg )
+            line6 = Label( about, text=enhancements, font='Helvetica 9', bg=bg )
+            line7 = Entry( about, font='Helvetica 9', bg=bg, width=len(www), justify=CENTER )
+	    
+
+            line7.insert(0, www)
+            line7.configure(state='readonly')
             line1.pack( padx=20, pady=10 )
             line2.pack(pady=10 )
             line3.pack(pady=10 )
             line4.pack(pady=10 )
             line5.pack(pady=10 )
+	    line6.pack(pady=10 )
+	    line7.pack(pady=10 )
             hide = ( lambda about=about: about.withdraw() )
             self.aboutBox = about
             # Hide on close rather than destroying window
