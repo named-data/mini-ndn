@@ -747,7 +747,6 @@ class MiniEdit( Frame ):
 	if 'LegacyRouter' == node:
 	    self.routerCount += 1
         if 'Host' == node:
-	    print "Host!"
             self.hostCount += 1
         if name is None:
             name = self.nodePrefixes[ node ] + nodeNum
