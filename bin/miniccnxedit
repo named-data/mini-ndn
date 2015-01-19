@@ -30,6 +30,8 @@ import os
 import sys
 from functools import partial
 
+import pdb
+
 if 'PYTHONPATH' in os.environ:
     sys.path = os.environ[ 'PYTHONPATH' ].split( ':' ) + sys.path
 
@@ -98,11 +100,11 @@ class CustomDialog(object):
 
             okButton = Button(buttonFrame, width=8, text='OK', relief='groove',
                        bd=4, command=self.okAction)
-            okButton.grid(row=0, column=0, sticky=E)
+            okButton.grid(row=1, column=0, sticky=E)
 
             canlceButton = Button(buttonFrame, width=8, text='Cancel', relief='groove',
                         bd=4, command=self.cancelAction)
-            canlceButton.grid(row=0, column=1, sticky=W)
+            canlceButton.grid(row=1, column=1, sticky=W)
 
         def body(self, master):
             self.rootFrame = master
@@ -119,10 +121,12 @@ class CustomDialog(object):
 
 class HostDialog(CustomDialog):
 
-        def __init__(self, master, title, prefDefaults):
+        def __init__(self, master, title, prefDefaults, isRouter):
 
             self.prefValues = prefDefaults
             self.result = None
+	    self.isRouter = isRouter
+	    self.title = title
 
             CustomDialog.__init__(self, master, title)
 
@@ -130,13 +134,9 @@ class HostDialog(CustomDialog):
             self.rootFrame = master
             n = Notebook(self.rootFrame)
             self.propFrame = Frame(n)
-            self.vlanFrame = Frame(n)
-            self.interfaceFrame = Frame(n)
-            self.mountFrame = Frame(n)
+            self.fibFrame = Frame(n)
             n.add(self.propFrame, text='Properties')
-            n.add(self.vlanFrame, text='VLAN Interfaces')
-            n.add(self.interfaceFrame, text='External Interfaces')
-            n.add(self.mountFrame, text='Private Directories')
+            n.add(self.fibFrame, text='FIB Entries')
             n.pack()
 
             ### TAB 1
@@ -147,156 +147,81 @@ class HostDialog(CustomDialog):
             if 'hostname' in self.prefValues:
                 self.hostnameEntry.insert(0, self.prefValues['hostname'])
 
-            # Field for Switch IP
-            Label(self.propFrame, text="IP Address:").grid(row=1, sticky=E)
-            self.ipEntry = Entry(self.propFrame)
-            self.ipEntry.grid(row=1, column=1)
-            if 'ip' in self.prefValues:
-                self.ipEntry.insert(0, self.prefValues['ip'])
-
-            # Field for default route
-            Label(self.propFrame, text="Default Route:").grid(row=2, sticky=E)
-            self.routeEntry = Entry(self.propFrame)
-            self.routeEntry.grid(row=2, column=1)
-            if 'defaultRoute' in self.prefValues:
-                self.routeEntry.insert(0, self.prefValues['defaultRoute'])
-
             # Field for CPU
-            Label(self.propFrame, text="Amount CPU:").grid(row=3, sticky=E)
+            Label(self.propFrame, text="Amount CPU:").grid(row=2, sticky=E)
             self.cpuEntry = Entry(self.propFrame)
-            self.cpuEntry.grid(row=3, column=1)
+            self.cpuEntry.grid(row=2, column=1)
+	    Label(self.propFrame, text="%").grid(row=2, column=2, sticky=W)
             if 'cpu' in self.prefValues:
                 self.cpuEntry.insert(0, str(self.prefValues['cpu']))
-            # Selection of Scheduler
-            if 'sched' in self.prefValues:
-                sched =  self.prefValues['sched']
-            else:
-                sched = 'host'
-            self.schedVar = StringVar(self.propFrame)
-            self.schedOption = OptionMenu(self.propFrame, self.schedVar, "host", "cfs", "rt")
-            self.schedOption.grid(row=3, column=2, sticky=W)
-            self.schedVar.set(sched)
-
-            # Selection of Cores
-            Label(self.propFrame, text="Cores:").grid(row=4, sticky=E)
-            self.coreEntry = Entry(self.propFrame)
-            self.coreEntry.grid(row=4, column=1)
-            if 'cores' in self.prefValues:
-                self.coreEntry.insert(1, self.prefValues['cores'])
+            
+	    # Field for Memory
+            Label(self.propFrame, text="Amount MEM:").grid(row=3, sticky=E)
+            self.memEntry = Entry(self.propFrame)
+            self.memEntry.grid(row=3, column=1)
+	    Label(self.propFrame, text="%").grid(row=3, column=2, sticky=W)
+            if 'mem' in self.prefValues:
+                self.memEntry.insert(0, str(self.prefValues['mem']))
+	    
+	    # Field for Cache
+            Label(self.propFrame, text="Amount CACHE:").grid(row=4, sticky=E)
+            self.cacheEntry = Entry(self.propFrame)
+            self.cacheEntry.grid(row=4, column=1)
+	    Label(self.propFrame, text="KBytes").grid(row=4, column=2, sticky=W)
+            if 'cache' in self.prefValues:
+                self.cacheEntry.insert(0, str(self.prefValues['cache']))
 
             # Start command
-            Label(self.propFrame, text="Start Command:").grid(row=5, sticky=E)
-            self.startEntry = Entry(self.propFrame)
-            self.startEntry.grid(row=5, column=1, sticky='nswe', columnspan=3)
-            if 'startCommand' in self.prefValues:
-                self.startEntry.insert(0, str(self.prefValues['startCommand']))
-            # Stop command
-            Label(self.propFrame, text="Stop Command:").grid(row=6, sticky=E)
-            self.stopEntry = Entry(self.propFrame)
-            self.stopEntry.grid(row=6, column=1, sticky='nswe', columnspan=3)
-            if 'stopCommand' in self.prefValues:
-                self.stopEntry.insert(0, str(self.prefValues['stopCommand']))
+	    #print self.isRouter
+	    if self.isRouter == 'False':
+		    Label(self.propFrame, text="Start Command:").grid(row=5, sticky=E)
+		    self.startEntry = Entry(self.propFrame)
+		    self.startEntry.grid(row=5, column=1, sticky='nswe', columnspan=3)
+		    Label(self.propFrame, text="[full path]").grid(row=5, column=2, sticky=W)
+		    if 'startCommand' in self.prefValues:
+		        self.startEntry.insert(0, str(self.prefValues['startCommand']))
+	    else: 
+		self.startEntry= Entry(self.propFrame)
 
             ### TAB 2
-            # External Interfaces
-            self.externalInterfaces = 0
-            Label(self.interfaceFrame, text="External Interface:").grid(row=0, column=0, sticky=E)
-            self.b = Button( self.interfaceFrame, text='Add', command=self.addInterface)
-            self.b.grid(row=0, column=1)
+            # FIB Entries
+            self.fibEntries = 0
+            Label(self.fibFrame, text="FIB Entry:").grid(row=0, column=0, sticky=E)
+            self.fibButton = Button( self.fibFrame, text='Add', command=self.addEntry)
+            self.fibButton.grid(row=0, column=1)
 
-            self.interfaceFrame = VerticalScrolledTable(self.interfaceFrame, rows=0, columns=1, title='External Interfaces')
-            self.interfaceFrame.grid(row=1, column=0, sticky='nswe', columnspan=2)
-            self.tableFrame = self.interfaceFrame.interior
-            self.tableFrame.addRow(value=['Interface Name'], readonly=True)
+            self.fibFrame = VerticalScrolledTable(self.fibFrame, rows=0, columns=2, title='FIB Entries')
+            self.fibFrame.grid(row=1, column=0, sticky='nswe', columnspan=2)
+            self.fibTableFrame = self.fibFrame.interior
+            self.fibTableFrame.addRow(value=['Prefix','Next Hop'], readonly=True)
 
-            # Add defined interfaces
-            externalInterfaces = []
-            if 'externalInterfaces' in self.prefValues:
-                externalInterfaces = self.prefValues['externalInterfaces']
-
-            for externalInterface in externalInterfaces:
-                self.tableFrame.addRow(value=[externalInterface])
-
-            ### TAB 3
-            # VLAN Interfaces
-            self.vlanInterfaces = 0
-            Label(self.vlanFrame, text="VLAN Interface:").grid(row=0, column=0, sticky=E)
-            self.vlanButton = Button( self.vlanFrame, text='Add', command=self.addVlanInterface)
-            self.vlanButton.grid(row=0, column=1)
-
-            self.vlanFrame = VerticalScrolledTable(self.vlanFrame, rows=0, columns=2, title='VLAN Interfaces')
-            self.vlanFrame.grid(row=1, column=0, sticky='nswe', columnspan=2)
-            self.vlanTableFrame = self.vlanFrame.interior
-            self.vlanTableFrame.addRow(value=['IP Address','VLAN ID'], readonly=True)
-
-            vlanInterfaces = []
-            if 'vlanInterfaces' in self.prefValues:
-                vlanInterfaces = self.prefValues['vlanInterfaces']
-            for vlanInterface in vlanInterfaces:
-                self.vlanTableFrame.addRow(value=vlanInterface)
-
-            ### TAB 4
-            # Private Directories
-            self.privateDirectories = 0
-            Label(self.mountFrame, text="Private Directory:").grid(row=0, column=0, sticky=E)
-            self.mountButton = Button( self.mountFrame, text='Add', command=self.addDirectory)
-            self.mountButton.grid(row=0, column=1)
-
-            self.mountFrame = VerticalScrolledTable(self.mountFrame, rows=0, columns=2, title='Directories')
-            self.mountFrame.grid(row=1, column=0, sticky='nswe', columnspan=2)
-            self.mountTableFrame = self.mountFrame.interior
-            self.mountTableFrame.addRow(value=['Mount','Persistent Directory'], readonly=True)
-
-            directoryList = []
-            if 'privateDirectory' in self.prefValues:
-                directoryList = self.prefValues['privateDirectory']
-            for privateDir in directoryList:
-                if isinstance( privateDir, tuple ):
-                    self.mountTableFrame.addRow(value=privateDir)
+            fibList = []
+            if 'fibEntries' in self.prefValues:
+                fibList = self.prefValues['fibEntries']
+            for fibEntr in fibList:
+                if isinstance( fibEntr, tuple ):
+                    self.fibTableFrame.addRow(value=fibEntr)
                 else:
-                    self.mountTableFrame.addRow(value=[privateDir,''])
+                    self.fibTableFrame.addRow(value=[fibEntr,''])
 
-
-        def addDirectory( self ):
-            self.mountTableFrame.addRow()
-
-        def addVlanInterface( self ):
-            self.vlanTableFrame.addRow()
-
-        def addInterface( self ):
-            self.tableFrame.addRow()
+        def addEntry( self ):
+            self.fibTableFrame.addRow()
 
         def apply(self):
-            externalInterfaces = []
-            for row in range(self.tableFrame.rows):
-                if (len(self.tableFrame.get(row, 0)) > 0 and
-                    row > 0):
-                    externalInterfaces.append(self.tableFrame.get(row, 0))
-            vlanInterfaces = []
-            for row in range(self.vlanTableFrame.rows):
-                if (len(self.vlanTableFrame.get(row, 0)) > 0 and
-                    len(self.vlanTableFrame.get(row, 1)) > 0 and
-                    row > 0):
-                    vlanInterfaces.append([self.vlanTableFrame.get(row, 0), self.vlanTableFrame.get(row, 1)])
-            privateDirectories = []
-            for row in range(self.mountTableFrame.rows):
-                if (len(self.mountTableFrame.get(row, 0)) > 0 and row > 0):
-                    if(len(self.mountTableFrame.get(row, 1)) > 0):
-                        privateDirectories.append((self.mountTableFrame.get(row, 0), self.mountTableFrame.get(row, 1)))
+            fibEntries = []
+            for row in range(self.fibTableFrame.rows):
+                if (len(self.fibTableFrame.get(row, 0)) > 0 and row > 0):
+                    if(len(self.fibTableFrame.get(row, 1)) > 0):
+                        fibEntries.append((self.fibTableFrame.get(row, 0), self.fibTableFrame.get(row, 1)))
                     else:
-                        privateDirectories.append(self.mountTableFrame.get(row, 0))
+                        fibEntries.append(self.fibTableFrame.get(row, 0))
 
             results = {'cpu': self.cpuEntry.get(),
-                       'cores':self.coreEntry.get(),
-                       'sched':self.schedVar.get(),
+                       'cache': self.cacheEntry.get(),
+                       'mem': self.memEntry.get(),
                        'hostname':self.hostnameEntry.get(),
-                       'ip':self.ipEntry.get(),
-                       'defaultRoute':self.routeEntry.get(),
                        'startCommand':self.startEntry.get(),
-                       'stopCommand':self.stopEntry.get(),
-                       'privateDirectory':privateDirectories,
-                       'externalInterfaces':externalInterfaces,
-                       'vlanInterfaces':vlanInterfaces}
+                       'fibEntries':fibEntries}
             self.result = results
 
 class VerticalScrolledTable(LabelFrame):
@@ -398,13 +323,14 @@ class LinkDialog(tkSimpleDialog.Dialog):
             Label(master, text="Bandwidth:").grid(row=0, sticky=E)
             self.e1 = Entry(master)
             self.e1.grid(row=0, column=1)
-            Label(master, text="Mbit").grid(row=0, column=2, sticky=W)
+            Label(master, text="[1-1000] Mbps").grid(row=0, column=2, sticky=W)
             if 'bw' in self.linkValues:
                 self.e1.insert(0,str(self.linkValues['bw']))
 
             Label(master, text="Delay:").grid(row=1, sticky=E)
             self.e2 = Entry(master)
             self.e2.grid(row=1, column=1)
+	    Label(master, text="[0-1000] ms").grid(row=1, column=2, sticky=W)
             if 'delay' in self.linkValues:
                 self.e2.insert(0, self.linkValues['delay'])
 
@@ -414,24 +340,6 @@ class LinkDialog(tkSimpleDialog.Dialog):
             Label(master, text="%").grid(row=2, column=2, sticky=W)
             if 'loss' in self.linkValues:
                 self.e3.insert(0, str(self.linkValues['loss']))
-
-            Label(master, text="Max Queue size:").grid(row=3, sticky=E)
-            self.e4 = Entry(master)
-            self.e4.grid(row=3, column=1)
-            if 'max_queue_size' in self.linkValues:
-                self.e4.insert(0, str(self.linkValues['max_queue_size']))
-
-            Label(master, text="Jitter:").grid(row=4, sticky=E)
-            self.e5 = Entry(master)
-            self.e5.grid(row=4, column=1)
-            if 'jitter' in self.linkValues:
-                self.e5.insert(0, self.linkValues['jitter'])
-
-            Label(master, text="Speedup:").grid(row=5, sticky=E)
-            self.e6 = Entry(master)
-            self.e6.grid(row=5, column=1)
-            if 'speedup' in self.linkValues:
-                self.e6.insert(0, str(self.linkValues['speedup']))
 
             return self.e1 # initial focus
 
@@ -443,12 +351,6 @@ class LinkDialog(tkSimpleDialog.Dialog):
                 self.result['delay'] = self.e2.get()
             if (len(self.e3.get()) > 0):
                 self.result['loss'] = int(self.e3.get())
-            if (len(self.e4.get()) > 0):
-                self.result['max_queue_size'] = int(self.e4.get())
-            if (len(self.e5.get()) > 0):
-                self.result['jitter'] = self.e5.get()
-            if (len(self.e6.get()) > 0):
-                self.result['speedup'] = int(self.e6.get())
 
 class ToolTip(object):
 
@@ -492,31 +394,6 @@ class MiniEdit( Frame ):
     "A simple network editor for MiniCCNx."
 
     def __init__( self, parent=None, cheight=600, cwidth=1000, template_file='miniccnx.conf' ):
-
-        #self.defaultIpBase='10.0.0.0/8'
-
-        self.nflowDefaults = {'nflowTarget':'',
-                              'nflowTimeout':'600',
-                              'nflowAddId':'0'}
-        self.sflowDefaults = {'sflowTarget':'',
-                              'sflowSampling':'400',
-                              'sflowHeader':'128',
-                              'sflowPolling':'30'}
-
-        self.appPrefs={
-            #"ipBase": self.defaultIpBase,
-            "startCLI": "0",
-            "terminalType": 'xterm',
-            "switchType": 'ovs',
-            "dpctl": '',
-            'sflow':self.sflowDefaults,
-            'netflow':self.nflowDefaults,
-            'openFlowVersions':{'ovsOf10':'1',
-                                'ovsOf11':'0',
-                                'ovsOf12':'0',
-                                'ovsOf13':'0'}
-
-        }
 	
 	self.template_file = template_file
 
@@ -584,15 +461,15 @@ class MiniEdit( Frame ):
 	self.bind( '<Button-1>', lambda event: self.clearPopups )
 
         self.hostPopup = Menu(self.top, tearoff=0)
-        self.hostPopup.add_command(label='Host Options', font=self.font)
-        self.hostPopup.add_separator()
-        self.hostPopup.add_command(label='Properties', font=self.font, command=self.hostDetails )
+        self.hostPopup.add_command(label='Host Options', font=self.font, command=self.hostDetails)
+        #self.hostPopup.add_separator()
+        #self.hostPopup.add_command(label='Properties', font=self.font, command=self.hostDetails )
 
         self.legacyRouterPopup = Menu(self.top, tearoff=0)
-        self.legacyRouterPopup.add_command(label='Router Options', font=self.font)
+        self.legacyRouterPopup.add_command(label='Router Options', font=self.font, command=self.hostDetails)
 
         self.linkPopup = Menu(self.top, tearoff=0)
-        self.linkPopup.add_command(label='Link Options', font=self.font)
+        self.linkPopup.add_command(label='Link Options', font=self.font, command=self.linkDetails)
         #self.linkPopup.add_separator()
         #self.linkPopup.add_command(label='Properties', font=self.font, command=self.linkDetails )
 
@@ -604,9 +481,9 @@ class MiniEdit( Frame ):
         self.links = {}
         self.hostOpts = {}
         self.switchOpts = {}
+	self.routerOpts = {}
         self.hostCount = 0
-        self.switchCount = 0
-        self.controllerCount = 0
+	self.routerCount = 0
         self.net = None
 
         # Close window gracefully
@@ -614,7 +491,7 @@ class MiniEdit( Frame ):
 
     def quit( self ):
         "Stop our network, if any, then quit."
-        self.stop()
+        #sself.stop()
         Frame.quit( self )
 
     def createMenubar( self ): # MODIFICADO - OK
@@ -625,25 +502,14 @@ class MiniEdit( Frame ):
         mbar = Menu( self.top, font=font )
         self.top.configure( menu=mbar )
 
-
         fileMenu = Menu( mbar, tearoff=False )
         mbar.add_cascade( label="File", font=font, menu=fileMenu )
         fileMenu.add_command( label="New", font=font, command=self.newTopology )
         fileMenu.add_command( label="Open", font=font, command=self.loadTopology )
         fileMenu.add_command( label="Save", font=font, command=self.saveTopology )
-        #fileMenu.add_command( label="Export Level 2 Script", font=font, command=self.exportScript )
+        fileMenu.add_command( label="Generate", font=font, command=self.doGenerate )
         fileMenu.add_separator()
         fileMenu.add_command( label='Quit', command=self.quit, font=font )
-
-        #editMenu.add_command( label="Preferences", font=font, command=self.prefDetails)
-
-        #runMenu = Menu( mbar, tearoff=False )
-        #mbar.add_cascade( label="Run", font=font, menu=runMenu )
-        #runMenu.add_command( label="Run", font=font, command=self.doRun )
-        #runMenu.add_command( label="Stop", font=font, command=self.doStop )
-        #fileMenu.add_separator()
-        #runMenu.add_command( label='Show OVS Summary', font=font, command=self.ovsShow )
-        #runMenu.add_command( label='Root Terminal', font=font, command=self.rootTerminal )
 	
         editMenu = Menu( mbar, tearoff=False )
         mbar.add_cascade( label="Edit", font=font, menu=editMenu )
@@ -752,13 +618,6 @@ class MiniEdit( Frame ):
         # Spacer
         Label( toolbar, text='' ).pack()
 
-        # Commands
-        #for cmd, color in [ ( 'Stop', 'darkRed' ), ( 'Run', 'darkGreen' ) ]:
-        #    doCmd = getattr( self, 'do' + cmd )
-        #    b = Button( toolbar, text=cmd, font=self.smallFont,
-        #                fg=color, command=doCmd )
-        #    b.pack( fill='x', side='bottom' )
-
 	# abaixo copiado Mini-CCNx para criar botao Generate
 
         for cmd, color in [ ( 'Generate', 'darkGreen' ) ]:
@@ -780,18 +639,21 @@ class MiniEdit( Frame ):
         for tool in self.tools:
             self.buttons[ tool ].config( state='normal' )
 
-    #def doRun( self ):
-    #    "Run command."
-    #    self.activate( 'Select' )
-    #    for tool in self.tools:
-    #        self.buttons[ tool ].config( state='disabled' )
-    #    self.start()
+	toplevel = Toplevel()
+	label1 = Label(toplevel, text="Template file generated successfully", height=0, width=30)
+	label1.pack()
+	b=Button(toplevel, text="Ok", width=5, command=toplevel.destroy)
+	b.pack(side='bottom', padx=0,pady=0)
 
-    def doStop( self ):
-        "Stop command."
-        self.stop()
-        for tool in self.tools:
-            self.buttons[ tool ].config( state='normal' )
+    def parseFibEntries ( self, fibEntries ):
+	"Parse FIB Entries for write"
+	result=''
+	
+	for fibEntry in fibEntries:
+		entry = ','.join(map(str, fibEntry))
+		result += entry + ' '
+
+	return result
 
     def buildTemplate( self ): #COPIA Mini-CCNx para criar Template
         "Generate template"
@@ -803,23 +665,60 @@ class MiniEdit( Frame ):
         for widget in self.widgetToItem:
             name = widget[ 'text' ]
             tags = self.canvas.gettags( self.widgetToItem[ widget ] )
+	    #print self.hostOpts[name]
             if 'Host' in tags:
-                template.write(name + ':\n')
+		hOpts=self.hostOpts[name]
+                template.write(name + ': ')
+		if 'startCommand' in hOpts:
+			template.write(hOpts['startCommand'] + ' ')
+		else:
+			template.write('_ ')
+		if 'cache' in hOpts:
+			template.write('cache=' + hOpts['cache'] + ' ')
+		if 'cpu' in hOpts:
+			cpu=float(hOpts['cpu'])/100
+			template.write('cpu=' + repr(cpu) + ' ')
+		if 'mem' in hOpts:
+			mem=float(hOpts['mem'])/100
+			template.write('mem=' + repr(mem) + ' ')
+		if 'fibEntries' in hOpts:
+			customFib = self.parseFibEntries(hOpts['fibEntries'])
+			template.write(customFib)
+		template.write('\n')
 
         # switches/routers
         template.write('[routers]\n')
-        for router in self.switchOpts.values():
-	    #print router
-	    hostname=router['hostname']
-	    nodetype=router['switchType']
-	    nodenum=router['nodeNum']
 
-	    template.write(hostname + ':\n')
+        for router in self.routerOpts.values():
 
-            #name = widget[ 'text' ]
-            #tags = self.canvas.gettags( self.widgetToItem[ widget ] )
-            #if 'Switch' in tags:
-                #template.write(name + ':\n')
+	    hasOpt='False'
+	    routerName=router['hostname']
+	    #nodetype=router['nodetype']
+	    #nodenum=router['nodenum']
+	    
+	    rOpts=self.routerOpts[routerName]
+
+	    template.write(routerName + ': ')
+
+	    if 'cpu' in rOpts:
+		cpu=float(rOpts['cpu'])/100
+		template.write('cpu=' + repr(cpu) + ' ')
+		hasOpt='True'
+	    if 'mem' in rOpts:
+		mem=float(rOpts['mem'])/100
+		template.write('mem=' + repr(mem) + ' ')
+		hasOpt='True'
+	    if 'cache' in rOpts:
+		template.write('cache=' + rOpts['cache'] + ' ')
+		hasOpt='True'
+	    if 'fibEntries' in rOpts:
+		customFib = self.parseFibEntries(rOpts['fibEntries'])
+		template.write(customFib)
+		hasOpt='True'
+	    if hasOpt == 'False':
+		template.write('_')
+
+	    template.write('\n')
 
         # Make links
         template.write('[links]\n')
@@ -828,23 +727,28 @@ class MiniEdit( Frame ):
 	     src=link['src']
 	     linkopts=link['linkOpts']
 	     linktype=link['type']
-	     
-	     #print linkopts
-	     #print linktype
 
              srcName, dstName = src[ 'text' ], dst[ 'text' ]
-             template.write(srcName + ':' + dstName + '\n')
+             template.write(srcName + ':' + dstName + ' ')
+	     if 'bw' in linkopts:
+	     	template.write('bw=' + str(linkopts['bw']) + ' ' )
+	     if 'loss' in linkopts:
+	     	template.write('loss=' + repr(linkopts['loss']) + ' ' )
+	     if 'delay' in linkopts:
+	     	template.write('delay=' + str(linkopts['delay']))
+	     
+	     template.write('\n')
 
 	template.close()
 
     def addNode( self, node, nodeNum, x, y, name=None):
         "Add a new node to our canvas."
-        if 'Switch' == node:
-            self.switchCount += 1
+
+	if 'LegacyRouter' == node:
+	    self.routerCount += 1
         if 'Host' == node:
+	    print "Host!"
             self.hostCount += 1
-        if 'Controller' == node:
-            self.controllerCount += 1
         if name is None:
             name = self.nodePrefixes[ node ] + nodeNum
         self.addNamedNode(node, name, x, y)
@@ -884,22 +788,6 @@ class MiniEdit( Frame ):
         self.newTopology()
         loadedTopology = self.convertJsonUnicode(json.load(f))
 
-        # Load application preferences
-        if 'application' in loadedTopology:
-            self.appPrefs = dict(self.appPrefs.items() + loadedTopology['application'].items())
-            if "ovsOf10" not in self.appPrefs["openFlowVersions"]:
-                self.appPrefs["openFlowVersions"]["ovsOf10"] = '0'
-            if "ovsOf11" not in self.appPrefs["openFlowVersions"]:
-                self.appPrefs["openFlowVersions"]["ovsOf11"] = '0'
-            if "ovsOf12" not in self.appPrefs["openFlowVersions"]:
-                self.appPrefs["openFlowVersions"]["ovsOf12"] = '0'
-            if "ovsOf13" not in self.appPrefs["openFlowVersions"]:
-                self.appPrefs["openFlowVersions"]["ovsOf13"] = '0'
-            if "sflow" not in self.appPrefs:
-                self.appPrefs["sflow"] = self.sflowDefaults
-            if "netflow" not in self.appPrefs:
-                self.appPrefs["netflow"] = self.nflowDefaults
-
         # Load hosts
         hosts = loadedTopology['hosts']
         for host in hosts:
@@ -928,26 +816,27 @@ class MiniEdit( Frame ):
             icon = self.findWidgetByName(hostname)
             icon.bind('<Button-3>', self.do_hostPopup )
 
-        # Load switches
-        switches = loadedTopology['switches']
-        for switch in switches:
-            nodeNum = switch['number']
-            hostname = 's'+nodeNum
-            if 'switchType' not in switch['opts']:
-                switch['opts']['switchType'] = 'default'
-            if 'hostname' in switch['opts']:
-                hostname = switch['opts']['hostname']
+        # Load routers
+        routers = loadedTopology['routers']
+        for router in routers:
+            nodeNum = router['number']
+            hostname = 'r'+nodeNum
+	    #print router
+            if 'nodeType' not in router['opts']:
+                router['opts']['nodeType'] = 'legacyRouter'
+            if 'hostname' in router['opts']:
+                hostname = router['opts']['hostname']
             else:
-                switch['opts']['hostname'] = hostname
-            if 'nodeNum' not in switch['opts']:
-                switch['opts']['nodeNum'] = int(nodeNum)
-            x = switch['x']
-            y = switch['y']
-            if switch['opts']['switchType'] == "legacyRouter":
+                router['opts']['hostname'] = hostname
+            if 'nodeNum' not in router['opts']:
+                router['opts']['nodeNum'] = int(nodeNum)
+            x = router['x']
+            y = router['y']
+            if router['opts']['nodeType'] == "legacyRouter":
                 self.addNode('LegacyRouter', nodeNum, float(x), float(y), name=hostname)
                 icon = self.findWidgetByName(hostname)
                 icon.bind('<Button-3>', self.do_legacyRouterPopup )
-            self.switchOpts[hostname] = switch['opts']
+            self.routerOpts[hostname] = router['opts']
 
         # Load links
         links = loadedTopology['links']
@@ -958,7 +847,7 @@ class MiniEdit( Frame ):
 
             destNode = link['dest']
             dest = self.findWidgetByName(destNode)
-            dx, dy = self.canvas.coords( self.widgetToItem[ dest]  )
+            dx, dy = self.canvas.coords( self.widgetToItem[ dest ]  )
 
             self.link = self.canvas.create_line( sx, sy, dx, dy, width=4,
                                              fill='blue', tag='link' )
@@ -979,11 +868,10 @@ class MiniEdit( Frame ):
         for widget in self.widgetToItem.keys():
             self.deleteItem( self.widgetToItem[ widget ] )
         self.hostCount = 0
-        self.switchCount = 0
+        self.routerCount = 0
         self.links = {}
         self.hostOpts = {}
-        self.switchOpts = {}
-        #self.appPrefs["ipBase"]= self.defaultIpBase
+	self.routerOpts = {}
 
     def saveTopology( self ):
         "Save command."
@@ -998,21 +886,21 @@ class MiniEdit( Frame ):
             # Save Application preferences
             savingDictionary['version'] = '2'
 
-            # Save Switches and Hosts
+            # Save routers and Hosts
             hostsToSave = []
-            switchesToSave = []
-            controllersToSave = []
+            routersToSave = []
+
             for widget in self.widgetToItem:
                 name = widget[ 'text' ]
                 tags = self.canvas.gettags( self.widgetToItem[ widget ] )
                 x1, y1 = self.canvas.coords( self.widgetToItem[ widget ] )
                 if 'LegacyRouter' in tags:
-                    nodeNum = self.switchOpts[name]['nodeNum']
+                    nodeNum = self.routerOpts[name]['nodeNum']
                     nodeToSave = {'number':str(nodeNum),
                                   'x':str(x1),
                                   'y':str(y1),
-                                  'opts':self.switchOpts[name] }
-                    switchesToSave.append(nodeToSave)
+                                  'opts':self.routerOpts[name] }
+                    routersToSave.append(nodeToSave)
                 elif 'Host' in tags:
                     nodeNum = self.hostOpts[name]['nodeNum']
                     nodeToSave = {'number':str(nodeNum),
@@ -1023,8 +911,7 @@ class MiniEdit( Frame ):
                 else:
                     raise Exception( "Cannot create mystery node: " + name )
             savingDictionary['hosts'] = hostsToSave
-            savingDictionary['switches'] = switchesToSave
-            savingDictionary['controllers'] = controllersToSave
+            savingDictionary['routers'] = routersToSave
 
             # Save Links
             linksToSave = []
@@ -1042,7 +929,7 @@ class MiniEdit( Frame ):
             savingDictionary['links'] = linksToSave
 
             # Save Application preferences
-            savingDictionary['application'] = self.appPrefs
+            #savingDictionary['application'] = self.appPrefs
 
             try:
                 f = open(fileName, 'wb')
@@ -1091,7 +978,7 @@ class MiniEdit( Frame ):
         else:
             return items[ 0 ]
 
-    # Canvas bindings for Select, Host, Switch and Link tools
+    # Canvas bindings for Select, Host, Router and Link tools
 
     def clickSelect( self, event ):
         "Select an item."
@@ -1141,29 +1028,15 @@ class MiniEdit( Frame ):
         c = self.canvas
         x, y = c.canvasx( event.x ), c.canvasy( event.y )
         name = self.nodePrefixes[ node ]
-        if 'Switch' == node:
-            self.switchCount += 1
-            name = self.nodePrefixes[ node ] + str( self.switchCount )
-            self.switchOpts[name] = {}
-            self.switchOpts[name]['nodeNum']=self.switchCount
-            self.switchOpts[name]['hostname']=name
-            self.switchOpts[name]['switchType']='default'
-            self.switchOpts[name]['controllers']=[]
+
         if 'LegacyRouter' == node:
-            self.switchCount += 1
-            name = self.nodePrefixes[ node ] + str( self.switchCount )
-            self.switchOpts[name] = {}
-            self.switchOpts[name]['nodeNum']=self.switchCount
-            self.switchOpts[name]['hostname']=name
-            self.switchOpts[name]['switchType']='legacyRouter'
-        if 'LegacySwitch' == node:
-            self.switchCount += 1
-            name = self.nodePrefixes[ node ] + str( self.switchCount )
-            self.switchOpts[name] = {}
-            self.switchOpts[name]['nodeNum']=self.switchCount
-            self.switchOpts[name]['hostname']=name
-            self.switchOpts[name]['switchType']='legacySwitch'
-            self.switchOpts[name]['controllers']=[]
+            self.routerCount += 1
+            name = self.nodePrefixes[ node ] + str( self.routerCount )
+            self.routerOpts[name] = {}
+            self.routerOpts[name]['nodeNum']=self.routerCount
+            self.routerOpts[name]['hostname']=name
+            self.routerOpts[name]['nodeType']='legacyRouter'
+
         if 'Host' == node:
             self.hostCount += 1
             name = self.nodePrefixes[ node ] + str( self.hostCount )
@@ -1188,7 +1061,7 @@ class MiniEdit( Frame ):
         self.newNode( 'Host', event )
 
     def clickLegacyRouter( self, event ):
-        "Add a new switch to our canvas."
+        "Add a new router to our canvas."
         self.newNode( 'LegacyRouter', event )
 
     def dragNetLink( self, event ):
@@ -1281,30 +1154,6 @@ class MiniEdit( Frame ):
             x1, y1 = c.coords( item )
             c.coords( link, x, y, x1, y1 )
         self.updateScrollRegion()
-
-    def createControlLinkBindings( self ):
-        "Create a set of bindings for nodes."
-        # Link bindings
-        # Selection still needs a bit of work overall
-        # Callbacks ignore event
-
-        def select( _event, link=self.link ):
-            "Select item on mouse entry."
-            self.selectItem( link )
-
-        def highlight( _event, link=self.link ):
-            "Highlight item on mouse entry."
-            self.selectItem( link )
-            self.canvas.itemconfig( link, fill='green' )
-
-        def unhighlight( _event, link=self.link ):
-            "Unhighlight item on mouse exit."
-            self.canvas.itemconfig( link, fill='red' )
-            #self.selectItem( None )
-
-        self.canvas.tag_bind( self.link, '<Enter>', highlight )
-        self.canvas.tag_bind( self.link, '<Leave>', unhighlight )
-        self.canvas.tag_bind( self.link, '<ButtonPress-1>', select )
 
     def createDataLinkBindings( self ):
         "Create a set of bindings for nodes."
@@ -1425,19 +1274,6 @@ class MiniEdit( Frame ):
     def createToolImages( self ):
         "Create toolbar (and icon) images."
 
-    def checkIntf( self, intf ):
-        "Make sure intf exists and is not configured."
-        if ( ' %s:' % intf ) not in quietRun( 'ip link show' ):
-            showerror(title="Error",
-                      message='External interface ' +intf + ' does not exist! Skipping.')
-            return False
-        ips = re.findall( r'\d+\.\d+\.\d+\.\d+', quietRun( 'ifconfig ' + intf ) )
-        if ips:
-            showerror(title="Error",
-                      message= intf + ' has an IP address and is probably in use! Skipping.' )
-            return False
-        return True
-
     def hostDetails( self, _ignore=None ):
         if ( self.selection is None or
              self.net is not None or
@@ -1446,63 +1282,57 @@ class MiniEdit( Frame ):
         widget = self.itemToWidget[ self.selection ]
         name = widget[ 'text' ]
         tags = self.canvas.gettags( self.selection )
-        if 'Host' not in tags:
-            return
 
-        prefDefaults = self.hostOpts[name]
-        hostBox = HostDialog(self, title='Host Details', prefDefaults=prefDefaults)
-        self.master.wait_window(hostBox.top)
-        if hostBox.result:
-            newHostOpts = {'nodeNum':self.hostOpts[name]['nodeNum']}
-            newHostOpts['sched'] = hostBox.result['sched']
-            if len(hostBox.result['startCommand']) > 0:
-                newHostOpts['startCommand'] = hostBox.result['startCommand']
-            if len(hostBox.result['stopCommand']) > 0:
-                newHostOpts['stopCommand'] = hostBox.result['stopCommand']
-            if len(hostBox.result['cpu']) > 0:
-                newHostOpts['cpu'] = float(hostBox.result['cpu'])
-            if len(hostBox.result['cores']) > 0:
-                newHostOpts['cores'] = hostBox.result['cores']
-            if len(hostBox.result['hostname']) > 0:
-                newHostOpts['hostname'] = hostBox.result['hostname']
-                name = hostBox.result['hostname']
-                widget[ 'text' ] = name
-            if len(hostBox.result['defaultRoute']) > 0:
-                newHostOpts['defaultRoute'] = hostBox.result['defaultRoute']
-            if len(hostBox.result['ip']) > 0:
-                newHostOpts['ip'] = hostBox.result['ip']
-            if len(hostBox.result['externalInterfaces']) > 0:
-                newHostOpts['externalInterfaces'] = hostBox.result['externalInterfaces']
-            if len(hostBox.result['vlanInterfaces']) > 0:
-                newHostOpts['vlanInterfaces'] = hostBox.result['vlanInterfaces']
-            if len(hostBox.result['privateDirectory']) > 0:
-                newHostOpts['privateDirectory'] = hostBox.result['privateDirectory']
-            self.hostOpts[name] = newHostOpts
-            print 'New host details for ' + name + ' = ' + str(newHostOpts)
+	#print tags
+        if 'Host' in tags:
 
-    def linkUp( self ):
-        if ( self.selection is None or
-             self.net is None):
-            return
-        link = self.selection
-        linkDetail =  self.links[link]
-        src = linkDetail['src']
-        dst = linkDetail['dest']
-        srcName, dstName = src[ 'text' ], dst[ 'text' ]
-        self.net.configLinkStatus(srcName, dstName, 'up')
-        self.canvas.itemconfig(link, dash=())
+        	prefDefaults = self.hostOpts[name]
+        	hostBox = HostDialog(self, title='Host Details', prefDefaults=prefDefaults, isRouter='False')
+        	self.master.wait_window(hostBox.top)
+        	if hostBox.result:
+		    newHostOpts = {'nodeNum':self.hostOpts[name]['nodeNum']}
 
-    def linkDown( self ):
-        if ( self.selection is None or
-             self.net is None):
-            return
-        link = self.selection
-        linkDetail =  self.links[link]
-        src = linkDetail['src']
-        dst = linkDetail['dest']
-        srcName, dstName = src[ 'text' ], dst[ 'text' ]
-        self.net.configLinkStatus(srcName, dstName, 'down')
-        self.canvas.itemconfig(link, dash=(4, 4))
+		    if len(hostBox.result['startCommand']) > 0:
+		        newHostOpts['startCommand'] = hostBox.result['startCommand']
+		    if hostBox.result['cpu']:
+		        newHostOpts['cpu'] = hostBox.result['cpu']
+		    if hostBox.result['mem']:
+		        newHostOpts['mem'] = hostBox.result['mem']
+		    if len(hostBox.result['hostname']) > 0:
+		        newHostOpts['hostname'] = hostBox.result['hostname']
+		        name = hostBox.result['hostname']
+		        widget[ 'text' ] = name
+		    if len(hostBox.result['cache']) > 0:
+		        newHostOpts['cache'] = hostBox.result['cache']
+		    if len(hostBox.result['fibEntries']) > 0:
+		        newHostOpts['fibEntries'] = hostBox.result['fibEntries']
+		    self.hostOpts[name] = newHostOpts
+
+		    print 'New host details for ' + name + ' = ' + str(newHostOpts)
+
+	elif 'LegacyRouter' in tags:
+
+		prefDefaults = self.routerOpts[name]
+        	hostBox = HostDialog(self, title='Router Details', prefDefaults=prefDefaults, isRouter='True')
+        	self.master.wait_window(hostBox.top)
+        	if hostBox.result:
+		    newRouterOpts = {'nodeNum':self.routerOpts[name]['nodeNum']}
+
+		    if hostBox.result['cpu']:
+		        newRouterOpts['cpu'] = hostBox.result['cpu']
+		    if hostBox.result['mem']:
+		        newRouterOpts['mem'] = hostBox.result['mem']
+		    if len(hostBox.result['hostname']) > 0:
+		        newRouterOpts['hostname'] = hostBox.result['hostname']
+		        name = hostBox.result['hostname']
+		        widget[ 'text' ] = name
+		    if len(hostBox.result['cache']) > 0:
+		        newRouterOpts['cache'] = hostBox.result['cache']
+		    if len(hostBox.result['fibEntries']) > 0:
+		        newRouterOpts['fibEntries'] = hostBox.result['fibEntries']
+		    self.routerOpts[name] = newRouterOpts
+
+		    print 'New host details for ' + name + ' = ' + str(newRouterOpts)
 
     def linkDetails( self, _ignore=None ):
         if ( self.selection is None or
@@ -1518,32 +1348,6 @@ class MiniEdit( Frame ):
         if linkBox.result is not None:
             linkDetail['linkOpts'] = linkBox.result
             print 'New link details = ' + str(linkBox.result)
-
-    def prefDetails( self ):
-        prefDefaults = self.appPrefs
-        prefBox = PrefsDialog(self, title='Preferences', prefDefaults=prefDefaults)
-        print 'New Prefs = ' + str(prefBox.result)
-        if prefBox.result:
-            self.appPrefs = prefBox.result
-
-    def listBridge( self, _ignore=None ):
-        if ( self.selection is None or
-             self.net is None or
-             self.selection not in self.itemToWidget ):
-            return
-        name = self.itemToWidget[ self.selection ][ 'text' ]
-        tags = self.canvas.gettags( self.selection )
-
-        if name not in self.net.nameToNode:
-            return
-        if 'Switch' in tags or 'LegacySwitch' in tags:
-           call(["xterm -T 'Bridge Details' -sb -sl 2000 -e 'ovs-vsctl list bridge " + name + "; read -p \"Press Enter to close\"' &"], shell=True)
-
-    def ovsShow( self, _ignore=None ):
-        call(["xterm -T 'OVS Summary' -sb -sl 2000 -e 'ovs-vsctl show; read -p \"Press Enter to close\"' &"], shell=True)
-
-    def rootTerminal( self, _ignore=None ):
-        call(["xterm -T 'Root Terminal' -sb -sl 2000 &"], shell=True)
 
     # Model interface
     #
@@ -1571,20 +1375,6 @@ class MiniEdit( Frame ):
             dtags = self.canvas.gettags( self.widgetToItem[ dest ] )
             ltags = self.canvas.gettags( link )
 
-            if 'control' in ltags:
-                controllerName = ''
-                switchName = ''
-                if 'Controller' in stags:
-                    controllerName = source[ 'text' ]
-                    switchName = dest[ 'text' ]
-                else:
-                    controllerName = dest[ 'text' ]
-                    switchName = source[ 'text' ]
-    
-                if controllerName in self.switchOpts[switchName]['controllers']:
-                    self.switchOpts[switchName]['controllers'].remove(controllerName)
-
-
         if link is not None:
             del self.links[ link ]
 
@@ -1599,228 +1389,6 @@ class MiniEdit( Frame ):
             self.deleteItem( link )
         del self.itemToWidget[ item ]
         del self.widgetToItem[ widget ]
-
-    def buildNodes( self, net):
-        # Make nodes
-        print "Getting Hosts and Switches."
-        for widget in self.widgetToItem:
-            name = widget[ 'text' ]
-            tags = self.canvas.gettags( self.widgetToItem[ widget ] )
-            #print name+' has '+str(tags)
-
-            if 'LegacyRouter' in tags:
-                newSwitch = net.addHost( name , cls=LegacyRouter)
-            elif 'Host' in tags:
-                opts = self.hostOpts[name]
-                #print str(opts)
-                ip = None
-                defaultRoute = None
-                if 'defaultRoute' in opts and len(opts['defaultRoute']) > 0:
-                    defaultRoute = 'via '+opts['defaultRoute']
-                if 'ip' in opts and len(opts['ip']) > 0:
-                    ip = opts['ip']
-                else:
-                    nodeNum = self.hostOpts[name]['nodeNum']
-                    #ipBaseNum, prefixLen = netParse( self.appPrefs['ipBase'] )
-                    #ip = ipAdd(i=nodeNum, prefixLen=prefixLen, ipBaseNum=ipBaseNum)
-
-                # Create the correct host class
-                if 'cores' in opts or 'cpu' in opts:
-                    if ('privateDirectory' in opts):
-                        hostCls = partial( CPULimitedHost,
-                                           privateDirs=opts['privateDirectory'] )
-                    else:
-                        hostCls=CPULimitedHost
-                else:
-                    if ('privateDirectory' in opts):
-                        hostCls = partial( Host,
-                                           privateDirs=opts['privateDirectory'] )
-                    else:
-                        hostCls=Host
-                print hostCls
-                newHost = net.addHost( name,
-                                       cls=hostCls,
-                                       ip=ip,
-                                       defaultRoute=defaultRoute
-                                      )
-
-                # Set the CPULimitedHost specific options
-                if 'cores' in opts:
-                    newHost.setCPUs(cores = opts['cores'])
-                if 'cpu' in opts:
-                    newHost.setCPUFrac(f=opts['cpu'], sched=opts['sched'])
-
-                # Attach external interfaces
-                if ('externalInterfaces' in opts):
-                    for extInterface in opts['externalInterfaces']:
-                        if self.checkIntf(extInterface):
-                           Intf( extInterface, node=newHost )
-                if ('vlanInterfaces' in opts):
-                    if len(opts['vlanInterfaces']) > 0:
-                        print 'Checking that OS is VLAN prepared'
-                        self.pathCheck('vconfig', moduleName='vlan package')
-                        moduleDeps( add='8021q' )
-            else:
-                raise Exception( "Cannot create mystery node: " + name )
-
-    def pathCheck( self, *args, **kwargs ):
-        "Make sure each program in *args can be found in $PATH."
-        moduleName = kwargs.get( 'moduleName', 'it' )
-        for arg in args:
-            if not quietRun( 'which ' + arg ):
-                showerror(title="Error",
-                      message= 'Cannot find required executable %s.\n' % arg +
-                       'Please make sure that %s is installed ' % moduleName +
-                       'and available in your $PATH.' )
-
-    def buildLinks( self, net):
-        # Make links
-        print "Getting Links."
-        for key,link in self.links.iteritems():
-            tags = self.canvas.gettags(key)
-            if 'data' in tags:
-                src=link['src']
-                dst=link['dest']
-                linkopts=link['linkOpts']
-                srcName, dstName = src[ 'text' ], dst[ 'text' ]
-                srcNode, dstNode = net.nameToNode[ srcName ], net.nameToNode[ dstName ]
-                if linkopts:
-                    net.addLink(srcNode, dstNode, cls=TCLink, **linkopts)
-                else:
-                    #print str(srcNode)
-                    #print str(dstNode)
-                    net.addLink(srcNode, dstNode)
-                self.canvas.itemconfig(key, dash=())
-
-
-    def build( self ):
-        print "Build network based on our topology."
-
-        dpctl = None
-        if len(self.appPrefs['dpctl']) > 0:
-            dpctl = int(self.appPrefs['dpctl'])
-        net = Mininet( topo=None,
-                       listenPort=dpctl,
-                       build=False)
-                       #ipBase=self.appPrefs['ipBase'] )
-
-        self.buildNodes(net)
-        self.buildLinks(net)
-
-        # Build network (we have to do this separately at the moment )
-        net.build()
-
-        return net
-
-
-    def postStartSetup( self ):
-
-        # Setup host details
-        for widget in self.widgetToItem:
-            name = widget[ 'text' ]
-            tags = self.canvas.gettags( self.widgetToItem[ widget ] )
-            if 'Host' in tags:
-                newHost = self.net.get(name)
-                opts = self.hostOpts[name]
-                # Attach vlan interfaces
-                if ('vlanInterfaces' in opts):
-                    for vlanInterface in opts['vlanInterfaces']:
-                        print 'adding vlan interface '+vlanInterface[1]
-                        newHost.cmdPrint('ifconfig '+name+'-eth0.'+vlanInterface[1]+' '+vlanInterface[0])
-                # Run User Defined Start Command
-                if ('startCommand' in opts):
-                    newHost.cmdPrint(opts['startCommand'])
-
-        # Configure NetFlow
-        nflowValues = self.appPrefs['netflow']
-        if len(nflowValues['nflowTarget']) > 0:
-            nflowEnabled = False
-            nflowSwitches = ''
-            for widget in self.widgetToItem:
-                name = widget[ 'text' ]
-                tags = self.canvas.gettags( self.widgetToItem[ widget ] )
-    
-                if 'Switch' in tags:
-                    opts = self.switchOpts[name]
-                    if 'netflow' in opts:
-                        if opts['netflow'] == '1':
-                            print name+' has Netflow enabled'
-                            nflowSwitches = nflowSwitches+' -- set Bridge '+name+' netflow=@MiniEditNF'
-                            nflowEnabled=True
-            if nflowEnabled:
-                nflowCmd = 'ovs-vsctl -- --id=@MiniEditNF create NetFlow '+ 'target=\\\"'+nflowValues['nflowTarget']+'\\\" '+ 'active-timeout='+nflowValues['nflowTimeout']
-                if nflowValues['nflowAddId'] == '1':
-                    nflowCmd = nflowCmd + ' add_id_to_interface=true'
-                else:
-                    nflowCmd = nflowCmd + ' add_id_to_interface=false'
-                print 'cmd = '+nflowCmd+nflowSwitches
-                call(nflowCmd+nflowSwitches, shell=True)
-
-            else:
-                print 'No switches with Netflow'
-        else:
-            print 'No NetFlow targets specified.'
-
-        # Configure sFlow
-        sflowValues = self.appPrefs['sflow']
-        if len(sflowValues['sflowTarget']) > 0:
-            sflowEnabled = False
-            sflowSwitches = ''
-            for widget in self.widgetToItem:
-                name = widget[ 'text' ]
-                tags = self.canvas.gettags( self.widgetToItem[ widget ] )
-    
-                if 'Switch' in tags:
-                    opts = self.switchOpts[name]
-                    if 'sflow' in opts:
-                        if opts['sflow'] == '1':
-                            print name+' has sflow enabled'
-                            sflowSwitches = sflowSwitches+' -- set Bridge '+name+' sflow=@MiniEditSF'
-                            sflowEnabled=True
-            if sflowEnabled:
-                sflowCmd = 'ovs-vsctl -- --id=@MiniEditSF create sFlow '+ 'target=\\\"'+sflowValues['sflowTarget']+'\\\" '+ 'header='+sflowValues['sflowHeader']+' '+ 'sampling='+sflowValues['sflowSampling']+' '+ 'polling='+sflowValues['sflowPolling']
-                print 'cmd = '+sflowCmd+sflowSwitches
-                call(sflowCmd+sflowSwitches, shell=True)
-
-            else:
-                print 'No switches with sflow'
-        else:
-            print 'No sFlow targets specified.'
-
-        ## NOTE: MAKE SURE THIS IS LAST THING CALLED
-        # Start the CLI if enabled
-        if self.appPrefs['startCLI'] == '1':
-            info( "\n\n NOTE: PLEASE REMEMBER TO EXIT THE CLI BEFORE YOU PRESS THE STOP BUTTON. Not exiting will prevent MiniEdit from quitting and will prevent you from starting the network again during this sessoin.\n\n")
-            CLI(self.net)
-
-    def start( self ):
-        "Start network."
-        if self.net is None:
-            self.net = self.build()
-
-            for widget in self.widgetToItem:
-                name = widget[ 'text' ]
-                tags = self.canvas.gettags( self.widgetToItem[ widget ] )
-
-            self.postStartSetup()
-
-    def stop( self ):
-        "Stop network."
-        if self.net is not None:
-            # Stop host details
-            for widget in self.widgetToItem:
-                name = widget[ 'text' ]
-                tags = self.canvas.gettags( self.widgetToItem[ widget ] )
-                if 'Host' in tags:
-                    newHost = self.net.get(name)
-                    opts = self.hostOpts[name]
-                    # Run User Defined Stop Command
-                    if ('stopCommand' in opts):
-                        newHost.cmdPrint(opts['stopCommand'])
-
-            self.net.stop()
-        cleanUpScreens()
-        self.net = None
 
     def do_linkPopup(self, event):
         # display the popup menu
@@ -1985,7 +1553,7 @@ class MiniEdit( Frame ):
             self.hostOpts[name] = {'sched':'host'}
             self.hostOpts[name]['nodeNum']=self.hostCount
             self.hostOpts[name]['hostname']=name
-            self.hostOpts[name]['ip']=host.IP()
+            #self.hostOpts[name]['ip']=host.IP()
 
             x = columnCount*100+100
             self.addNode('Host', self.hostCount,
@@ -2034,36 +1602,49 @@ def miniEditImages():
             file='/usr/include/X11/bitmaps/left_ptr' ),
 
         'LegacyRouter': PhotoImage( data=r"""
-	    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
-	    gGPLHwLwcMIo12Qxu0ABAQA7
+	    R0lGODlhMgAYAPcAAAEBAXZ8gQNAgL29vQNctjl/xVSa4j1dfCF+
+	    3QFq1DmL3wJMmAMzZZW11dnZ2SFrtyNdmTSO6gIZMUKa8gJVqEOH
+	    zR9Pf5W74wFjxgFx4jltn+np6Eyi+DuT6qKiohdtwwUPGWiq6ymF
+	    4LHH3Rh11CV81kKT5AMoUA9dq1ap/mV0gxdXlytRdR1ptRNPjTt9
+	    vwNgvwJZsX+69gsXJQFHjTtjizF0tvHx8VOm9z2V736Dhz2N3QM2
+	    acPZ70qe8gFo0HS19wVRnTiR6hMpP0eP1i6J5iNlqAtgtktjfQFu
+	    3TNxryx4xAMTIzOE1XqAh1uf5SWC4AcfNy1XgQJny93n8a2trRh3
+	    12Gt+VGm/AQIDTmByAF37QJasydzvxM/ayF3zhdLf8zLywFdu4i5
+	    6gFlyi2J4yV/1w8wUo2/8j+X8D2Q5Eee9jeR7Uia7DpeggFt2QNP
+	    m97e3jRong9bpziH2DuT7aipqQoVICmG45vI9R5720eT4Q1hs1er
+	    /yVVhwJJktPh70tfdbHP7Xev5xs5V7W1sz9jhz11rUVZcQ9WoCVV
+	    hQk7cRdtwWuw9QYOFyFHbSBnr0dznxtWkS18zKfP9wwcLAMHCwFF
+	    iS5UeqGtuRNNiwMfPS1hlQMtWRE5XzGM5yhxusLCwCljnwMdOFWh
+	    7cve8pG/7Tlxp+Tr8g9bpXF3f0lheStrrYu13QEXLS1ppTV3uUuR
+	    1RMjNTF3vU2X4TZupwRSolNne4nB+T+L2YGz4zJ/zYe99YGHjRdD
+	    cT95sx09XQldsgMLEwMrVc/X3yN3yQ1JhTRbggsdMQNfu9HPz6Wl
+	    pW2t7RctQ0GFyeHh4dvl8SBZklCb5kOO2kWR3Vmt/zdjkQIQHi90
+	    uvPz8wIVKBp42SV5zbfT7wtXpStVfwFWrBVvyTt3swFz5kGBv2+1
+	    /QlbrVFjdQM7d1+j54i67UmX51qn9i1vsy+D2TuR5zddhQsjOR1t
+	    u0GV6ghbsDVZf4+76RRisent8Xd9hQFBgwFNmwJLlcPDwwFr1z2T
+	    5yH5BAEAAAAALAAAAAAyABgABwj/AAEIHEiQYJY7Qwg9UsTplRIb
+	    ENuxEiXJgpcz8e5YKsixY8Essh7JcbbOBwcOa1JOmJAmTY4cHeoI
+	    abJrCShI0XyB8YRso0eOjoAdWpciBZajJ1GuWcnSZY46Ed5N8hPA
+	    TqEBoRB9gVJsxRlhPwHI0kDkVywcRpGe9LF0adOnMpt8CxDnxg1o
+	    9lphKoEACoIvmlxxvHOKVg0n/Tzku2WoVoU2J1P6WNkSrtwADuxC
+	    G/MOjwgRUEIjGG3FhaOBzaThiDSCil27G8Isc3LLjZwXsA6YYJmD
+	    jhTMmseoKQIFDx7RoxHo2abnwygAlUj1mV6tWjlelEpRwfd6gzI7
+	    VeJQ/2vZoVaDUqigqftXpH0R46H9Kl++zUo4JnKq9dGvv09RHFhc
+	    IUMe0NiFDyql0OJUHWywMc87TXRhhCRGiHAccvNZUR8JxpDTH38p
+	    9HEUFhxgMSAvjbBjQge8PSXEC6uo0IsHA6gAAShmgCbffNtsQwIJ
+	    ifhRHX/TpUUiSijlUk8AqgQixSwdNBjCa7CFoVggmEgCyRf01WcF
+	    CYvYUgB104k4YlK5HONEXXfpokYdMrXRAzMhmNINNNzB9p0T57Ag
+	    yZckpKKPGFNgw06ZWKR10jTw6MAmFWj4AJcQQkQQwSefvFeGCemM
+	    IQggeaJywSQ/wgHOAmJskQEfWqBlFBEH1P/QaGY3QOpDZXA2+A6m
+	    7hl3IRQKGDCIAj6iwE8yGKC6xbJv8IHNHgACQQybN2QiTi5NwdlB
+	    pZdiisd7vyanByOJ7CMGGRhgwE+qyy47DhnBPLDLEzLIAEQjBtCh
+	    RmVPNWgpr+Be+Nc9icARww9TkIEuDAsQ0O7DzGIQzD2QdDEJHTsI
+	    AROc3F7qWQncyHPPHN5QQAAG/vjzw8oKp8sPPxDH3O44/kwBQzLB
+	    xBCMOTzzHEMMBMBARgJvZJBBEm/4k0ACKydMBgwYoKNNEjJXbTXE
+	    42Q9jtFIp8z0Dy1jQMA1AGziz9VoW7310V0znYDTGMQgwUDXLDBO
+	    2nhvoTXbbyRk/XXL+pxWkAT8UJ331WsbnbTSK8MggDZhCTOMLQkc
+	    jvXeSPedAAw0nABWWARZIgEDfyTzxt15Z53BG1PEcEknrvgEelhZ
+	    MDHKCTwI8EcQFHBBAAFcgGPLHwLwcMIo12Qxu0ABAQA7
             """),
 
         'Host': PhotoImage( data=r"""
