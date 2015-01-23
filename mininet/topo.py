@@ -17,11 +17,12 @@ setup for testing, and can even be emulated with the Mininet package.
 
 from networkx import Graph
 from mininet.util import irange, natural, naturalSeq
+import pdb
 
 class Topo(object):
     "Data center network representation for structured multi-trees."
 
-    def __init__(self, hopts=None, sopts=None, lopts=None):
+    def __init__(self, hopts=None, sopts=None, lopts=None, ropts=None):
         """Topo object:
            hinfo: default host options
            sopts: default switch options
@@ -30,6 +31,7 @@ class Topo(object):
         self.node_info = {}
         self.link_info = {}  # (src, dst) tuples hash to EdgeInfo objects
         self.hopts = {} if hopts is None else hopts
+	self.ropts = {} if ropts is None else ropts
         self.sopts = {} if sopts is None else sopts
         self.lopts = {} if lopts is None else lopts
         self.ports = {}  # ports[src][dst] is port on src that connects to dst
@@ -48,8 +50,12 @@ class Topo(object):
            name: host name
            opts: host options
            returns: host name"""
-        if not opts and self.hopts:
+	#pdb.set_trace()
+        if not opts:
+	 if self.hopts:
             opts = self.hopts
+	 elif self.ropts:
+	    opts = self.ropts
         return self.addNode(name, **opts)
 
     def addSwitch(self, name, **opts):
@@ -102,6 +108,7 @@ class Topo(object):
 
     def isSwitch(self, n):
         '''Returns true if node is a switch.'''
+	#pdb.set_trace()
         info = self.node_info[n]
         return info and info.get('isSwitch', False)
 

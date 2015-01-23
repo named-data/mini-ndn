@@ -10,6 +10,7 @@ from mininet.conf_parser import parse_hosts,parse_routers, parse_links
 import os.path, time
 import optparse
 import datetime
+import pdb
 
 def parse_args():
     usage="""Usage: miniccnx [template_file] [ -t | --testbed ]
@@ -43,7 +44,7 @@ class CCNTopo(Topo):
         Topo.__init__(self, **opts)
 
         hosts_conf = parse_hosts(conf_arq)
-#       routers_conf = parse_routers(conf_arq)
+       	routers_conf = parse_routers(conf_arq)
         links_conf = parse_links(conf_arq)
 
 
@@ -56,13 +57,14 @@ class CCNTopo(Topo):
                 self.isLimited = True
             self.addHost(host.name, app=host.app, fib=host.uri_tuples,cpu=host.cpu,cores=host.cores,cache=host.cache)
 
-#        for router in routers_conf:
-#            if router.cpu != None and self.isLimited != True:
-#                self.isLimited = True
-#            self.addHost(router.name,fib=router.uri_tuples,cpu=router.cpu,cores=router.cores)
+        for router in routers_conf:
+            if router.cpu != None and self.isLimited != True:
+                self.isLimited = True
+            self.addHost(router.name,fib=router.uri_tuples,cpu=router.cpu,cores=router.cores, cache=router.cache)
 
         for link in links_conf:
             if len(link.linkDict) == 0:
+		#pdb.set_trace()
                 self.addLink(link.h1, link.h2)
             else:
                 self.addLink(link.h1, link.h2, **link.linkDict)
