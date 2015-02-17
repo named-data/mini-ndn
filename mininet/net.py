@@ -164,7 +164,7 @@ class Mininet( object ):
         if topo and build:
             self.build()
 
-    def isCCNhost(self, node):
+    def isNdnhost(self, node):
         if 'fib' in node.params:
             return True
         else:
@@ -260,8 +260,8 @@ class Mininet( object ):
         for host in self.hosts:
             info( host.name + ' ' )
             intf = host.defaultIntf()
-            if self.isCCNhost(host):
-                host.configCCN()    
+            if self.isNdnhost(host):
+                host.configNdn()
                 host.configDefault(ip=None,mac=None)         
             elif intf:
                 host.configDefault( defaultRoute=intf )
@@ -315,7 +315,7 @@ class Mininet( object ):
             params = topo.linkInfo( srcName, dstName )
             srcPort, dstPort = topo.port( srcName, dstName )
             self.addLink( src, dst, srcPort, dstPort, **params )
-            if self.isCCNhost(src):
+            if self.isNdnhost(src):
                 src.setIP(ipStr(ipParse(self.ccnNetBase) + 1) + '/30', intf=src.name + '-eth' + str(srcPort))
                 dst.setIP(ipStr(ipParse(self.ccnNetBase) + 2) + '/30', intf=dst.name + '-eth' + str(dstPort))
                 self.ccnNetBase=nextCCNnet(self.ccnNetBase)

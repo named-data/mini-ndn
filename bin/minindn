@@ -1,0 +1,186 @@
+#!/usr/bin/env python
+
+from mininet.topo import Topo
+from mininet.net import Mininet
+from mininet.log import setLogLevel, output, info
+from mininet.cli import CLI
+from mininet.link import TCLink
+from mininet.conf_parser import parse_hosts, parse_links
+
+from ndn.experiments import HyperbolicExperiment, FailureExperiment
+from ndn.ndn_host import NdnHost, CpuLimitedNdnHost
+
+import os.path, time
+import optparse
+import datetime
+
+from ndn.nlsr import Nlsr, NlsrConfigGenerator
+
+def parse_args():
+    usage="""Usage: minindn [template_file] [ -t | --testbed ]
+    If no template_file is given, will try to load template
+    from file minindn.conf in the current directory.
+    If --testbed is used, minindn will run the NDN Project Testbed.
+    This assumes you are in the testbed directory in the minindn installation
+    directory.
+    """
+
+    testbed = False
+    pingall = False
+    hr = False
+    failure = False
+
+    parser = optparse.OptionParser(usage)
+
+    parser.add_option("-t", "--testbed", action="store_true", dest="testbed",
+    help="instantiates NDN Testbed")
+
+    parser.add_option("--pingall", action="store", dest="pingall", type="int",
+    help="Sequentiall pings all the other nodes from each node")
+
+    parser.add_option("--ctime", action="store", dest="ctime", type="int",
+    help="Specify convergence time for the topology (Default 60 seconds)")
+
+    parser.add_option("--hr", action="store_true", dest="hr",
+    help="--hr is used to turn on hyperbolic routing")
+
+    parser.add_option("--faces", action="store", dest="faces", type="int",
+    help="Specify number of faces 0-60")
+
+    parser.add_option("--failure", action="store_true", dest="failure",
+    help="Run failure experiment, specify the number of pings using pingall")
+
+    parser.add_option("--no-cli", action="store_false", dest="isCliEnabled",
+        help="Run experiments and exit without showing the command line interface")
+
+    (options, arg) = parser.parse_args()
+
+    testbed = options.testbed
+    pingall = options.pingall
+    ctime = options.ctime
+    hr = options.hr
+    faces = options.faces
+    failure = options.failure
+    isCliEnabled = options.isCliEnabled
+
+    if ctime is None:
+        ctime = 60
+
+    if isCliEnabled is None:
+        isCliEnabled = True
+
+    if len(arg) == 0 or len(arg) > 2:
+        file = ''
+    else:
+        file = arg[0]
+
+    return file, testbed, pingall, ctime, hr, faces, failure, isCliEnabled
+
+class NdnTopo(Topo):
+    def __init__(self, conf_arq, **opts):
+        Topo.__init__(self, **opts)
+
+        global hosts_conf
+        global links_conf
+        hosts_conf = parse_hosts(conf_arq)
+        links_conf = parse_links(conf_arq)
+
+        self.isTCLink = False
+        self.isLimited = False
+
+        for host in hosts_conf:
+            if host.cpu != None and self.isLimited != True:
+                self.isLimited = True
+            self.addHost(host.name, app=host.app, fib=host.uri_tuples,cpu=host.cpu,cores=host.cores,cache=host.cache)
+
+        for link in links_conf:
+            if len(link.linkDict) == 0:
+                self.addLink(link.h1, link.h2)
+            else:
+                self.addLink(link.h1, link.h2, **link.linkDict)
+                self.isTCLink = True
+
+        info('Parse of ' + conf_arq + ' done.\n')
+
+def execute(template_file='minindn.conf', testbed=False, pingall=None, ctime=None, hr=False, faces=3, failure=False, isCliEnabled=True):
+    "Create a network based on template_file"
+
+    home = expanduser("~")
+
+    if template_file == '':
+        template_file='minindn.conf'
+
+    if os.path.exists(template_file) == False:
+        info('No template file given and default template file minindn.conf not found. Exiting...\n')
+        quit()
+
+    topo = NdnTopo(template_file)
+
+    t = datetime.datetime.now()
+
+    if topo.isTCLink == True and topo.isLimited == True:
+        net = Mininet(topo,host=CpuLimitedNdnHost,link=TCLink)
+    elif topo.isTCLink == True and topo.isLimited == False:
+        net = Mininet(topo,host=NdnHost,link=TCLink)
+    elif topo.isTCLink == False and topo.isLimited == True:
+        net = Mininet(topo,host=CpuLimitedNdnHost)
+    else:
+        net = Mininet(topo,host=NdnHost)
+
+    t2 = datetime.datetime.now()
+
+    delta = t2 - t
+
+    info('Setup time: ' + str(delta.seconds) + '\n')
+
+    net.start()
+
+    nodes = ""    # Used later to check prefix name in checkFIB
+
+    # NLSR initialization
+    for host in net.hosts:
+        nodes += str(host.name) + ","
+
+        conf = next(x for x in hosts_conf if x.name == host.name)
+        host.nlsrParameters = conf.nlsrParameters
+
+        if faces is not None:
+            host.nlsrParameters["max-faces-per-prefix"] = faces
+
+        if hr is True:
+            host.nlsrParameters["hyperbolic-state"] = "on"
+
+        # Generate NLSR configuration file
+        configGenerator = NlsrConfigGenerator(host, home)
+        configGenerator.createConfigFile()
+
+        # Start NLSR
+        nlsr = Nlsr(host)
+        nlsr.start()
+
+    nodes = nodes[0:-1]
+
+    if failure is True:
+        test = FailureExperiment(net, nodes, ctime)
+        test.run()
+    elif pingall is not None:
+        test = HyperbolicExperiment(net, nodes, ctime, pingall)
+        test.run()
+
+    for host in net.hosts:
+        if 'app' in host.params:
+            if host.params['app'] != '_':
+                host.cmd(host.params['app'])
+
+    if isCliEnabled is True:
+        CLI(net)
+
+    net.stop()
+
+if __name__ == '__main__':
+    hosts_conf = []
+    links_conf = []
+    template, testbed, pingall, ctime, hr, faces, failure, isCliEnabled = parse_args()
+
+    setLogLevel('info')
+    execute(template, testbed, pingall, ctime, hr, faces, failure, isCliEnabled)
