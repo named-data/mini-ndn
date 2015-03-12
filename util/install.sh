@@ -133,13 +133,13 @@ function mn_deps {
 
     # Add sysctl parameters as noted in the INSTALL file to increase kernel
     # limits to support larger setups:
-    sudo su -c "cat $HOME/mn-ccnx/util/sysctl_addon >> /etc/sysctl.conf"
+    sudo su -c "cat $HOME/mini-ndn/util/sysctl_addon >> /etc/sysctl.conf"
 
     # Load new sysctl settings:
     sudo sysctl -p
 
     echo "Installing Mininet/Mini-CCNx core"
-    pushd ~/mn-ccnx
+    pushd ~/mini-ndn
     sudo make install
     popd
 }
@@ -158,7 +158,7 @@ function of {
     cd ~/openflow
 
     # Patch controller to handle more than 16 switches
-    patch -p1 < ~/mn-ccnx/util/openflow-patches/controller.patch
+    patch -p1 < ~/mini-ndn/util/openflow-patches/controller.patch
 
     # Resume the install:
     ./boot.sh
@@ -208,7 +208,7 @@ function wireshark {
 
     # Copy coloring rules: OF is white-on-blue:
     mkdir -p ~/.wireshark
-    cp ~/mn-ccnx/util/colorfilters ~/.wireshark
+    cp ~/mini-ndn/util/colorfilters ~/.wireshark
 }
 
 
@@ -357,9 +357,9 @@ function nox {
 
     # Apply patches
     git checkout -b tutorial-destiny
-    git am ~/mn-ccnx/util/nox-patches/*tutorial-port-nox-destiny*.patch
+    git am ~/mini-ndn/util/nox-patches/*tutorial-port-nox-destiny*.patch
     if [ "$DIST" = "Ubuntu" ] && [ `expr $RELEASE '>=' 12.04` = 1 ]; then
-        git am ~/mn-ccnx/util/nox-patches/*nox-ubuntu12-hacks.patch
+        git am ~/mini-ndn/util/nox-patches/*nox-ubuntu12-hacks.patch
     fi
 
     # Build

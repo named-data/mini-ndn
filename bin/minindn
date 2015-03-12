@@ -13,6 +13,7 @@ from ndn.ndn_host import NdnHost, CpuLimitedNdnHost
 import os.path, time
 import optparse
 import datetime
+from os.path import expanduser
 
 from ndn.nlsr import Nlsr, NlsrConfigGenerator
 

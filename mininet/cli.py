@@ -35,12 +35,11 @@ import time
 from mininet.log import info, output, error
 from mininet.term import makeTerms
 from mininet.util import quietRun, isShellBuiltin, dumpNodeConnections
-from mininet.node import CCNHost
 
 class CLI( Cmd ):
     "Simple command-line interface to talk to nodes."
 
-    prompt = 'miniccnx> '
+    prompt = 'minindn> '
 
     def __init__( self, mininet, stdin=sys.stdin, script=None ):
         self.mn = mininet

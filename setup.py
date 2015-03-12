@@ -10,14 +10,14 @@ import sys
 sys.path.append( '.' )
 from mininet.net import VERSION
 
-scripts = [ join( 'bin', filename ) for filename in [ 'mn', 'miniccnx', 'miniccnxedit' ] ]
+scripts = [ join( 'bin', filename ) for filename in [ 'mn', 'minindn', 'minindnedit' ] ]
 
 modname = distname = 'mininet'
 
 setup(
     name=distname,
     version=VERSION,
-    description='Process-based OpenFlow emulator with CCNx extension',
+    description='Process-based OpenFlow emulator with NDN extension',
     author='Bob Lantz, Carlos Cabral',
     author_email='rlantz@cs.stanford.edu, cabral@dca.fee.unicamp.br',
     packages=find_packages(exclude='test'),
@@ -26,8 +26,8 @@ setup(
         virtualization to create virtual networks for rapid
         prototyping of Software-Defined Network (SDN) designs
         using OpenFlow. http://openflow.org/mininet.
-	This also includes an extension for using Content Centric
-	Networks based on the NDN model (project CCNx).
+        This also includes an extension for using Content Centric
+        Networks based on the Named Data Networking (NDN) model.
         """,
     classifiers=[
           "License :: OSI Approved :: BSD License",
@@ -36,7 +36,7 @@ setup(
           "Intended Audience :: Developers",
           "Topic :: Internet",
     ],
-    keywords='networking emulator protocol Internet OpenFlow SDN CCNx CCN',
+    keywords='networking emulator protocol Internet OpenFlow SDN NDN NFD NLSR',
     license='BSD',
     install_requires=[
         'setuptools',

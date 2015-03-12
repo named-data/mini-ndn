@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import time
-from os.path import expanduser
 
 class Nfd:
     def __init__(self, node):
@@ -18,9 +17,6 @@ class Nfd:
         self.sockFile = "/var/run/%s.sock" % node.name
         self.ndnFolder = "%s/.ndn" % self.homeFolder
         self.clientConf = "%s/client.conf" % self.ndnFolder
-
-        # Copy file that checks FIB
-        node.cmd("sudo cp ~/mn-ndn/ndn_utils/checkFIB %s/checkFIB" % self.homeFolder)
 
         # Copy nfd.conf file from mn-ndn/ndn_utils to the node's home
         node.cmd("sudo cp ~/mn-ndn/ndn_utils/nfd.conf %s" % self.confFile)
