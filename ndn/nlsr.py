@@ -1,10 +1,12 @@
 #!/usr/bin/env python
+import os
 
 class Nlsr:
     def __init__(self, node):
         self.node = node
         self.routerName = "/%sC1.Router/cs/%s" % ('%', node.name)
         self.confFile = "/tmp/%s/nlsr.conf" % node.name
+        self.isRunning = False
 
         # Make directory for log file
         self.logDir = "/tmp/%s/log" % node.name
@@ -17,8 +19,23 @@ class Nlsr:
         node.cmd("sudo sed -i 's|prefix .*netlab|prefix /ndn/edu/%s|g' %s" % (node.name, self.confFile))
 
     def start(self):
-        self.node.cmd("nlsr -d")
+        if self.isRunning is True:
+            try:
+                os.kill(int(self.processId), 0)
+            except OSError:
+                self.isRunning = False
 
+        if self.isRunning is False: 
+            self.node.cmd("nlsr -d")
+            self.processId = self.node.cmd("echo $!")[:-1]
+
+            self.isRunning = True
+
+    def stop(self):
+        if self.isRunning:
+            self.node.cmd("sudo kill %s" % self.processId)
+
+            self.isRunning = False
 
 class NlsrConfigGenerator:
 
@@ -26,7 +43,7 @@ class NlsrConfigGenerator:
     ROUTING_HYPERBOLIC = "hr"
 
     def __init__(self, node, home):
-        node.cmd("sudo cp %s/mn-ndn/ndn_utils/nlsr.conf nlsr.conf" % home)
+        node.cmd("sudo cp %s/mini-ndn/ndn_utils/nlsr.conf nlsr.conf" % home)
         self.node = node
 
         parameters = node.nlsrParameters
