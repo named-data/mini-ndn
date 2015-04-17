@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 """
-MiniCCNxEdit: a simple network editor for MiniCCNx
+MiniNDNEdit: a simple network editor for MiniNDN
 
 Based on miniedit by:
 Bob Lantz, April 2010
@@ -18,7 +18,7 @@ from optparse import OptionParser
 from Tkinter import *
 from ttk import Notebook
 from tkMessageBox import showinfo, showerror, showwarning
-from subprocess import call
+from subprocess import call, Popen
 import tkFont
 import csv
 import tkFileDialog
@@ -28,6 +28,7 @@ import json
 from distutils.version import StrictVersion
 import os
 import sys
+import threading
 from functools import partial
 
 import pdb
@@ -52,10 +53,13 @@ from mininet.moduledeps import moduleDeps, pathCheck
 from mininet.topo import SingleSwitchTopo, LinearTopo, SingleSwitchReversedTopo
 from mininet.topolib import TreeTopo
 
-print 'MiniCCNxEdit running...' #+VERSION
+print 'MiniNDNEdit running...' #+VERSION
 MININET_VERSION = re.sub(r'[^\d\.]', '', VERSION)
 if StrictVersion(MININET_VERSION) > StrictVersion('2.0'):
     from mininet.node import IVSSwitch
+
+
+from ndn.gui import NfdFrame, NlsrFrame
 
 TOPODEF = 'none'
 TOPOS = { 'minimal': lambda: SingleSwitchTopo( k=2 ),
@@ -71,6 +75,16 @@ HOSTDEF = 'proc'
 HOSTS = { 'proc': Host,
           'rt': custom( CPULimitedHost, sched='rt' ),
           'cfs': custom( CPULimitedHost, sched='cfs' ) }
+
+def runMiniNdn(window, template):
+    # Hide window
+    window.withdraw()
+
+    proc = Popen("sudo minindn %s" % template, shell=True)
+    proc.wait()
+
+    # Restore window
+    window.deiconify()
 
 class LegacyRouter( Node ):
 
@@ -135,8 +149,17 @@ class HostDialog(CustomDialog):
             n = Notebook(self.rootFrame)
             self.propFrame = Frame(n)
             self.fibFrame = Frame(n)
+
+            # NDN
+            self.nfdFrame = NfdFrame(n)
+            self.nlsrFrame = NlsrFrame(n)
+
             n.add(self.propFrame, text='Properties')
             n.add(self.fibFrame, text='FIB Entries')
+
+            n.add(self.nfdFrame, text=self.nfdFrame.frameLabel)
+            n.add(self.nlsrFrame, text=self.nlsrFrame.frameLabel)
+
             n.pack()
 
             ### TAB 1
@@ -221,7 +244,10 @@ class HostDialog(CustomDialog):
                        'mem': self.memEntry.get(),
                        'hostname':self.hostnameEntry.get(),
                        'startCommand':self.startEntry.get(),
-                       'fibEntries':fibEntries}
+                       'fibEntries':fibEntries,
+                       'nlsr': self.nlsrFrame.getValues()
+            }
+
             self.result = results
 
 class VerticalScrolledTable(LabelFrame):
@@ -391,15 +417,15 @@ class ToolTip(object):
 
 class MiniEdit( Frame ):
 
-    "A simple network editor for MiniCCNx."
+    "A simple network editor for MiniNDN."
 
-    def __init__( self, parent=None, cheight=600, cwidth=1000, template_file='miniccnx.conf' ):
+    def __init__( self, parent=None, cheight=600, cwidth=1000, template_file='minindn.conf' ):
 
         self.template_file = template_file
 
         Frame.__init__( self, parent )
         self.action = None
-        self.appName = 'MiniccnxEdit'
+        self.appName = 'MiniNDNEdit'
         self.fixedFont = tkFont.Font ( family="DejaVu Sans Mono", size="14" )
 
         # Style
@@ -425,8 +451,8 @@ class MiniEdit( Frame ):
         self.images = miniEditImages()
         self.buttons = {}
         self.active = None
-        self.tools = ( 'Select', 'Host', 'LegacyRouter', 'NetLink' )
-        self.customColors = { 'LegacyRouter': 'darkGreen', 'Host': 'blue' }
+        self.tools = ( 'Select', 'Host', 'NetLink' )
+        #self.customColors = { 'LegacyRouter': 'darkGreen', 'Host': 'blue' }
         self.toolbar = self.createToolbar()
 
         # Layout
@@ -508,6 +534,7 @@ class MiniEdit( Frame ):
         fileMenu.add_command( label="Open", font=font, command=self.loadTopology )
         fileMenu.add_command( label="Save", font=font, command=self.saveTopology )
         fileMenu.add_command( label="Generate", font=font, command=self.doGenerate )
+        fileMenu.add_command( label="Run", font=font, command=self.doRun )
         fileMenu.add_separator()
         fileMenu.add_command( label='Quit', command=self.quit, font=font )
 
@@ -519,7 +546,7 @@ class MiniEdit( Frame ):
         # Application menu
         appMenu = Menu( mbar, tearoff=False )
         mbar.add_cascade( label=self.appName, font=font, menu=appMenu )
-        appMenu.add_command( label='About Mini-CCNx', command=self.about,
+        appMenu.add_command( label='About Mini-NDN', command=self.about,
                              font=font)
         #appMenu.add_separator()
         #appMenu.add_command( label='Quit', command=self.quit, font=font )
@@ -618,7 +645,7 @@ class MiniEdit( Frame ):
         # Spacer
         Label( toolbar, text='' ).pack()
 
-        # abaixo copiado Mini-CCNx para criar botao Generate
+        # abaixo copiado Mini-NDN para criar botao Generate
 
         for cmd, color in [ ( 'Generate', 'darkGreen' ) ]:
             doCmd = getattr( self, 'do' + cmd )
@@ -628,7 +655,7 @@ class MiniEdit( Frame ):
 
         return toolbar
 
-    def doGenerate( self ): #COPIA Mini-CCNx - GERA TEMPLATE
+    def doGenerate( self ): #COPIA Mini-NDN - GERA TEMPLATE
         "Generate template."
         self.activate( 'Select' )
         for tool in self.tools:
@@ -645,6 +672,19 @@ class MiniEdit( Frame ):
         b=Button(toplevel, text="Ok", width=5, command=toplevel.destroy)
         b.pack(side='bottom', padx=0,pady=0)
 
+    def doRun( self ):
+        "Use current configuration to generate a template and run the topology"
+
+        # Generate temporary template file
+        old_template_file = self.template_file
+        self.template_file = "/tmp/tmp.conf"
+        self.doGenerate()
+
+        thread = threading.Thread(target=runMiniNdn, args=(self.master, self.template_file))
+        thread.start()
+
+        self.template_file = old_template_file
+
     def parseFibEntries ( self, fibEntries ):
         "Parse FIB Entries for write"
         result=''
@@ -655,17 +695,17 @@ class MiniEdit( Frame ):
 
         return result
 
-    def buildTemplate( self ): #COPIA Mini-CCNx para criar Template
+    def buildTemplate( self ): #COPIA Mini-NDN para criar Template
         "Generate template"
 
         template = open(self.template_file, 'w')
 
         # hosts
-        template.write('[hosts]\n')
+        template.write('[nodes]\n')
         for widget in self.widgetToItem:
             name = widget[ 'text' ]
             tags = self.canvas.gettags( self.widgetToItem[ widget ] )
-            #print self.hostOpts[name]
+            print self.hostOpts[name]
             if 'Host' in tags:
                 hOpts=self.hostOpts[name]
                 template.write(name + ': ')
@@ -684,10 +724,22 @@ class MiniEdit( Frame ):
                 if 'fibEntries' in hOpts:
                         customFib = self.parseFibEntries(hOpts['fibEntries'])
                         template.write(customFib)
+                if 'nlsr' in hOpts:
+                        values = hOpts['nlsr']
+
+                        template.write('hyperbolic-state=' + values['hyperbolic-state'] + ' ')
+                        template.write('radius=' + values['radius'] + ' ')
+                        template.write('angle=' + values['angle'] + ' ')
+                        template.write('network=' + values['network'] + ' ')
+                        template.write('router=' + values['router'] + ' ')
+                        template.write('site=' + values['site'] + ' ')
+                        template.write('log-level=' + values['log-level'] + ' ')
+                        template.write('max-faces-per-prefix=' + values['max-faces-per-prefix'] + ' ')
+
                 template.write('\n')
 
         # switches/routers
-        template.write('[routers]\n')
+        #template.write('[routers]\n')
 
         for router in self.routerOpts.values():
 
@@ -735,7 +787,7 @@ class MiniEdit( Frame ):
              if 'loss' in linkopts:
                      template.write('loss=' + repr(linkopts['loss']) + ' ' )
              if 'delay' in linkopts:
-                     template.write('delay=' + str(linkopts['delay']))
+                     template.write('delay=' + str(linkopts['delay'])+ 'ms' )
 
              template.write('\n')
 
@@ -778,7 +830,7 @@ class MiniEdit( Frame ):
         c = self.canvas
 
         myFormats = [
-            ('Miniccnx Topology','*.mnccnx'),
+            ('MiniNDN Topology','*.mnndn'),
             ('All Files','*'),
         ]
         f = tkFileDialog.askopenfile(filetypes=myFormats, mode='rb')
@@ -788,7 +840,7 @@ class MiniEdit( Frame ):
         loadedTopology = self.convertJsonUnicode(json.load(f))
 
         # Load hosts
-        hosts = loadedTopology['hosts']
+        hosts = loadedTopology['nodes']
         for host in hosts:
             nodeNum = host['number']
             hostname = 'h'+nodeNum
@@ -800,6 +852,7 @@ class MiniEdit( Frame ):
                 host['opts']['nodeNum'] = int(nodeNum)
             x = host['x']
             y = host['y']
+
             self.addNode('Host', nodeNum, float(x), float(y), name=hostname)
 
             # Fix JSON converting tuple to list when saving
@@ -875,7 +928,7 @@ class MiniEdit( Frame ):
     def saveTopology( self ):
         "Save command."
         myFormats = [
-            ('Miniccnx Topology','*.mnccnx'),
+            ('MiniNDN Topology','*.mnndn'),
             ('All Files','*'),
         ]
 
@@ -1004,11 +1057,10 @@ class MiniEdit( Frame ):
 
     def clearPopups(self):
         print 'Entrou funcao clear_popups'
-
-            if isHostPopup == True:
-                print 'Hostpopup = true'
-                    self.hostPopup.unpost
-                isHostPopup = False
+        if isHostPopup == True:
+            print 'Hostpopup = true'
+            self.hostPopup.unpost
+            isHostPopup = False
         #if isRouterPopup == True
         #if isLinkPopup == True
 
@@ -1211,9 +1263,9 @@ class MiniEdit( Frame ):
         # For now, don't allow hosts to be directly linked
         stags = self.canvas.gettags( self.widgetToItem[ source ] )
         dtags = self.canvas.gettags( target )
-        if (('Host' in stags and 'Host' in dtags)):
-            self.releaseNetLink( event )
-            return
+        #if (('Host' in stags and 'Host' in dtags)):
+            #self.releaseNetLink( event )
+            #return
 
         # Set link type
         linkType='data'
@@ -1237,12 +1289,14 @@ class MiniEdit( Frame ):
             bg = 'white'
             about = Toplevel( bg='white' )
             about.title( 'About' )
-            info = self.appName + ': a simple network editor for MiniCCNx - based on Miniedit'
+            info = self.appName + ': a simple network editor for MiniNDN - based on Miniedit'
             warning = 'Development version - not entirely functional!'
             #version = 'MiniEdit '+MINIEDIT_VERSION
-            author = 'Carlos Cabral, Jan 2013'
-            author2 = 'Caio Elias, Nov 2014'
-            author3 = 'Originally by: Bob Lantz <rlantz@cs>, April 2010'
+            author = 'Vince Lehman, Jan 2015'
+            author2 = 'Ashlesh Gawande, Jan 2015'
+            author3 = 'Carlos Cabral, Jan 2013'
+            author4 = 'Caio Elias, Nov 2014'
+            author5 = 'Originally by: Bob Lantz <rlantz@cs>, April 2010'
             enhancements = 'Enhancements by: Gregory Gee, Since July 2013'
             www = 'http://gregorygee.wordpress.com/category/miniedit/'
             line1 = Label( about, text=info, font='Helvetica 10 bold', bg=bg )
@@ -1250,11 +1304,14 @@ class MiniEdit( Frame ):
             line3 = Label( about, text=author, font='Helvetica 9', bg=bg )
             line4 = Label( about, text=author2, font='Helvetica 9', bg=bg )
             line5 = Label( about, text=author3, font='Helvetica 9', bg=bg )
-            line6 = Label( about, text=enhancements, font='Helvetica 9', bg=bg )
-            line7 = Entry( about, font='Helvetica 9', bg=bg, width=len(www), justify=CENTER )
+            line6 = Label( about, text=author4, font='Helvetica 9', bg=bg )
+            line7 = Label( about, text=author5, font='Helvetica 9', bg=bg )
+            line8 = Label( about, text=enhancements, font='Helvetica 9', bg=bg )
+            line9 = Entry( about, font='Helvetica 9', bg=bg, width=len(www), justify=CENTER )
 
-            line7.insert(0, www)
-            line7.configure(state='readonly')
+
+            line9.insert(0, www)
+            line9.configure(state='readonly')
             line1.pack( padx=20, pady=10 )
             line2.pack(pady=10 )
             line3.pack(pady=10 )
@@ -1262,6 +1319,8 @@ class MiniEdit( Frame ):
             line5.pack(pady=10 )
             line6.pack(pady=10 )
             line7.pack(pady=10 )
+            line8.pack(pady=10 )
+            line9.pack(pady=10 )
             hide = ( lambda about=about: about.withdraw() )
             self.aboutBox = about
             # Hide on close rather than destroying window
@@ -1304,6 +1363,9 @@ class MiniEdit( Frame ):
                         newHostOpts['cache'] = hostBox.result['cache']
                     if len(hostBox.result['fibEntries']) > 0:
                         newHostOpts['fibEntries'] = hostBox.result['fibEntries']
+
+                    newHostOpts['nlsr'] = hostBox.nlsrFrame.getValues()
+
                     self.hostOpts[name] = newHostOpts
 
                     print 'New host details for ' + name + ' = ' + str(newHostOpts)
@@ -1456,12 +1518,12 @@ class MiniEdit( Frame ):
             else:
                 raise Exception( 'Custom file name not found' )
 
-        desc = ( "The %prog utility creates Miniccnx network from the\n"
+        desc = ( "The %prog utility creates Minindn network from the\n"
                  "command line. It can create parametrized topologies,\n"
-                 "invoke the Miniccnx CLI, and run tests." )
+                 "invoke the Minindn CLI, and run tests." )
 
         usage = ( '%prog [options] [template_file]\n'
-                  '\nIf no template_file is given, generated template will be written to the file miniccnx.conf in the current directory.\n'
+                  '\nIf no template_file is given, generated template will be written to the file minindn.conf in the current directory.\n'
                   'Type %prog -h for details)' )
 
         opts = OptionParser( description=desc, usage=usage )

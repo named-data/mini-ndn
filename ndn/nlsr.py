@@ -113,7 +113,7 @@ class NlsrConfigGenerator:
                     other = node1
                     ip = other.IP(str(link.intf1))
 
-                linkCost = intf.params.get("delay", "0ms").replace("ms", "")
+                linkCost = intf.params.get("delay", "10ms").replace("ms", "")
 
                 neighbors += "neighbor\n"
                 neighbors += "{\n"
