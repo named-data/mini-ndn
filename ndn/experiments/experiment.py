@@ -58,13 +58,16 @@ class Experiment:
                 host.nfd.stop()
             sys.exit(1)
 
+    def ping(self, source, dest, nPings):
+        # Use "&" to run in background and perform parallel pings
+        print "Scheduling ping(s) from %s to %s" % (source.name, dest.name)
+        source.cmd("ndnping -t -c "+ str(nPings) + " /ndn/edu/" + dest.name + " >> ping-data/" + dest.name + ".txt &")
+        time.sleep(0.2)
+
     def startPings(self):
         for host in self.net.hosts:
             for other in self.net.hosts:
                 # Do not ping self
                 if host.name != other.name:
-                    # Use "&" to run in background and perform parallel pings
-                    print "Scheduling ping(s) from %s to %s" % (host.name, other.name)
-                    host.cmd("ndnping -t -c "+ str(self.nPings) + " /ndn/edu/" + other.name + " > ping-data/" + other.name + ".txt &")
-                    time.sleep(0.2)
+                    self.ping(host, other, self.nPings)
 

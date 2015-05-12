@@ -7,6 +7,7 @@ from mininet.cli import CLI
 from mininet.link import TCLink
 from mininet.conf_parser import parse_hosts, parse_links
 
+from ndn.experiments.multiple_failure_experiment import MultipleFailureExperiment
 from ndn.experiments.pingall_experiment import PingallExperiment
 from ndn.experiments.failure_experiment import FailureExperiment
 from ndn.ndn_host import NdnHost, CpuLimitedNdnHost
@@ -32,6 +33,7 @@ def parse_args():
     pingall = False
     hr = False
     failure = False
+    isMultipleFailure = False
 
     parser = optparse.OptionParser(usage)
 
@@ -53,6 +55,9 @@ def parse_args():
     parser.add_option("--failure", action="store_true", dest="failure",
     help="Run failure experiment, specify the number of pings using pingall")
 
+    parser.add_option("--multiple-failure", action="store_true", dest="isMultipleFailure",
+    help="Run multiple failure experiment; each node will fail and recover once")
+
     parser.add_option("--no-cli", action="store_false", dest="isCliEnabled",
         help="Run experiments and exit without showing the command line interface")
 
@@ -64,6 +69,7 @@ def parse_args():
     hr = options.hr
     faces = options.faces
     failure = options.failure
+    isMultipleFailure = options.isMultipleFailure
     isCliEnabled = options.isCliEnabled
 
     if ctime is None:
@@ -77,7 +83,7 @@ def parse_args():
     else:
         file = arg[0]
 
-    return file, testbed, pingall, ctime, hr, faces, failure, isCliEnabled
+    return file, testbed, pingall, ctime, hr, faces, failure, isMultipleFailure, isCliEnabled
 
 class NdnTopo(Topo):
     def __init__(self, conf_arq, **opts):
@@ -105,7 +111,7 @@ class NdnTopo(Topo):
 
         info('Parse of ' + conf_arq + ' done.\n')
 
-def execute(template_file='minindn.conf', testbed=False, pingall=None, ctime=None, hr=False, faces=3, failure=False, isCliEnabled=True):
+def execute(template_file='minindn.conf', testbed=False, pingall=None, ctime=None, hr=False, faces=3, failure=False, isMultipleFailure=False, isCliEnabled=True):
     "Create a network based on template_file"
 
     home = expanduser("~")
@@ -163,7 +169,10 @@ def execute(template_file='minindn.conf', testbed=False, pingall=None, ctime=Non
 
     nodes = nodes[0:-1]
 
-    if failure is True:
+    if isMultipleFailure is True:
+        test = MultipleFailureExperiment(net, nodes, ctime, Nfd.STRATEGY_BEST_ROUTE_V3)
+        test.start()
+    elif failure is True:
         test = FailureExperiment(net, nodes, ctime, Nfd.STRATEGY_BEST_ROUTE_V3)
         test.start()
     elif pingall is not None:
@@ -183,7 +192,7 @@ def execute(template_file='minindn.conf', testbed=False, pingall=None, ctime=Non
 if __name__ == '__main__':
     hosts_conf = []
     links_conf = []
-    template, testbed, pingall, ctime, hr, faces, failure, isCliEnabled = parse_args()
+    template, testbed, pingall, ctime, hr, faces, failure, isMultipleFailure, isCliEnabled = parse_args()
 
     setLogLevel('info')
-    execute(template, testbed, pingall, ctime, hr, faces, failure, isCliEnabled)
+    execute(template, testbed, pingall, ctime, hr, faces, failure, isMultipleFailure, isCliEnabled)
