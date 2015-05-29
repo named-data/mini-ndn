@@ -10,7 +10,7 @@ extra packages and also to execute **Mini-NDN**.
 
 ### Installing NDN
 
-Each node in **Mini-NDN** will run the official implementation of NDN. Let's get it.
+Each node in **Mini-NDN** will run the official implementation of NDN. The following dependencies are needed:
 
 Mini-NDN uses NFD, NLSR, and ndn-tlv-ping.
 
@@ -20,45 +20,33 @@ http://named-data.net/doc/NFD/current/INSTALL.html
 To install NLSR:
 http://named-data.net/doc/NLSR/current/INSTALL.html
 
-To install ndn-tlv-ping:
-https://github.com/named-data/ndn-tlv-ping
+To install ndn-tools:
+https://github.com/named-data/ndn-tools
 
-### Downloading and installing **Mini-NDN**
+### Installing Mininet
 
-If you don't have it yet, you'll need to have _git_ installed first. In Ubuntu, that would be:
+**Mini-NDN** is based on Mininet. To install Mininet:
+https://github.com/mininet/mininet/INSTALL
 
-    sudo apt-get install git
+### Installing **Mini-NDN**
 
-Now, let's get the source code of **Mini-NDN**.
-Go to your home directory and use the following command:
+If you have all the dependencies installed simply clone this repository and run:
 
-    git clone https://github.com/named-data/mini-ndn
+    sudo ./install.sh -i
 
-As a result, there will be a directory named _mini-ndn_ in your home directory, containing all the source code.
+else if you don't have the dependencies:
 
-Still in your home directory, use the utility install script with _-fnv_ options:
-
-    sudo ./mini-ndn/util/install.sh -fnv
-
-where
--f: install open(F)low
--n: install mini(N)et dependencies + core files
--v: install open (V)switch
-
-Prerequisite packages will be downloaded and installed during the process.
+    sudo ./install.sh -mrfti
 
 ### Verification
 
-Once everything is installed, the following command can be issued for verification from the home folder:
+Once everything is installed, the following command can be issued for verification
 
-    sudo minindn --pingall 50 --ctime 180 mini-ndn/ndn_utils/hyperbolic_conf_file/minindn.caida.conf
-
-where:
---pingall: Will schedule and collect the specified number of pings from each node to every other node
---ctime: Convergence time for NLSR, provide according to the size of the topology
-
-Note: The configuration file contains hyperbolic coordinates but hyperbolic routing will only be
-activated if --hr is provided
+    sudo minindn --pingall 50 --ctime 180 ndn_utils/hyperbolic_conf_file/minindn.caida.conf
 
 All the ping logs will be stored under /tmp/node-name/ping-data and the command will provide a
 command line interface at the end.
+
+When the "mininet>" CLI prompt appears, press CTRL+D to terminate the experiment.
+Then, execute `ls /tmp/*/ping-data/*.txt | wc -l`, and expect to see "90".
+Execute `cat /tmp/*/ping-data/*.txt | grep loss`, and expect to see "0% packet loss" on every line.

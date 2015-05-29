@@ -42,8 +42,8 @@ class NlsrConfigGenerator:
     ROUTING_LINK_STATE = "ls"
     ROUTING_HYPERBOLIC = "hr"
 
-    def __init__(self, node, home):
-        node.cmd("sudo cp %s/mini-ndn/ndn_utils/nlsr.conf nlsr.conf" % home)
+    def __init__(self, node):
+        node.cmd("sudo cp /usr/local/etc/mini-ndn/nlsr.conf nlsr.conf")
         self.node = node
 
         parameters = node.nlsrParameters

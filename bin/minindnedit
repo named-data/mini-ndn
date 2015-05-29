@@ -42,7 +42,7 @@ from mininet.log import info, error, debug, output, setLogLevel
 from mininet.net import Mininet, VERSION
 from mininet.util import ipStr, netParse, ipAdd, quietRun
 from mininet.util import buildTopo
-from mininet.util import custom, customConstructor
+from mininet.util import custom
 from mininet.term import makeTerm, cleanUpScreens
 from mininet.node import Controller, RemoteController, NOX, OVSController
 from mininet.node import CPULimitedHost, Host, Node

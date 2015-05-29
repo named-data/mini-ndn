@@ -21,8 +21,8 @@ class Nfd:
         self.ndnFolder = "%s/.ndn" % self.homeFolder
         self.clientConf = "%s/client.conf" % self.ndnFolder
 
-        # Copy nfd.conf file from mini-ndn/ndn_utils to the node's home
-        node.cmd("sudo cp ~/mini-ndn/ndn_utils/nfd.conf %s" % self.confFile)
+        # Copy nfd.conf file from /usr/local/etc/mini-ndn to the node's home
+        node.cmd("sudo cp /usr/local/etc/mini-ndn/nfd.conf %s" % self.confFile)
 
         # Open the conf file and change socket file name
         node.cmd("sudo sed -i 's|nfd.sock|%s.sock|g' %s" % (node.name, self.confFile))
@@ -31,7 +31,7 @@ class Nfd:
         node.cmd("sudo mkdir %s" % self.ndnFolder)
 
         # Copy the client.conf file and change the unix socket
-        node.cmd("sudo cp ~/mini-ndn/ndn_utils/client.conf.sample %s" % self.clientConf)
+        node.cmd("sudo cp /usr/local/etc/mini-ndn/client.conf.sample %s" % self.clientConf)
         node.cmd("sudo sed -i 's|nfd.sock|%s.sock|g' %s" % (node.name, self.clientConf))
 
         # Change home folder
