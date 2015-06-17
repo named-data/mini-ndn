@@ -23,11 +23,9 @@ from ndn.nfd import Nfd
 
 def parse_args():
     usage="""Usage: minindn [template_file] [ -t | --testbed ]
-    If no template_file is given, will try to load template
-    from file minindn.conf in the current directory.
+    If no template_file is given, ndn_utils/default-topology.conf (given sample file)
+    will be used.
     If --testbed is used, minindn will run the NDN Project Testbed.
-    This assumes you are in the testbed directory in the minindn installation
-    directory.
     """
 
     testbed = False
@@ -115,12 +113,18 @@ class NdnTopo(Topo):
 def execute(template_file='minindn.conf', testbed=False, pingall=None, ctime=None, hr=False, faces=3, failure=False, isMultipleFailure=False, isCliEnabled=True):
     "Create a network based on template_file"
 
+    install_dir='/usr/local/etc/mini-ndn/'
+
     if template_file == '':
-        template_file='minindn.conf'
+        template_file = install_dir + 'default-topology.conf'
+
+    if testbed:
+        template_file = install_dir + 'minindn.testbed.conf'
 
     if os.path.exists(template_file) == False:
-        info('No template file given and default template file minindn.conf not found. Exiting...\n')
+        info('No template file given and default template file cannot be found. Exiting...\n')
         quit()
+
     topo = NdnTopo(template_file)
 
     t = datetime.datetime.now()

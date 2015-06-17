@@ -144,10 +144,14 @@ function minindn {
         $install python-setuptools
         pysetup="true"
     fi
-    sudo mkdir -p /usr/local/etc/mini-ndn/
-    sudo cp ndn_utils/client.conf.sample /usr/local/etc/mini-ndn/
-    sudo cp ndn_utils/nfd.conf /usr/local/etc/mini-ndn/
-    sudo cp ndn_utils/nlsr.conf /usr/local/etc/mini-ndn/
+    install_dir="/usr/local/etc/mini-ndn/"
+
+    sudo mkdir -p "$install_dir"
+    sudo cp ndn_utils/client.conf.sample "$install_dir"
+    sudo cp ndn_utils/nfd.conf "$install_dir"
+    sudo cp ndn_utils/nlsr.conf "$install_dir"
+    sudo cp ndn_utils/topologies/default-topology.conf "$install_dir"
+    sudo cp ndn_utils/topologies/minindn.testbed.conf "$install_dir"
     sudo python setup.py install
 }
 
