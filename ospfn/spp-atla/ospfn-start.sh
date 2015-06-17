@@ -1,1 +1,0 @@
-../ospfn-start.sh
