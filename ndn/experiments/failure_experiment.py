@@ -7,9 +7,10 @@ import time
 
 class FailureExperiment(Experiment):
 
-    def __init__(self, net, nodes, convergenceTime, strategy):
+    def __init__(self, args):
+        args["nPings"] = 300
+        Experiment.__init__(self, args)
 
-        Experiment.__init__(self, net, nodes, convergenceTime, 300, strategy)
         self.PING_COLLECTION_TIME_BEFORE_FAILURE = 60
         self.PING_COLLECTION_TIME_AFTER_RECOVERY = 90
 
@@ -40,3 +41,5 @@ class FailureExperiment(Experiment):
 
         # Collect pings for more seconds after CSU is up
         time.sleep(self.PING_COLLECTION_TIME_AFTER_RECOVERY)
+
+Experiment.register("failure", FailureExperiment)

@@ -3,14 +3,16 @@
 import time
 import sys
 
+from ndn import ExperimentManager
+
 class Experiment:
 
-    def __init__(self, net, nodes, convergenceTime, nPings, strategy):
-        self.net = net
-        self.nodes = nodes
-        self.convergenceTime = convergenceTime
-        self.nPings = nPings
-        self.strategy = strategy
+    def __init__(self, args):
+        self.net = args["net"]
+        self.nodes = args["nodes"]
+        self.convergenceTime = args["ctime"]
+        self.nPings = args["nPings"]
+        self.strategy = args["strategy"]
 
     def start(self):
         self.setup()
@@ -70,4 +72,8 @@ class Experiment:
                 # Do not ping self
                 if host.name != other.name:
                     self.ping(host, other, self.nPings)
+
+    @staticmethod
+    def register(name, experimentClass):
+        ExperimentManager.register(name, experimentClass)
 

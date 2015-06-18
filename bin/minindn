@@ -7,9 +7,8 @@ from mininet.cli import CLI
 from mininet.link import TCLink
 from mininet.util import ipStr, ipParse
 
-from ndn.experiments.multiple_failure_experiment import MultipleFailureExperiment
-from ndn.experiments.pingall_experiment import PingallExperiment
-from ndn.experiments.failure_experiment import FailureExperiment
+
+from ndn import ExperimentManager
 from ndn.ndn_host import NdnHost, CpuLimitedNdnHost
 from ndn.conf_parser import parse_hosts, parse_links
 
@@ -17,9 +16,17 @@ import os.path, time
 import optparse
 import datetime
 from os.path import expanduser
+import sys
 
 from ndn.nlsr import Nlsr, NlsrConfigGenerator
 from ndn.nfd import Nfd
+
+def printExperimentNames():
+    experimentNames = ExperimentManager.getExperimentNames()
+
+    print "Mini-NDN experiments:"
+    for experiment in experimentNames:
+        print "  %s" % experiment
 
 def parse_args():
     usage="""Usage: minindn [template_file] [ -t | --testbed ]
@@ -29,18 +36,21 @@ def parse_args():
     """
 
     testbed = False
-    pingall = False
     hr = False
-    failure = False
-    isMultipleFailure = False
 
     parser = optparse.OptionParser(usage)
 
     parser.add_option("-t", "--testbed", action="store_true", dest="testbed",
     help="instantiates NDN Testbed")
 
-    parser.add_option("--pingall", action="store", dest="pingall", type="int",
-    help="Sequentiall pings all the other nodes from each node")
+    parser.add_option("--experiment", action="store", dest="experiment",
+    help="Runs the specified experiment")
+
+    parser.add_option("--list-experiments", action="store_true", dest="shouldListExperiments",
+    help="Lists the names of all available experiments")
+
+    parser.add_option("--nPings", action="store", dest="nPings", type="int",
+    help="Number of pings to perform between each node in the experiment")
 
     parser.add_option("--ctime", action="store", dest="ctime", type="int",
     help="Specify convergence time for the topology (Default 60 seconds)")
@@ -51,28 +61,29 @@ def parse_args():
     parser.add_option("--faces", action="store", dest="faces", type="int",
     help="Specify number of faces 0-60")
 
-    parser.add_option("--failure", action="store_true", dest="failure",
-    help="Run failure experiment, specify the number of pings using pingall")
-
-    parser.add_option("--multiple-failure", action="store_true", dest="isMultipleFailure",
-    help="Run multiple failure experiment; each node will fail and recover once")
-
     parser.add_option("--no-cli", action="store_false", dest="isCliEnabled",
         help="Run experiments and exit without showing the command line interface")
 
     (options, arg) = parser.parse_args()
 
     testbed = options.testbed
-    pingall = options.pingall
+    experimentName = options.experiment
+    shouldListExperiments = options.shouldListExperiments
+    nPings = options.nPings
     ctime = options.ctime
     hr = options.hr
     faces = options.faces
-    failure = options.failure
-    isMultipleFailure = options.isMultipleFailure
     isCliEnabled = options.isCliEnabled
+
+    if shouldListExperiments is not None:
+        printExperimentNames()
+        sys.exit()
 
     if ctime is None:
         ctime = 60
+
+    if nPings is None:
+        nPings = 300
 
     if isCliEnabled is None:
         isCliEnabled = True
@@ -82,7 +93,7 @@ def parse_args():
     else:
         file = arg[0]
 
-    return file, testbed, pingall, ctime, hr, faces, failure, isMultipleFailure, isCliEnabled
+    return file, testbed, experimentName, nPings, ctime, hr, faces, isCliEnabled
 
 class NdnTopo(Topo):
     def __init__(self, conf_arq, **opts):
@@ -110,7 +121,7 @@ class NdnTopo(Topo):
 
         info('Parse of ' + conf_arq + ' done.\n')
 
-def execute(template_file='minindn.conf', testbed=False, pingall=None, ctime=None, hr=False, faces=3, failure=False, isMultipleFailure=False, isCliEnabled=True):
+def execute(template_file='minindn.conf', testbed=False, experimentName=None, nPings=None, ctime=None, hr=False, faces=3, isCliEnabled=True):
     "Create a network based on template_file"
 
     install_dir='/usr/local/etc/mini-ndn/'
@@ -187,20 +198,30 @@ def execute(template_file='minindn.conf', testbed=False, pingall=None, ctime=Non
 
     nodes = nodes[0:-1]
 
-    if isMultipleFailure is True:
-        test = MultipleFailureExperiment(net, nodes, ctime, Nfd.STRATEGY_BEST_ROUTE_V3)
-        test.start()
-    elif failure is True:
-        test = FailureExperiment(net, nodes, ctime, Nfd.STRATEGY_BEST_ROUTE_V3)
-        test.start()
-    elif pingall is not None:
-        test = PingallExperiment(net, nodes, ctime, pingall, Nfd.STRATEGY_BEST_ROUTE_V3)
-        test.start()
-
     for host in net.hosts:
         if 'app' in host.params:
             if host.params['app'] != '_':
                 host.cmd(host.params['app'])
+
+    # Load experiment
+    if experimentName is not None:
+        print "Loading experiment: %s" % experimentName
+
+        experimentArgs = {
+            "net": net,
+            "nodes": nodes,
+            "ctime": ctime,
+            "nPings": nPings,
+            "strategy": Nfd.STRATEGY_BEST_ROUTE_V3
+        }
+
+        experiment = ExperimentManager.create(experimentName, experimentArgs)
+
+        if experiment is not None:
+            experiment.start()
+        else:
+            print "ERROR: Experiment '%s' does not exist" % experimentName
+            return
 
     if isCliEnabled is True:
         CLI(net)
@@ -208,9 +229,10 @@ def execute(template_file='minindn.conf', testbed=False, pingall=None, ctime=Non
     net.stop()
 
 if __name__ == '__main__':
+
     hosts_conf = []
     links_conf = []
-    template, testbed, pingall, ctime, hr, faces, failure, isMultipleFailure, isCliEnabled = parse_args()
+    template, testbed, experimentName, nPings, ctime, hr, faces, isCliEnabled = parse_args()
 
     setLogLevel('info')
-    execute(template, testbed, pingall, ctime, hr, faces, failure, isMultipleFailure, isCliEnabled)
+    execute(template, testbed, experimentName, nPings, ctime, hr, faces, isCliEnabled)

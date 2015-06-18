@@ -7,7 +7,7 @@ import time
 
 class MultipleFailureExperiment(Experiment):
 
-    def __init__(self, net, nodes, convergenceTime, strategy):
+    def __init__(self, args):
 
         self.PING_COLLECTION_TIME_BEFORE_FAILURE = 60
 
@@ -15,10 +15,12 @@ class MultipleFailureExperiment(Experiment):
         self.RECOVERY_INTERVAL = 60
 
         # This is the number of pings required to make it through the full experiment
-        nInitialPings = self.PING_COLLECTION_TIME_BEFORE_FAILURE + len(net.hosts)*(self.FAILURE_INTERVAL + self.RECOVERY_INTERVAL)
+        nInitialPings = self.PING_COLLECTION_TIME_BEFORE_FAILURE + len(args["net"].hosts)*(self.FAILURE_INTERVAL + self.RECOVERY_INTERVAL)
         print("Scheduling with %s initial pings" % nInitialPings)
 
-        Experiment.__init__(self, net, nodes, convergenceTime, nInitialPings, strategy)
+        args["nPings"] = nInitialPings
+
+        Experiment.__init__(self, args)
 
     def failNode(self, host):
         print("Bringing %s down" % host.name)
@@ -65,3 +67,5 @@ class MultipleFailureExperiment(Experiment):
                     self.ping(host, other, nPings)
 
             time.sleep(self.RECOVERY_INTERVAL)
+
+Experiment.register("multiple-failure", MultipleFailureExperiment)
