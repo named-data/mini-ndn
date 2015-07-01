@@ -197,10 +197,13 @@ class HostDialog(CustomDialog):
             # Start command
             #print self.isRouter
             if self.isRouter == 'False':
-                    Label(self.propFrame, text="Start Command:").grid(row=5, sticky=E)
-                    self.startEntry = Entry(self.propFrame)
-                    self.startEntry.grid(row=5, column=1, sticky='nswe', columnspan=3)
-                    Label(self.propFrame, text="[full path]").grid(row=5, column=2, sticky=W)
+                    Label(self.propFrame, text="Start Command(s):").grid(row=5, sticky=E)
+                    self.scrollbar = Scrollbar(self.propFrame, orient="horizontal")
+                    self.startEntry = Entry(self.propFrame, xscrollcommand=self.scrollbar.set,)
+                    self.startEntry.grid(row=5, column=1)
+                    self.scrollbar.grid(row=6, column=1, sticky=N+S+E+W)
+                    self.scrollbar.config(command=self.startEntry.xview)
+                    Label(self.propFrame, text="[Use bash syntax]").grid(row=5, column=2, sticky=W)
                     if 'startCommand' in self.prefValues:
                         self.startEntry.insert(0, str(self.prefValues['startCommand']))
             else:
@@ -711,7 +714,8 @@ class MiniEdit( Frame ):
                 hOpts=self.hostOpts[name]
                 template.write(name + ': ')
                 if 'startCommand' in hOpts:
-                        template.write(hOpts['startCommand'] + ' ')
+                        cmds = hOpts['startCommand'].replace("\"", "\\\"")
+                        template.write('apps="%s" ' % cmds)
                 else:
                         template.write('_ ')
                 if 'cache' in hOpts:

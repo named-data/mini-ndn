@@ -1,4 +1,5 @@
 import ConfigParser, re
+import shlex
 
 class confNDNHost():
 
@@ -58,9 +59,7 @@ def parse_hosts(conf_arq):
 
         name = item[0]
 
-        rest = item[1].split()
-
-        app = rest.pop(0)
+        rest = shlex.split(item[1])
 
         uris = rest
         params = {}
@@ -77,6 +76,10 @@ def parse_hosts(conf_arq):
                 cache = uri.split('=')[1]
             elif re.match("mem",uri):
                 mem = uri.split('=')[1]
+            elif re.match("app",uri):
+                app = uri.split('=')[1]
+            elif re.match("_", uri):
+                app = ""
             else:
                 params[uri.split('=')[0]] = uri.split('=')[1]
 

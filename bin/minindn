@@ -200,8 +200,10 @@ def execute(template_file='minindn.conf', testbed=False, experimentName=None, nP
 
     for host in net.hosts:
         if 'app' in host.params:
-            if host.params['app'] != '_':
-                host.cmd(host.params['app'])
+            if host.params['app'] != '':
+                app = host.params['app']
+                print "Starting " + app + " on node " + host.name
+                print(host.cmd(app))
 
     # Load experiment
     if experimentName is not None:
