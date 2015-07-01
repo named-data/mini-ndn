@@ -52,6 +52,7 @@ class NlsrConfigGenerator:
         self.hyperbolicState = parameters.get("hyperbolic-state", "off")
         self.hyperRadius = parameters.get("radius", 0.0)
         self.hyperAngle = parameters.get("angle", 0.0)
+        self.logLevel = parameters.get("nlsr-log-level", "DEBUG")
 
     def createConfigFile(self):
 
@@ -89,7 +90,7 @@ class NlsrConfigGenerator:
         general += "  network /ndn/\n"
         general += "  site /edu\n"
         general += "  router /%C1.Router/cs/" + self.node.name + "\n"
-        general += "  log-level DEBUG\n"
+        general += "  log-level " + self.logLevel + "\n"
         general += "  log-dir /tmp/" + self.node.name + "/log\n"
         general += "  seq-dir /tmp/" + self.node.name + "/log\n"
         general += "}\n"

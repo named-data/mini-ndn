@@ -733,7 +733,7 @@ class MiniEdit( Frame ):
                         template.write('network=' + values['network'] + ' ')
                         template.write('router=' + values['router'] + ' ')
                         template.write('site=' + values['site'] + ' ')
-                        template.write('log-level=' + values['log-level'] + ' ')
+                        template.write('nlsr-log-level=' + values['log-level'] + ' ')
                         template.write('max-faces-per-prefix=' + values['max-faces-per-prefix'] + ' ')
 
                 template.write('\n')
