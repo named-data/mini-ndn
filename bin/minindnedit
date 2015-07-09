@@ -151,8 +151,8 @@ class HostDialog(CustomDialog):
             self.fibFrame = Frame(n)
 
             # NDN
-            self.nfdFrame = NfdFrame(n)
-            self.nlsrFrame = NlsrFrame(n)
+            self.nfdFrame = NfdFrame(n, self.prefValues)
+            self.nlsrFrame = NlsrFrame(n,self.prefValues)
 
             n.add(self.propFrame, text='Properties')
             n.add(self.fibFrame, text='FIB Entries')
@@ -849,7 +849,7 @@ class MiniEdit( Frame ):
         loadedTopology = self.convertJsonUnicode(json.load(f))
 
         # Load hosts
-        hosts = loadedTopology['nodes']
+        hosts = loadedTopology['hosts']
         for host in hosts:
             nodeNum = host['number']
             hostname = 'h'+nodeNum
@@ -859,6 +859,7 @@ class MiniEdit( Frame ):
                 host['opts']['hostname'] = hostname
             if 'nodeNum' not in host['opts']:
                 host['opts']['nodeNum'] = int(nodeNum)
+
             x = host['x']
             y = host['y']
 

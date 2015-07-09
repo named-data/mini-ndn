@@ -13,8 +13,11 @@ LOG_LEVELS = [
 ]
 
 class GuiFrame(Frame):
-    def __init__(self, notebook):
+    def __init__(self, notebook, prefValues, appId):
         Frame.__init__(self, notebook)
+
+        self.prefValues = prefValues
+        self.appId = appId
 
         self.row = 0
         self.column = 0
@@ -38,21 +41,29 @@ class GuiFrame(Frame):
 
         self.row += 1
 
+    def getPreferredOrDefaultValue(self, key, defaultValue):
+        if self.appId in self.prefValues:
+            return self.prefValues[self.appId][key]
+        else:
+            return defaultValue
+
 class NfdFrame(GuiFrame):
-    def __init__(self, notebook):
-        GuiFrame.__init__(self, notebook)
+    def __init__(self, notebook, prefValues):
+        GuiFrame.__init__(self, notebook, prefValues, "nfd")
 
         self.frameLabel = "NFD"
 
         # log-level
         self.logLevel = StringVar(self)
-        self.addDropDown("Log level:", self.logLevel, LOG_LEVELS, LOG_LEVELS[3])
+        self.addDropDown("Log level:",
+                         self.logLevel,
+                         LOG_LEVELS,
+                         self.getPreferredOrDefaultValue("log-level", LOG_LEVELS[3]))
 
     def getValues(self):
         return {
             "log-level": self.logLevel.get()
         }
-
 
 class NlsrFrame(GuiFrame):
 
@@ -62,44 +73,54 @@ class NlsrFrame(GuiFrame):
         "dry-run"
     ]
 
-    def __init__(self, notebook):
-        GuiFrame.__init__(self, notebook)
+    def __init__(self, notebook, prefValues):
+        GuiFrame.__init__(self, notebook, prefValues, "nlsr")
 
         self.frameLabel = "NLSR"
 
         # general: network
         self.network = StringVar(self)
-        self.addEntryBox("Network:", self.network, "/ndn/")
+        self.addEntryBox("Network:",
+                         self.network,
+                         self.getPreferredOrDefaultValue("network", "/ndn"))
 
         # general: site
         self.site = StringVar(self)
-        self.addEntryBox("Site:", self.site, "/edu/site")
+        self.addEntryBox("Site:", self.site, self.getPreferredOrDefaultValue("site", "/edu/site"))
 
         # general: router
         self.router = StringVar(self)
-        self.addEntryBox("Router:", self.router, "/%C1.Router/cs/host")
+        self.addEntryBox("Router:",
+                         self.router,
+                         self.getPreferredOrDefaultValue("router", "/%C1.Router/cs/host"))
 
         # general: log-level
         self.logLevel = StringVar(self)
-        self.addDropDown("Log level:", self.logLevel, LOG_LEVELS, LOG_LEVELS[3])
+        self.addDropDown("Log level:",
+                         self.logLevel,
+                         LOG_LEVELS,
+                         self.getPreferredOrDefaultValue("log-level", LOG_LEVELS[3]))
 
         # hyperbolic: state
         self.hyperbolicState = StringVar(self)
-        self.addDropDown("Hyperbolic routing:", self.hyperbolicState,
-                         self.HYPERBOLIC_STATES, self.HYPERBOLIC_STATES[0])
+        self.addDropDown("Hyperbolic routing:",
+                         self.hyperbolicState,
+                         self.HYPERBOLIC_STATES,
+                         self.getPreferredOrDefaultValue("hyperbolic-state", self.HYPERBOLIC_STATES[0]))
 
         # hyperbolic: angle
         self.angle = StringVar(self)
-        self.addEntryBox("Angle:", self.angle, "0.0")
+        self.addEntryBox("Angle:", self.angle, self.getPreferredOrDefaultValue("angle", "0.0"))
 
         # hyperbolic: radius
         self.radius = StringVar(self)
-        self.addEntryBox("Radius:", self.radius, "0.0")
+        self.addEntryBox("Radius:", self.radius, self.getPreferredOrDefaultValue("radius", "0.0"))
 
         # fib: max-faces-per-prefix
         self.maxFaces = StringVar(self)
-        self.addEntryBox("Max faces per prefix:", self.maxFaces, "0")
-
+        self.addEntryBox("Max faces per prefix:",
+                         self.maxFaces,
+                         self.getPreferredOrDefaultValue("max-faces-per-prefix", "0"))
 
     def getValues(self):
         return {
