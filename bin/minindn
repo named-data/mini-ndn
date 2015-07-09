@@ -110,7 +110,7 @@ class NdnTopo(Topo):
         for host in hosts_conf:
             if host.cpu != None and self.isLimited != True:
                 self.isLimited = True
-            self.addHost(host.name, app=host.app, fib=host.uri_tuples,cpu=host.cpu,cores=host.cores,cache=host.cache)
+            self.addHost(host.name, app=host.app, params=host.uri_tuples, cpu=host.cpu,cores=host.cores,cache=host.cache)
 
         for link in links_conf:
             if len(link.linkDict) == 0:

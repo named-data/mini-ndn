@@ -6,6 +6,7 @@ class confNDNHost():
         self.name = name
         self.app = app
         self.uri_tuples = params
+        self.params = params
         self.cpu = cpu
         self.cores = cores
         self.cache = cache

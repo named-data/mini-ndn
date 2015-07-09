@@ -48,6 +48,12 @@ class NfdFrame(GuiFrame):
         self.logLevel = StringVar(self)
         self.addDropDown("Log level:", self.logLevel, LOG_LEVELS, LOG_LEVELS[3])
 
+    def getValues(self):
+        return {
+            "log-level": self.logLevel.get()
+        }
+
+
 class NlsrFrame(GuiFrame):
 
     HYPERBOLIC_STATES = [

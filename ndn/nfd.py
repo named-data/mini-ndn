@@ -10,6 +10,8 @@ class Nfd:
         self.node = node
         self.isRunning = False
 
+        self.logLevel = node.params["params"].get("nfd-log-level", "NONE")
+
         # Create home directory for a node
         node.cmd("cd /tmp && mkdir %s" % node.name)
         node.cmd("cd %s" % node.name)
@@ -23,6 +25,9 @@ class Nfd:
 
         # Copy nfd.conf file from /usr/local/etc/mini-ndn to the node's home
         node.cmd("sudo cp /usr/local/etc/mini-ndn/nfd.conf %s" % self.confFile)
+
+        # Set log level
+        node.cmd("sudo sed -i \'s|$LOG_LEVEL|%s|g\' %s" % (self.logLevel, self.confFile))
 
         # Open the conf file and change socket file name
         node.cmd("sudo sed -i 's|nfd.sock|%s.sock|g' %s" % (node.name, self.confFile))

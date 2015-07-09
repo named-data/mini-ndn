@@ -245,6 +245,7 @@ class HostDialog(CustomDialog):
                        'hostname':self.hostnameEntry.get(),
                        'startCommand':self.startEntry.get(),
                        'fibEntries':fibEntries,
+                       'nfd': self.nfdFrame.getValues(),
                        'nlsr': self.nlsrFrame.getValues()
             }
 
@@ -735,6 +736,10 @@ class MiniEdit( Frame ):
                         template.write('site=' + values['site'] + ' ')
                         template.write('nlsr-log-level=' + values['log-level'] + ' ')
                         template.write('max-faces-per-prefix=' + values['max-faces-per-prefix'] + ' ')
+                if 'nfd' in hOpts:
+                        values = hOpts['nfd']
+
+                        template.write('nfd-log-level=' + values['log-level'] + ' ')
 
                 template.write('\n')
 
@@ -1365,6 +1370,7 @@ class MiniEdit( Frame ):
                         newHostOpts['fibEntries'] = hostBox.result['fibEntries']
 
                     newHostOpts['nlsr'] = hostBox.nlsrFrame.getValues()
+                    newHostOpts['nfd'] = hostBox.nfdFrame.getValues()
 
                     self.hostOpts[name] = newHostOpts
 
