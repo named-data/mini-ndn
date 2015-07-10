@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
 import time
+from ndn.ndn_application import NdnApplication
 
-class Nfd:
+class Nfd(NdnApplication):
     STRATEGY_BEST_ROUTE_V3 = "best-route/%FD%03"
     STRATEGY_NCC = "ncc"
 
     def __init__(self, node):
-        self.node = node
-        self.isRunning = False
+        NdnApplication.__init__(self, node)
 
         self.logLevel = node.params["params"].get("nfd-log-level", "NONE")
 
@@ -43,25 +43,8 @@ class Nfd:
         node.cmd("export HOME=%s" % self.homeFolder)
 
     def start(self):
-        if self.isRunning is True:
-            try:
-                os.kill(int(self.processId), 0)
-            except OSError:
-                self.isRunning = False
-
-        if self.isRunning is False:
-            self.node.cmd("sudo nfd --config %s 2>> %s &" % (self.confFile, self.logFile))
-            self.processId = self.node.cmd("echo $!")[:-1]
-
-            time.sleep(2)
-
-            self.isRunning = True
-
-    def stop(self):
-        if self.isRunning is True:
-            self.node.cmd("sudo kill %s" % self.processId)
-
-            self.isRunning = False
+        NdnApplication.start(self, "sudo nfd --config %s 2>> %s &" % (self.confFile, self.logFile))
+        time.sleep(2)
 
     def setStrategy(self, name, strategy):
         self.node.cmd("nfdc set-strategy %s ndn:/localhost/nfd/strategy/%s" % (name, strategy))

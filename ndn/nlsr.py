@@ -1,12 +1,11 @@
 #!/usr/bin/env python
-import os
+from ndn.ndn_application import NdnApplication
 
-class Nlsr:
+class Nlsr(NdnApplication):
     def __init__(self, node):
-        self.node = node
+        NdnApplication.__init__(self, node)
         self.routerName = "/%sC1.Router/cs/%s" % ('%', node.name)
         self.confFile = "/tmp/%s/nlsr.conf" % node.name
-        self.isRunning = False
 
         # Make directory for log file
         self.logDir = "/tmp/%s/log" % node.name
@@ -19,23 +18,7 @@ class Nlsr:
         node.cmd("sudo sed -i 's|prefix .*netlab|prefix /ndn/edu/%s|g' %s" % (node.name, self.confFile))
 
     def start(self):
-        if self.isRunning is True:
-            try:
-                os.kill(int(self.processId), 0)
-            except OSError:
-                self.isRunning = False
-
-        if self.isRunning is False: 
-            self.node.cmd("nlsr -d")
-            self.processId = self.node.cmd("echo $!")[:-1]
-
-            self.isRunning = True
-
-    def stop(self):
-        if self.isRunning:
-            self.node.cmd("sudo kill %s" % self.processId)
-
-            self.isRunning = False
+        NdnApplication.start(self, "nlsr -d")
 
 class NlsrConfigGenerator:
 
