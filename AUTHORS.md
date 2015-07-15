@@ -1,10 +1,9 @@
 Mini-NDN Authors
 ================
 
-Mini-NDN is an open source project that includes contributions from the members
-of the [NDN project team](http://named-data.net/project/participants/).
+Mini-NDN is an open source project that includes contributions from the following individuals.
 
-## All project authors, contributors and their affiliations:
+## Mini-NDN contributors and affiliations:
 
 * The University of Memphis
 
