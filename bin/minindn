@@ -79,12 +79,18 @@ import sys
 from ndn.nlsr import Nlsr, NlsrConfigGenerator
 from ndn.nfd import Nfd
 
+VERSION_NUMBER = "0.1.0"
+
 def printExperimentNames():
     experimentNames = ExperimentManager.getExperimentNames()
 
     print "Mini-NDN experiments:"
     for experiment in experimentNames:
         print "  %s" % experiment
+
+def printVersion(option, opt, value, parser):
+    print "Mini-NDN v%s" % VERSION_NUMBER
+    sys.exit()
 
 def parse_args():
     usage="""Usage: minindn [template_file] [ -t | --testbed ]
@@ -121,6 +127,9 @@ def parse_args():
 
     parser.add_option("--no-cli", action="store_false", dest="isCliEnabled",
         help="Run experiments and exit without showing the command line interface")
+
+    parser.add_option('--version', '-V', action='callback', callback=printVersion,
+    help='Displays version information')
 
     (options, arg) = parser.parse_args()
 
