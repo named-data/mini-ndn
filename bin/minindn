@@ -146,6 +146,10 @@ def parse_args():
         printExperimentNames()
         sys.exit()
 
+    if experimentName is not None and experimentName not in ExperimentManager.getExperimentNames():
+        print("No experiment named %s" % experimentName)
+        sys.exit()
+
     if ctime is None:
         ctime = 60
 
