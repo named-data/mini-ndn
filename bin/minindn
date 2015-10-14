@@ -105,6 +105,28 @@ class ProgramOptions:
         self.nPings = 300
         self.testbed = False
         self.workDir = "/tmp"
+        self.resultDir = None
+
+def createResultsDir(resultDir, faces, hr):
+    if faces == 0:
+        faces = "all"
+
+    if hr:
+        routingType = "/hr/"
+    else:
+        routingType = "/ls/"
+
+    resultDir = "%s/%s/faces-%s" % (str(resultDir), routingType, str(faces))
+    resultDir = os.path.abspath(resultDir)
+
+    if not os.path.isdir(resultDir):
+        os.makedirs(resultDir)
+    else:
+        print("Results directory (%s) already exists!" % resultDir)
+        sys.exit(1);
+
+    print "Results will be stored at: %s" % resultDir
+    return resultDir
 
 def parse_args():
     usage = """Usage: minindn [template_file] [ -t | --testbed ]
@@ -142,6 +164,9 @@ def parse_args():
     parser.add_option("--work-dir", action="store", dest="workDir", default="/tmp",
     help="Specify the working directory; default is /tmp")
 
+    parser.add_option("--result-dir", action="store", dest="resultDir", default=None,
+    help="Specify the full path destination folder where experiment results will be moved")
+
     parser.add_option('--version', '-V', action='callback', callback=printVersion,
     help='Displays version information')
 
@@ -156,10 +181,14 @@ def parse_args():
     options.nPings = args.nPings
     options.testbed = args.testbed
     options.workDir = args.workDir
+    options.resultDir = args.resultDir
 
     if options.experimentName is not None and options.experimentName not in ExperimentManager.getExperimentNames():
         print("No experiment named %s" % options.experimentName)
         sys.exit()
+
+    if options.experimentName is not None and options.resultDir is None:
+        print "No results folder specified; experiment results will remain in the working directory"
 
     if len(arg) == 0 or len(arg) > 2:
         options.templateFile = ''
@@ -218,6 +247,9 @@ def execute(options):
     nfdConfFile = "%s/nfd.conf" % install_dir
     os.system("sudo cp /usr/local/etc/ndn/nfd.conf.sample %s" % nfdConfFile)
     os.system("sudo sed -i \'s|default_level [A-Z]*$|default_level $LOG_LEVEL|g\' %s" % nfdConfFile)
+
+    if options.resultDir is not None:
+        options.resultDir = createResultsDir(options.resultDir, options.nFaces, options.hr)
 
     topo = NdnTopo(template_file, options.workDir)
 
@@ -319,6 +351,10 @@ def execute(options):
         CLI(net)
 
     net.stop()
+
+    if options.resultDir is not None:
+        print("Moving results to %s" % options.resultDir)
+        os.system("sudo mv /%s/* %s" % (options.workDir, options.resultDir))
 
 if __name__ == '__main__':
 
