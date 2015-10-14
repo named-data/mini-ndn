@@ -68,7 +68,7 @@ from mininet.util import ipStr, ipParse
 
 from ndn import ExperimentManager
 from ndn.ndn_host import NdnHost, CpuLimitedNdnHost
-from ndn.conf_parser import parse_hosts, parse_links
+from ndn.conf_parser import parse_hosts, parse_switches, parse_links
 
 import os.path, time
 import optparse
@@ -175,6 +175,7 @@ class NdnTopo(Topo):
         global hosts_conf
         global links_conf
         hosts_conf = parse_hosts(conf_arq)
+        switches_conf = parse_switches(conf_arq)
         links_conf = parse_links(conf_arq)
 
         self.isTCLink = False
@@ -184,6 +185,9 @@ class NdnTopo(Topo):
             if host.cpu != None and self.isLimited != True:
                 self.isLimited = True
             self.addHost(host.name, app=host.app, params=host.uri_tuples, cpu=host.cpu,cores=host.cores,cache=host.cache, workdir=workDir)
+
+        for switch in switches_conf:
+            self.addSwitch(switch.name)
 
         for link in links_conf:
             if len(link.linkDict) == 0:
@@ -245,6 +249,11 @@ def execute(options):
         for intf in host.intfList():
             link = intf.link
             node1, node2 = link.intf1.node, link.intf2.node
+
+            if node1 in net.switches or node2 in net.switches:
+                print "%s or %s is a switch" % (node1.name, node2.name)
+                continue
+
             if link.intf1 not in interfaces and link.intf2 not in interfaces:
                 interfaces.append(link.intf1)
                 interfaces.append(link.intf2)

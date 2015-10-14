@@ -86,6 +86,10 @@ class confNDNHost():
                ' Angle: '  + str(self.angle) + \
                ' NLSR Parameters: ' + self.nlsrParameters
 
+class confNdnSwitch:
+    def __init__(self, name):
+        self.name = name
+
 class confNDNLink():
 
     def __init__(self,h1,h2,linkDict=None):
@@ -146,6 +150,24 @@ def parse_hosts(conf_arq):
         hosts.append(confNDNHost(name, app, params, cpu, cores, cache))
 
     return hosts
+
+def parse_switches(conf_arq):
+    'Parse switches section from the conf file.'
+    config = ConfigParser.RawConfigParser()
+    config.read(conf_arq)
+
+    switches = []
+
+    try:
+        items = config.items('switches')
+    except ConfigParser.NoSectionError:
+        return switches
+
+    for item in items:
+        name = item[0]
+        switches.append(confNdnSwitch(name))
+
+    return switches
 
 def parse_links(conf_arq):
     'Parse links section from the conf file.'

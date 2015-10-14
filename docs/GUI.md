@@ -43,8 +43,14 @@ removed from the topology using the ``backspace`` key or by selecting ``edit/cut
 ### Host tool
 ![host-tool](img/gui/host-tool.png)
 
-The *host tool* is used to add a node to the topology. Click on the canvas to create a new node at
-the mouse cursor's position.
+The *host tool* is used to add a host node to the topology. Click on the canvas to create a new host
+node at the mouse cursor's position.
+
+### Switch tool
+![switch-tool](img/gui/switch-tool.png)
+
+The *switch tool* is used to add a switch to the topology. Click on the canvas to create a new
+switch at the mouse cursor's position.
 
 ### Link tool
 ![link-tool](img/gui/link-tool.png)

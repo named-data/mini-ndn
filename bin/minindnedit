@@ -514,7 +514,7 @@ class MiniEdit( Frame ):
         self.images = miniEditImages()
         self.buttons = {}
         self.active = None
-        self.tools = ( 'Select', 'Host', 'NetLink' )
+        self.tools = ( 'Select', 'Host', 'Switch', 'NetLink' )
         #self.customColors = { 'LegacyRouter': 'darkGreen', 'Host': 'blue' }
         self.toolbar = self.createToolbar()
 
@@ -530,7 +530,7 @@ class MiniEdit( Frame ):
 
         # Initialize node data
         self.nodeBindings = self.createNodeBindings()
-        self.nodePrefixes = { 'LegacyRouter': 'r', 'Host': 'h'}
+        self.nodePrefixes = { 'LegacyRouter': 'r', 'Host': 'h', 'Switch': 's'}
         self.widgetToItem = {}
         self.itemToWidget = {}
 
@@ -572,6 +572,7 @@ class MiniEdit( Frame ):
         self.switchOpts = {}
         self.routerOpts = {}
         self.hostCount = 0
+        self.switchCount = 0
         self.routerCount = 0
         self.net = None
 
@@ -768,9 +769,11 @@ class MiniEdit( Frame ):
         for widget in self.widgetToItem:
             name = widget[ 'text' ]
             tags = self.canvas.gettags( self.widgetToItem[ widget ] )
-            print self.hostOpts[name]
+
             if 'Host' in tags:
                 hOpts=self.hostOpts[name]
+                print hOpts
+
                 template.write(name + ': ')
                 if 'startCommand' in hOpts:
                         cmds = hOpts['startCommand'].replace("\"", "\\\"")
@@ -840,6 +843,15 @@ class MiniEdit( Frame ):
 
             template.write('\n')
 
+        # Write switches
+        template.write('[switches]\n')
+
+        for switch in self.switchOpts.values():
+            print "Switch%s" % switch
+
+            name = switch['hostname']
+            template.write(name + ': _\n')
+
         # Make links
         template.write('[links]\n')
         for link in self.links.values():
@@ -868,6 +880,8 @@ class MiniEdit( Frame ):
             self.routerCount += 1
         if 'Host' == node:
             self.hostCount += 1
+        if 'Switch' == node:
+            self.switchCount += 1
         if name is None:
             name = self.nodePrefixes[ node ] + nodeNum
         self.addNamedNode(node, name, x, y)
@@ -959,6 +973,29 @@ class MiniEdit( Frame ):
                 icon.bind('<Button-3>', self.do_legacyRouterPopup )
             self.routerOpts[hostname] = router['opts']
 
+        # Load switches
+        switches = loadedTopology['switches']
+
+        for switch in switches:
+            nodeNum = switch['number']
+            hostname = 's' + nodeNum
+
+            if 'hostname' in switch['opts']:
+                hostname = switch['opts']['hostname']
+            else:
+                switch['opts']['hostname'] = hostname
+
+            if 'nodeNum' not in switch['opts']:
+                switch['opts']['nodeNum'] = int(nodeNum)
+
+            x = switch['x']
+            y = switch['y']
+
+            self.addNode('Switch', nodeNum, float(x), float(y), name=hostname)
+            icon = self.findWidgetByName(hostname)
+
+            self.switchOpts[hostname] = switch['opts']
+
         # Load links
         links = loadedTopology['links']
         for link in links:
@@ -990,6 +1027,7 @@ class MiniEdit( Frame ):
             self.deleteItem( self.widgetToItem[ widget ] )
         self.hostCount = 0
         self.routerCount = 0
+        self.switchCount = 0
         self.links = {}
         self.hostOpts = {}
         self.routerOpts = {}
@@ -1010,6 +1048,7 @@ class MiniEdit( Frame ):
             # Save routers and Hosts
             hostsToSave = []
             routersToSave = []
+            switchesToSave = []
 
             for widget in self.widgetToItem:
                 name = widget[ 'text' ]
@@ -1029,10 +1068,18 @@ class MiniEdit( Frame ):
                                   'y':str(y1),
                                   'opts':self.hostOpts[name] }
                     hostsToSave.append(nodeToSave)
+                elif 'Switch' in tags:
+                    nodeNum = self.switchOpts[name]['nodeNum']
+                    nodeToSave = {'number':str(nodeNum),
+                                  'x':str(x1),
+                                  'y':str(y1),
+                                  'opts':self.switchOpts[name] }
+                    switchesToSave.append(nodeToSave)
                 else:
                     raise Exception( "Cannot create mystery node: " + name )
             savingDictionary['hosts'] = hostsToSave
             savingDictionary['routers'] = routersToSave
+            savingDictionary['switches'] = switchesToSave
 
             # Save Links
             linksToSave = []
@@ -1164,6 +1211,13 @@ class MiniEdit( Frame ):
             self.hostOpts[name]['nodeNum']=self.hostCount
             self.hostOpts[name]['hostname']=name
 
+        if 'Switch' == node:
+            self.switchCount += 1
+            name = self.nodePrefixes[ node ] + str( self.switchCount )
+            self.switchOpts[name] = {}
+            self.switchOpts[name]['nodeNum']=self.switchCount
+            self.switchOpts[name]['hostname']=name
+
         icon = self.nodeIcon( node, name )
         item = self.canvas.create_window( x, y, anchor='c', window=icon,
                                           tags=node )
@@ -1179,6 +1233,10 @@ class MiniEdit( Frame ):
     def clickHost( self, event ):
         "Add a new host to our canvas."
         self.newNode( 'Host', event )
+
+    def clickSwitch( self, event ):
+        "Add a new switch to the canvas."
+        self.newNode( 'Switch', event )
 
     def clickLegacyRouter( self, event ):
         "Add a new router to our canvas."
@@ -1803,6 +1861,41 @@ def miniEditImages():
             HEkQZsyCM0mmvGkw50uePUV2tEnOZkyfQA8iTYpTKNOgKJ+C3AhO
             p9SWVaVOfWj1KdauTL9q5UgVbFKsEjGqXVtP40NwcBnCjXtw7tx/
             C8cSBBAQADs=
+        """ ),
+
+        'Switch': PhotoImage( data=r"""
+            R0lGODlhMgAYAPcAAAEBAXmDjbe4uAE5cjF7xwFWq2Sa0S9biSlrrdTW1k2Ly02a5xUvSQFHjmep
+            6bfI2Q5SlQIYLwFfvj6M3Jaan8fHyDuFzwFp0Vah60uU3AEiRhFgrgFRogFr10N9uTFrpytHYQFM
+            mGWt9wIwX+bm5kaT4gtFgR1cnJPF9yt80CF0yAIMGHmp2c/P0AEoUb/P4Fei7qK4zgpLjgFkyQlf
+            t1mf5jKD1WWJrQ86ZwFAgBhYmVOa4MPV52uv8y+A0iR3ywFbtUyX5ECI0Q1UmwIcOUGQ3RBXoQI0
+            aRJbpr3BxVeJvQUJDafH5wIlS2aq7xBmv52lr7fH12el5Wml3097ph1ru7vM3HCz91Ke6lid40KQ
+            4GSQvgQGClFnfwVJjszMzVCX3hljrdPT1AFLlBRnutPf6yd5zjeI2QE9eRBdrBNVl+3v70mV4ydf
+            lwMVKwErVlul8AFChTGB1QE3bsTFxQImTVmAp0FjiUSM1k+b6QQvWQ1SlxMgLgFixEqU3xJhsgFT
+            pn2Xs5OluZ+1yz1Xb6HN+Td9wy1zuYClykV5r0x2oeDh4qmvt8LDwxhuxRlLfyRioo2124mft9bi
+            71mDr7fT79nl8Z2hpQs9b7vN4QMQIOPj5XOPrU2Jx32z6xtvwzeBywFFikFnjwcPFa29yxJjuFmP
+            xQFv3qGxwRc/Z8vb6wsRGBNqwqmpqTdvqQIbNQFPngMzZAEfP0mQ13mHlQFYsAFnznOXu2mPtQxj
+            vQ1Vn4Ot1+/x8my0/CJgnxNNh8DT5CdJaWyx+AELFWmt8QxPkxBZpwMFB015pgFduGCNuyx7zdnZ
+            2WKm6h1xyOPp8aW70QtPkUmM0LrCyr/FyztljwFPm0OJzwFny7/L1xFjswE/e12i50iR2VR8o2Gf
+            3xszS2eTvz2BxSlloQdJiwMHDzF3u7bJ3T2I1WCp8+Xt80FokQFJklef6mORw2ap7SJ1y77Q47nN
+            3wFfu1Kb5cXJyxdhrdDR0wlNkTSF11Oa4yp4yQEuW0WQ3QIDBQI7dSH5BAEAAAAALAAAAAAyABgA
+            Bwj/AAEIHDjKF6SDvhImPMHwhA6HOiLqUENRDYSLEIplxBcNHz4Z5GTI8BLKS5OBA1Ply2fDhxwf
+            PlLITGFmmRkzP+DlVKHCmU9nnz45csSqKKsn9gileZKrVC4aRFACOGZu5UobNuRohRkzhc2b+36o
+            qCaqrFmzZEV1ERBg3BOmMl5JZTBhwhm7ZyycYZnvJdeuNl21qkCHTiPDhxspTtKoQgUKCJ6wehMV
+            5QctWupeo6TkjOd8e1lmdQkTGbTTMaDFiDGINeskX6YhEicUiQa5A/kUKaFFwQ0oXzjZ8Tbcm3Hj
+            irwpMtTSgg9QMJf5WEZ9375AiED19ImpSQSUB4Kw/8HFSMyiRWJaqG/xhf2X91+oCbmq1e/MFD/2
+            EcApVkWVJhp8J9AqsywQxDfAbLJJPAy+kMkL8shjxTkUnhOJZ5+JVp8cKfhwxwdf4fQLgG4MFAwW
+            KOZRAxM81EAPPQvoE0QQfrDhx4399OMBMjz2yCMVivCoCAWXKLKMTPvoUYcsKwi0RCcwYCAlFjU0
+            A6OBM4pXAhsl8FYELYWFWZhiZCbRQgIC2AGTLy408coxAoEDx5wwtGPALTVg0E4NKC7gp4FsBKoA
+            Ki8U+oIVmVih6DnZPMBMAlGwIARWOLiggSYC+ZNIOulwY4AkSZCyxaikbqHMqaeaIp4+rAaxQxBg
+            2P+IozuRzvLZIS4syYVAfMAhwhSC1EPCGoskIIYY9yS7Hny75OFnEIAGyiVvWkjjRxF11fXIG3WU
+            KNA6wghDTCW88PKMJZOkm24Z7LarSjPtoIjFn1lKyyVmmBVhwRtvaDDMgFL0Eu4VhaiDwhXCXNFD
+            D8QQw7ATEDsBw8RSxotFHs7CKJ60XWrRBj91EOGPQCA48c7J7zTjSTPctOzynjVkkYU+O9S8Axg4
+            Z6BzBt30003Ps+AhNB5C4PCGC5gKJMMTZJBRytOl/CH1HxvQkMbVVxujtdZGGKGL17rsEfYQe+xR
+            zNnFcGQCv7LsKlAtp8R9Sgd0032BLXjPoPcMffTd3YcEgAMOxOBA1GJ4AYgXAMjiHDTgggveCgRI
+            3RfcnffefgcOeDKEG3444osDwgEspMNiTQhx5FoOShxcrrfff0uQjOycD+554qFzMHrpp4cwBju/
+            5+CmVNbArnntndeCO+O689777+w0IH0o1P/TRJMohRA4EJwn47nyiocOSOmkn/57COxE3wD11Mfh
+            fg45zCGyVF4Ufvvyze8ewv5jQK9++6FwXxzglwM0GPAfR8AeSo4gwAHCbxsQNCAa/kHBAVhwAHPI
+            4BE2eIRYeHAEIBwBP0Y4Qn41YWRSCQgAOw==
         """ ),
 
         'NetLink': PhotoImage( data=r"""
