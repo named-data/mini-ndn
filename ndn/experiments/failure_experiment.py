@@ -33,7 +33,7 @@ class FailureExperiment(Experiment):
         Experiment.__init__(self, args)
 
         self.PING_COLLECTION_TIME_BEFORE_FAILURE = 60
-        self.PING_COLLECTION_TIME_AFTER_RECOVERY = 90
+        self.PING_COLLECTION_TIME_AFTER_RECOVERY = 120
 
     def run(self):
         self.startPings()
@@ -59,6 +59,10 @@ class FailureExperiment(Experiment):
                 host.nlsr.start()
                 host.nfd.setStrategy("/ndn/edu", self.strategy)
                 host.cmd("ndnpingserver /ndn/edu/" + str(host) + " > ping-server &")
+
+                for other in self.net.hosts:
+                    if host.name != other.name:
+                        self.ping(host, other, self.PING_COLLECTION_TIME_AFTER_RECOVERY)
 
         # Collect pings for more seconds after CSU is up
         time.sleep(self.PING_COLLECTION_TIME_AFTER_RECOVERY)
