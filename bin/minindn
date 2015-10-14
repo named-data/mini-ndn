@@ -104,6 +104,7 @@ class ProgramOptions:
         self.isCliEnabled = True
         self.nPings = 300
         self.testbed = False
+        self.workDir = "/tmp"
 
 def parse_args():
     usage = """Usage: minindn [template_file] [ -t | --testbed ]
@@ -138,6 +139,9 @@ def parse_args():
     parser.add_option("-t", "--testbed", action="store_true", dest="testbed", default=False,
     help="instantiates NDN Testbed")
 
+    parser.add_option("--work-dir", action="store", dest="workDir", default="/tmp",
+    help="Specify the working directory; default is /tmp")
+
     parser.add_option('--version', '-V', action='callback', callback=printVersion,
     help='Displays version information')
 
@@ -151,6 +155,7 @@ def parse_args():
     options.isCliEnabled = args.isCliEnabled
     options.nPings = args.nPings
     options.testbed = args.testbed
+    options.workDir = args.workDir
 
     if options.experimentName is not None and options.experimentName not in ExperimentManager.getExperimentNames():
         print("No experiment named %s" % options.experimentName)
@@ -164,7 +169,7 @@ def parse_args():
     return options
 
 class NdnTopo(Topo):
-    def __init__(self, conf_arq, **opts):
+    def __init__(self, conf_arq, workDir, **opts):
         Topo.__init__(self, **opts)
 
         global hosts_conf
@@ -178,7 +183,7 @@ class NdnTopo(Topo):
         for host in hosts_conf:
             if host.cpu != None and self.isLimited != True:
                 self.isLimited = True
-            self.addHost(host.name, app=host.app, params=host.uri_tuples, cpu=host.cpu,cores=host.cores,cache=host.cache)
+            self.addHost(host.name, app=host.app, params=host.uri_tuples, cpu=host.cpu,cores=host.cores,cache=host.cache, workdir=workDir)
 
         for link in links_conf:
             if len(link.linkDict) == 0:
@@ -210,7 +215,7 @@ def execute(options):
     os.system("sudo cp /usr/local/etc/ndn/nfd.conf.sample %s" % nfdConfFile)
     os.system("sudo sed -i \'s|default_level [A-Z]*$|default_level $LOG_LEVEL|g\' %s" % nfdConfFile)
 
-    topo = NdnTopo(template_file)
+    topo = NdnTopo(template_file, options.workDir)
 
     t = datetime.datetime.now()
 

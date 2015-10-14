@@ -27,10 +27,10 @@ class Nlsr(NdnApplication):
     def __init__(self, node):
         NdnApplication.__init__(self, node)
         self.routerName = "/%sC1.Router/cs/%s" % ('%', node.name)
-        self.confFile = "/tmp/%s/nlsr.conf" % node.name
+        self.confFile = "%s/nlsr.conf" % node.homeFolder
 
         # Make directory for log file
-        self.logDir = "/tmp/%s/log" % node.name
+        self.logDir = "%s/log" % node.homeFolder
         node.cmd("mkdir %s" % self.logDir)
 
         # Configure basic router information in nlsr.conf based on host name
@@ -61,7 +61,7 @@ class NlsrConfigGenerator:
 
     def createConfigFile(self):
 
-        filePath = "/tmp/%s/nlsr.conf" % self.node.name
+        filePath = "%s/nlsr.conf" % self.node.homeFolder
 
         configFile = open(filePath, 'r')
         oldContent = configFile.read()
@@ -96,8 +96,8 @@ class NlsrConfigGenerator:
         general += "  site /edu\n"
         general += "  router /%C1.Router/cs/" + self.node.name + "\n"
         general += "  log-level " + self.logLevel + "\n"
-        general += "  log-dir /tmp/" + self.node.name + "/log\n"
-        general += "  seq-dir /tmp/" + self.node.name + "/log\n"
+        general += "  log-dir " + self.node.homeFolder + "/log\n"
+        general += "  seq-dir " + self.node.homeFolder + "/log\n"
         general += "}\n"
 
         return general

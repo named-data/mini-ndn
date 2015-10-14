@@ -33,15 +33,10 @@ class Nfd(NdnApplication):
 
         self.logLevel = node.params["params"].get("nfd-log-level", "NONE")
 
-        # Create home directory for a node
-        node.cmd("cd /tmp && mkdir %s" % node.name)
-        node.cmd("cd %s" % node.name)
-
-        self.homeFolder = "/tmp/%s" % node.name
-        self.confFile = "%s/%s.conf" % (self.homeFolder, node.name)
-        self.logFile = "%s/%s.log" % (self.homeFolder, node.name)
+        self.confFile = "%s/%s.conf" % (node.homeFolder, node.name)
+        self.logFile = "%s/%s.log" % (node.homeFolder, node.name)
         self.sockFile = "/var/run/%s.sock" % node.name
-        self.ndnFolder = "%s/.ndn" % self.homeFolder
+        self.ndnFolder = "%s/.ndn" % node.homeFolder
         self.clientConf = "%s/client.conf" % self.ndnFolder
 
         # Copy nfd.conf file from /usr/local/etc/mini-ndn to the node's home
@@ -61,7 +56,7 @@ class Nfd(NdnApplication):
         node.cmd("sudo sed -i 's|nfd.sock|%s.sock|g' %s" % (node.name, self.clientConf))
 
         # Change home folder
-        node.cmd("export HOME=%s" % self.homeFolder)
+        node.cmd("export HOME=%s" % node.homeFolder)
 
     def start(self):
         NdnApplication.start(self, "sudo nfd --config %s 2>> %s &" % (self.confFile, self.logFile))

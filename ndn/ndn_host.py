@@ -93,6 +93,11 @@ class NdnHost(Host, NdnHostCommon):
         if not NdnHost.inited:
             NdnHostCommon.init()
 
+        # Create home directory for a node
+        self.homeFolder = "%s/%s" % (self.params['workdir'], self.name)
+        self.cmd("mkdir -p %s" % self.homeFolder)
+        self.cmd("cd %s" % self.homeFolder)
+
         self.nfd = Nfd(self)
         self.nfd.start()
 
@@ -122,6 +127,11 @@ class CpuLimitedNdnHost(CPULimitedHost, NdnHostCommon):
         CPULimitedHost.__init__(self, name, sched, **kwargs)
         if not NdnHost.inited:
             NdnHostCommon.init()
+
+        # Create home directory for a node
+        self.homeFolder = "%s/%s" % (self.params['workdir'], self.name)
+        self.cmd("mkdir -p %s" % self.homeFolder)
+        self.cmd("cd %s" % self.homeFolder)
 
         self.nfd = Nfd(self)
         self.nfd.start()
