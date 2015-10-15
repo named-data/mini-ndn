@@ -81,90 +81,87 @@ from ndn.nfd import Nfd
 
 VERSION_NUMBER = "0.1.0"
 
-def printExperimentNames():
+def printExperimentNames(option, opt, value, parser):
     experimentNames = ExperimentManager.getExperimentNames()
 
     print "Mini-NDN experiments:"
     for experiment in experimentNames:
         print "  %s" % experiment
 
+    sys.exit()
+
 def printVersion(option, opt, value, parser):
     print "Mini-NDN v%s" % VERSION_NUMBER
     sys.exit()
 
+class ProgramOptions:
+    def __init__(self):
+        self.ctime = 60
+        self.experimentName = None
+        self.nFaces = 3
+        self.templateFile = "minindn.conf"
+        self.hr = False
+        self.isCliEnabled = True
+        self.nPings = 300
+        self.testbed = False
+
 def parse_args():
-    usage="""Usage: minindn [template_file] [ -t | --testbed ]
+    usage = """Usage: minindn [template_file] [ -t | --testbed ]
     If no template_file is given, ndn_utils/default-topology.conf (given sample file)
     will be used.
     If --testbed is used, minindn will run the NDN Project Testbed.
     """
 
-    testbed = False
-    hr = False
-
     parser = optparse.OptionParser(usage)
 
-    parser.add_option("-t", "--testbed", action="store_true", dest="testbed",
-    help="instantiates NDN Testbed")
+    parser.add_option("--ctime", action="store", dest="ctime", type="int", default=60,
+    help="Specify convergence time for the topology (Default: 60 seconds)")
 
     parser.add_option("--experiment", action="store", dest="experiment",
     help="Runs the specified experiment")
 
-    parser.add_option("--list-experiments", action="store_true", dest="shouldListExperiments",
-    help="Lists the names of all available experiments")
-
-    parser.add_option("--nPings", action="store", dest="nPings", type="int",
-    help="Number of pings to perform between each node in the experiment")
-
-    parser.add_option("--ctime", action="store", dest="ctime", type="int",
-    help="Specify convergence time for the topology (Default 60 seconds)")
-
-    parser.add_option("--hr", action="store_true", dest="hr",
-    help="--hr is used to turn on hyperbolic routing")
-
-    parser.add_option("--faces", action="store", dest="faces", type="int",
+    parser.add_option("--faces", action="store", dest="faces", type="int", default=3,
     help="Specify number of faces 0-60")
 
-    parser.add_option("--no-cli", action="store_false", dest="isCliEnabled",
-        help="Run experiments and exit without showing the command line interface")
+    parser.add_option("--hr", action="store_true", dest="hr", default=False,
+    help="--hr is used to turn on hyperbolic routing")
+
+    parser.add_option("--list-experiments", action="callback", callback=printExperimentNames,
+    help="Lists the names of all available experiments")
+
+    parser.add_option("--no-cli", action="store_false", dest="isCliEnabled", default=True,
+    help="Run experiments and exit without showing the command line interface")
+
+    parser.add_option("--nPings", action="store", dest="nPings", type="int", default=300,
+    help="Number of pings to perform between each node in the experiment")
+
+    parser.add_option("-t", "--testbed", action="store_true", dest="testbed", default=False,
+    help="instantiates NDN Testbed")
 
     parser.add_option('--version', '-V', action='callback', callback=printVersion,
     help='Displays version information')
 
-    (options, arg) = parser.parse_args()
+    (args, arg) = parser.parse_args()
 
-    testbed = options.testbed
-    experimentName = options.experiment
-    shouldListExperiments = options.shouldListExperiments
-    nPings = options.nPings
-    ctime = options.ctime
-    hr = options.hr
-    faces = options.faces
-    isCliEnabled = options.isCliEnabled
+    options = ProgramOptions()
+    options.ctime = args.ctime
+    options.experimentName = args.experiment
+    options.nFaces = args.faces
+    options.hr = args.hr
+    options.isCliEnabled = args.isCliEnabled
+    options.nPings = args.nPings
+    options.testbed = args.testbed
 
-    if shouldListExperiments is not None:
-        printExperimentNames()
+    if options.experimentName is not None and options.experimentName not in ExperimentManager.getExperimentNames():
+        print("No experiment named %s" % options.experimentName)
         sys.exit()
-
-    if experimentName is not None and experimentName not in ExperimentManager.getExperimentNames():
-        print("No experiment named %s" % experimentName)
-        sys.exit()
-
-    if ctime is None:
-        ctime = 60
-
-    if nPings is None:
-        nPings = 300
-
-    if isCliEnabled is None:
-        isCliEnabled = True
 
     if len(arg) == 0 or len(arg) > 2:
-        file = ''
+        options.templateFile = ''
     else:
-        file = arg[0]
+        options.templateFile = arg[0]
 
-    return file, testbed, experimentName, nPings, ctime, hr, faces, isCliEnabled
+    return options
 
 class NdnTopo(Topo):
     def __init__(self, conf_arq, **opts):
@@ -192,15 +189,16 @@ class NdnTopo(Topo):
 
         info('Parse of ' + conf_arq + ' done.\n')
 
-def execute(template_file='minindn.conf', testbed=False, experimentName=None, nPings=None, ctime=None, hr=False, faces=3, isCliEnabled=True):
+def execute(options):
     "Create a network based on template_file"
 
+    template_file = options.templateFile
     install_dir='/usr/local/etc/mini-ndn/'
 
     if template_file == '':
         template_file = install_dir + 'default-topology.conf'
 
-    if testbed:
+    if options.testbed:
         template_file = install_dir + 'minindn.testbed.conf'
 
     if os.path.exists(template_file) == False:
@@ -258,10 +256,10 @@ def execute(template_file='minindn.conf', testbed=False, experimentName=None, nP
         conf = next(x for x in hosts_conf if x.name == host.name)
         host.nlsrParameters = conf.nlsrParameters
 
-        if faces is not None:
-            host.nlsrParameters["max-faces-per-prefix"] = faces
+        if options.nFaces is not None:
+            host.nlsrParameters["max-faces-per-prefix"] = options.nFaces
 
-        if hr is True:
+        if options.hr is True:
             host.nlsrParameters["hyperbolic-state"] = "on"
 
         # Generate NLSR configuration file
@@ -282,14 +280,16 @@ def execute(template_file='minindn.conf', testbed=False, experimentName=None, nP
                 print(host.cmd(app))
 
     # Load experiment
+    experimentName = options.experimentName
+
     if experimentName is not None:
         print "Loading experiment: %s" % experimentName
 
         experimentArgs = {
             "net": net,
             "nodes": nodes,
-            "ctime": ctime,
-            "nPings": nPings,
+            "ctime": options.ctime,
+            "nPings": options.nPings,
             "strategy": Nfd.STRATEGY_BEST_ROUTE_V3
         }
 
@@ -301,7 +301,7 @@ def execute(template_file='minindn.conf', testbed=False, experimentName=None, nP
             print "ERROR: Experiment '%s' does not exist" % experimentName
             return
 
-    if isCliEnabled is True:
+    if options.isCliEnabled is True:
         CLI(net)
 
     net.stop()
@@ -310,7 +310,8 @@ if __name__ == '__main__':
 
     hosts_conf = []
     links_conf = []
-    template, testbed, experimentName, nPings, ctime, hr, faces, isCliEnabled = parse_args()
+
+    options = parse_args()
 
     setLogLevel('info')
-    execute(template, testbed, experimentName, nPings, ctime, hr, faces, isCliEnabled)
+    execute(options)
