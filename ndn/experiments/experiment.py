@@ -23,6 +23,7 @@
 
 import time
 import sys
+from itertools import cycle
 
 from ndn import ExperimentManager
 
@@ -34,6 +35,11 @@ class Experiment:
         self.convergenceTime = args["ctime"]
         self.nPings = args["nPings"]
         self.strategy = args["strategy"]
+        self.pctTraffic = float(args["pctTraffic"])
+
+        # Used to restart pings on the recovered node if any
+        self.pingedDict = {}
+
 
     def start(self):
         self.setup()
@@ -104,6 +110,36 @@ class Experiment:
         host.nlsr.start()
         host.nfd.setStrategy("/ndn/edu", self.strategy)
         host.cmd("ndnpingserver /ndn/edu/" + str(host) + " > ping-server &")
+
+    def startPctPings(self):
+        nNodesToPing = int(round(len(self.net.hosts)*self.pctTraffic))
+        print "Each node will ping %d node(s)" % nNodesToPing
+        # Temporarily store all the nodes being pinged by a particular node
+        nodesPingedList = []
+
+        for host in self.net.hosts:
+            # Create a circular list
+            pool = cycle(self.net.hosts)
+
+            # Move iterator to current node
+            next(x for x in pool if host.name == x.name)
+
+            # Track number of nodes to ping scheduled for this node
+            nNodesScheduled = 0
+
+            while nNodesScheduled < nNodesToPing:
+                other = pool.next()
+
+                # Do not ping self
+                if host.name != other.name:
+                    self.ping(host, other, self.nPings)
+                    nodesPingedList.append(other)
+
+                # Always increment because in 100% case a node should not ping itself
+                nNodesScheduled = nNodesScheduled + 1
+
+            self.pingedDict[host] = nodesPingedList
+            nodesPingedList = []
 
     @staticmethod
     def register(name, experimentClass):

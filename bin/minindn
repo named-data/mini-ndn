@@ -106,6 +106,7 @@ class ProgramOptions:
         self.testbed = False
         self.workDir = "/tmp"
         self.resultDir = None
+        self.pctTraffic = 1.0
 
 def createResultsDir(resultDir, faces, hr):
     if faces == 0:
@@ -167,6 +168,9 @@ def parse_args():
     parser.add_option("--result-dir", action="store", dest="resultDir", default=None,
     help="Specify the full path destination folder where experiment results will be moved")
 
+    parser.add_option("--pct-traffic", action="store", dest="pctTraffic", type="float", default=1.0,
+    help="Specify the percentage of nodes each node should ping")
+
     parser.add_option('--version', '-V', action='callback', callback=printVersion,
     help='Displays version information')
 
@@ -182,6 +186,7 @@ def parse_args():
     options.testbed = args.testbed
     options.workDir = args.workDir
     options.resultDir = args.resultDir
+    options.pctTraffic = args.pctTraffic
 
     if options.experimentName is not None and options.experimentName not in ExperimentManager.getExperimentNames():
         print("No experiment named %s" % options.experimentName)
@@ -335,7 +340,8 @@ def execute(options):
             "nodes": nodes,
             "ctime": options.ctime,
             "nPings": options.nPings,
-            "strategy": Nfd.STRATEGY_BEST_ROUTE_V3
+            "strategy": Nfd.STRATEGY_BEST_ROUTE_V3,
+            "pctTraffic": options.pctTraffic
         }
 
         experiment = ExperimentManager.create(experimentName, experimentArgs)

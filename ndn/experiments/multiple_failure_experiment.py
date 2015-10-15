@@ -36,7 +36,8 @@ class MultipleFailureExperiment(Experiment):
         self.RECOVERY_INTERVAL = 60
 
         # This is the number of pings required to make it through the full experiment
-        nInitialPings = self.PING_COLLECTION_TIME_BEFORE_FAILURE + len(args["net"].hosts)*(self.FAILURE_INTERVAL + self.RECOVERY_INTERVAL)
+        nInitialPings = (self.PING_COLLECTION_TIME_BEFORE_FAILURE +
+                         len(args["net"].hosts)*(self.FAILURE_INTERVAL + self.RECOVERY_INTERVAL))
         print("Scheduling with %s initial pings" % nInitialPings)
 
         args["nPings"] = nInitialPings
@@ -44,7 +45,7 @@ class MultipleFailureExperiment(Experiment):
         Experiment.__init__(self, args)
 
     def run(self):
-        self.startPings()
+        self.startPctPings()
 
         # After the pings are scheduled, collect pings for 1 minute
         time.sleep(self.PING_COLLECTION_TIME_BEFORE_FAILURE)
@@ -56,26 +57,25 @@ class MultipleFailureExperiment(Experiment):
             # Fail the node
             self.failNode(host)
 
-            # Stay in failure state for FAILURE_INTERVAL
+            # Stay in failure state for FAILURE_INTERVAL seconds
             time.sleep(self.FAILURE_INTERVAL)
 
             # Bring the node back up
+            start_time = time.time()
             self.recoverNode(host)
+            recovery_time = int(time.time() - start_time)
 
             # Number of pings required to reach the end of the test
-            nPings = self.RECOVERY_INTERVAL + nNodesRemainingToFail*(self.FAILURE_INTERVAL + self.RECOVERY_INTERVAL)
-            nNodesRemainingToFail = nNodesRemainingToFail - 1
+            nNodesRemainingToFail -= 1
+            nPings = ((self.RECOVERY_INTERVAL - recovery_time) +
+                      nNodesRemainingToFail*(self.FAILURE_INTERVAL + self.RECOVERY_INTERVAL))
 
-            # Wait for NFD and NLSR to fully recover
-            time.sleep(1)
             print("Scheduling with %s remaining pings" % nPings)
 
             # Restart pings
-            for other in self.net.hosts:
-                # Do not ping self
-                if host.name != other.name:
-                    self.ping(host, other, nPings)
+            for nodeToPing in self.pingedDict[host]:
+                self.ping(host, nodeToPing, nPings)
 
-            time.sleep(self.RECOVERY_INTERVAL)
+            time.sleep(self.RECOVERY_INTERVAL - recovery_time)
 
 Experiment.register("multiple-failure", MultipleFailureExperiment)

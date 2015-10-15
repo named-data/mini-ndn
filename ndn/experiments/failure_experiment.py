@@ -36,7 +36,7 @@ class FailureExperiment(Experiment):
         self.PING_COLLECTION_TIME_AFTER_RECOVERY = 120
 
     def run(self):
-        self.startPings()
+        self.startPctPings()
 
         # After the pings are scheduled, collect pings for 1 minute
         time.sleep(self.PING_COLLECTION_TIME_BEFORE_FAILURE)
