@@ -207,7 +207,6 @@ function minindn {
 
     sudo mkdir -p "$install_dir"
     sudo cp ndn_utils/client.conf.sample "$install_dir"
-    sudo cp ndn_utils/nfd.conf "$install_dir"
     sudo cp ndn_utils/nlsr.conf "$install_dir"
     sudo cp ndn_utils/topologies/default-topology.conf "$install_dir"
     sudo cp ndn_utils/topologies/minindn.testbed.conf "$install_dir"
