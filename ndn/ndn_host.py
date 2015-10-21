@@ -103,12 +103,11 @@ class NdnHost(Host, NdnHostCommon):
 
         self.peerList = {}
 
-    def config(self, fib=None, app=None, cache=None, **params):
+    def config(self, app=None, cache=None, **params):
 
         r = Node.config(self, **params)
 
-        self.setParam(r, 'app', fib=fib)   # why is this not app=app, to be investigated
-        self.setParam(r, 'fib', app=app)   # and this fib=fib
+        self.setParam(r, 'app', app=app)
         self.setParam(r, 'cache', cache=cache)
 
         return r
@@ -138,12 +137,11 @@ class CpuLimitedNdnHost(CPULimitedHost, NdnHostCommon):
 
         self.peerList = {}
 
-    def config(self, fib=None, app=None, cpu=None, cores=None, cache=None, **params):
+    def config(self, app=None, cpu=None, cores=None, cache=None, **params):
 
         r = CPULimitedHost.config(self,cpu,cores, **params)
 
-        self.setParam(r, 'app', fib=fib)   #????? shoud it be app=app
-        self.setParam(r, 'fib', app=app)
+        self.setParam(r, 'app', app=app)
         self.setParam(r, 'cache', cache=cache)
 
         return r

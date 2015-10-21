@@ -207,14 +207,12 @@ class HostDialog(CustomDialog):
             self.rootFrame = master
             n = Notebook(self.rootFrame)
             self.propFrame = Frame(n)
-            self.fibFrame = Frame(n)
 
             # NDN
             self.nfdFrame = NfdFrame(n, self.prefValues)
             self.nlsrFrame = NlsrFrame(n,self.prefValues)
 
             n.add(self.propFrame, text='Properties')
-            n.add(self.fibFrame, text='FIB Entries')
 
             n.add(self.nfdFrame, text=self.nfdFrame.frameLabel)
             n.add(self.nlsrFrame, text=self.nlsrFrame.frameLabel)
@@ -268,45 +266,12 @@ class HostDialog(CustomDialog):
             else:
                 self.startEntry= Entry(self.propFrame)
 
-            ### TAB 2
-            # FIB Entries
-            self.fibEntries = 0
-            Label(self.fibFrame, text="FIB Entry:").grid(row=0, column=0, sticky=E)
-            self.fibButton = Button( self.fibFrame, text='Add', command=self.addEntry)
-            self.fibButton.grid(row=0, column=1)
-
-            self.fibFrame = VerticalScrolledTable(self.fibFrame, rows=0, columns=2, title='FIB Entries')
-            self.fibFrame.grid(row=1, column=0, sticky='nswe', columnspan=2)
-            self.fibTableFrame = self.fibFrame.interior
-            self.fibTableFrame.addRow(value=['Prefix','Next Hop'], readonly=True)
-
-            fibList = []
-            if 'fibEntries' in self.prefValues:
-                fibList = self.prefValues['fibEntries']
-            for fibEntr in fibList:
-                if isinstance( fibEntr, tuple ):
-                    self.fibTableFrame.addRow(value=fibEntr)
-                else:
-                    self.fibTableFrame.addRow(value=[fibEntr,''])
-
-        def addEntry( self ):
-            self.fibTableFrame.addRow()
-
         def apply(self):
-            fibEntries = []
-            for row in range(self.fibTableFrame.rows):
-                if (len(self.fibTableFrame.get(row, 0)) > 0 and row > 0):
-                    if(len(self.fibTableFrame.get(row, 1)) > 0):
-                        fibEntries.append((self.fibTableFrame.get(row, 0), self.fibTableFrame.get(row, 1)))
-                    else:
-                        fibEntries.append(self.fibTableFrame.get(row, 0))
-
             results = {'cpu': self.cpuEntry.get(),
                        'cache': self.cacheEntry.get(),
                        'mem': self.memEntry.get(),
                        'hostname':self.hostnameEntry.get(),
                        'startCommand':self.startEntry.get(),
-                       'fibEntries':fibEntries,
                        'nfd': self.nfdFrame.getValues(),
                        'nlsr': self.nlsrFrame.getValues()
             }
@@ -749,16 +714,6 @@ class MiniEdit( Frame ):
 
         self.template_file = old_template_file
 
-    def parseFibEntries ( self, fibEntries ):
-        "Parse FIB Entries for write"
-        result=''
-
-        for fibEntry in fibEntries:
-                entry = ','.join(map(str, fibEntry))
-                result += entry + ' '
-
-        return result
-
     def buildTemplate( self ): #COPIA Mini-NDN para criar Template
         "Generate template"
 
@@ -788,9 +743,6 @@ class MiniEdit( Frame ):
                 if 'mem' in hOpts:
                         mem=float(hOpts['mem'])/100
                         template.write('mem=' + repr(mem) + ' ')
-                if 'fibEntries' in hOpts:
-                        customFib = self.parseFibEntries(hOpts['fibEntries'])
-                        template.write(customFib)
                 if 'nlsr' in hOpts:
                         values = hOpts['nlsr']
 
@@ -833,10 +785,6 @@ class MiniEdit( Frame ):
                 hasOpt='True'
             if 'cache' in rOpts:
                 template.write('cache=' + rOpts['cache'] + ' ')
-                hasOpt='True'
-            if 'fibEntries' in rOpts:
-                customFib = self.parseFibEntries(rOpts['fibEntries'])
-                template.write(customFib)
                 hasOpt='True'
             if hasOpt == 'False':
                 template.write('_')
@@ -1488,8 +1436,6 @@ class MiniEdit( Frame ):
                         widget[ 'text' ] = name
                     if len(hostBox.result['cache']) > 0:
                         newHostOpts['cache'] = hostBox.result['cache']
-                    if len(hostBox.result['fibEntries']) > 0:
-                        newHostOpts['fibEntries'] = hostBox.result['fibEntries']
 
                     newHostOpts['nlsr'] = hostBox.nlsrFrame.getValues()
                     newHostOpts['nfd'] = hostBox.nfdFrame.getValues()
@@ -1516,8 +1462,6 @@ class MiniEdit( Frame ):
                         widget[ 'text' ] = name
                     if len(hostBox.result['cache']) > 0:
                         newRouterOpts['cache'] = hostBox.result['cache']
-                    if len(hostBox.result['fibEntries']) > 0:
-                        newRouterOpts['fibEntries'] = hostBox.result['fibEntries']
                     self.routerOpts[name] = newRouterOpts
 
                     print 'New host details for ' + name + ' = ' + str(newRouterOpts)
