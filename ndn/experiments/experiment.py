@@ -94,6 +94,17 @@ class Experiment:
                 if host.name != other.name:
                     self.ping(host, other, self.nPings)
 
+    def failNode(self, host):
+        print("Bringing %s down" % host.name)
+        host.nfd.stop()
+
+    def recoverNode(self, host):
+        print("Bringing %s up" % host.name)
+        host.nfd.start()
+        host.nlsr.start()
+        host.nfd.setStrategy("/ndn/edu", self.strategy)
+        host.cmd("ndnpingserver /ndn/edu/" + str(host) + " > ping-server &")
+
     @staticmethod
     def register(name, experimentClass):
         ExperimentManager.register(name, experimentClass)

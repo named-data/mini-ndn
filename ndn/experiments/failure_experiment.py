@@ -44,8 +44,7 @@ class FailureExperiment(Experiment):
         # Bring down CSU
         for host in self.net.hosts:
             if host.name == "csu":
-                print("Bringing CSU down")
-                host.nfd.stop()
+                self.failNode(host)
                 break
 
         # CSU is down for 2 minutes
@@ -54,11 +53,7 @@ class FailureExperiment(Experiment):
         # Bring CSU back up
         for host in self.net.hosts:
             if host.name == "csu":
-                print("Bringing CSU up")
-                host.nfd.start()
-                host.nlsr.start()
-                host.nfd.setStrategy("/ndn/edu", self.strategy)
-                host.cmd("ndnpingserver /ndn/edu/" + str(host) + " > ping-server &")
+                self.recoverNode(host)
 
                 for other in self.net.hosts:
                     if host.name != other.name:

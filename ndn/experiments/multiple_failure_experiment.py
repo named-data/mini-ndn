@@ -43,17 +43,6 @@ class MultipleFailureExperiment(Experiment):
 
         Experiment.__init__(self, args)
 
-    def failNode(self, host):
-        print("Bringing %s down" % host.name)
-        host.nfd.stop()
-
-    def recoverNode(self, host):
-        print("Bringing %s up" % host.name)
-        host.nfd.start()
-        host.nlsr.start()
-        host.nfd.setStrategy("/ndn/edu", self.strategy)
-        host.cmd("ndnpingserver /ndn/edu/" + str(host) + " > ping-server &")
-
     def run(self):
         self.startPings()
 
