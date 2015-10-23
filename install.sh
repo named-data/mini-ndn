@@ -149,6 +149,7 @@ function ndncxx {
     ./waf configure
     ./waf
     sudo ./waf install
+    sudo ldconfig
     cd ../
 }
 
@@ -158,7 +159,11 @@ function crypto {
     $install unzip
     wget http://www.cryptopp.com/cryptopp562.zip
     unzip cryptopp562.zip
-    make
+
+    # Uncomments flags to build shared object
+    sed -i '/^# CXXFLAGS += -fPIC/s/^# //' GNUmakefile
+
+    make static dynamic
     sudo make install
     cd ../
 }

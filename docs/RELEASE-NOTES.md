@@ -1,6 +1,39 @@
 Release Notes
 =============
 
+Mini-NDN version 0.1.1 (changes since version 0.1.0)
+----------------------------------------
+
+Release date: November 4, 2015
+
+**New features**:
+
+- Use nfd.conf.sample from currently installed NFD
+
+- Add working directory option to allow execution environment outside of /tmp
+
+- Add results directory option to store experiment results after completion
+
+- Add support for switches in GUI and configuration file
+
+- Add failNode and recoverNode methods to Experiment class
+
+- Add most connected node (MCN) failure experiment
+
+- Add option to specify percentage of nodes pinged
+
+**Code changes**:
+
+- Refactor program options into container class
+
+- Remove unused "FIB Entries" option from NDN host options
+
+**Bug fixes**:
+
+- Abort start up if experiment name is invalid
+
+- Restart pings after recovery in failure experiment
+
 Mini-NDN version 0.1.0 (initial release)
 ----------------------------------------
 

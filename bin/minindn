@@ -79,7 +79,7 @@ import sys
 from ndn.nlsr import Nlsr, NlsrConfigGenerator
 from ndn.nfd import Nfd
 
-VERSION_NUMBER = "0.1.0"
+VERSION_NUMBER = "0.1.1"
 
 def printExperimentNames(option, opt, value, parser):
     experimentNames = ExperimentManager.getExperimentNames()
