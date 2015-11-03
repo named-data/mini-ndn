@@ -283,7 +283,6 @@ def execute(options):
             node1, node2 = link.intf1.node, link.intf2.node
 
             if node1 in net.switches or node2 in net.switches:
-                print "%s or %s is a switch" % (node1.name, node2.name)
                 continue
 
             if link.intf1 not in interfaces and link.intf2 not in interfaces:
