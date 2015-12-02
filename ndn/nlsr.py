@@ -1,8 +1,8 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015 The University of Memphis,
-#                    Arizona Board of Regents,
-#                    Regents of the University of California.
+# Copyright (C) 2015-2016, The University of Memphis,
+#                          Arizona Board of Regents,
+#                          Regents of the University of California.
 #
 # This file is part of Mini-NDN.
 # See AUTHORS.md for a complete list of Mini-NDN authors and contributors.
@@ -21,7 +21,13 @@
 # along with Mini-NDN, e.g., in COPYING.md file.
 # If not, see <http://www.gnu.org/licenses/>.
 
+from mininet.clean import sh
+
 from ndn.ndn_application import NdnApplication
+
+import os
+import shutil
+import textwrap
 
 class Nlsr(NdnApplication):
     def __init__(self, node):
@@ -42,14 +48,71 @@ class Nlsr(NdnApplication):
     def start(self):
         NdnApplication.start(self, "nlsr -d -f {} &".format(self.confFile))
 
+    @staticmethod
+    def createKey(host, name, outputFile):
+        host.cmd("ndnsec-keygen {} > {}".format(name, outputFile))
+
+    @staticmethod
+    def createCertificate(host, name, prefix, keyFile, outputFile, signer=None):
+        if signer is None:
+            host.cmd("ndnsec-certgen -N {} -p {} {} > {}".format(name, prefix, keyFile, outputFile))
+        else:
+            host.cmd("ndnsec-certgen -N {} -p {} -s {} {} > {}".format(name, prefix, signer, keyFile, outputFile))
+
+    @staticmethod
+    def createKeysAndCertificates(net, workDir):
+        securityDir = "{}/security".format(workDir)
+
+        if not os.path.exists(securityDir):
+                os.mkdir(securityDir)
+
+        # Create root certificate
+        rootName = "/ndn"
+        sh("ndnsec-keygen {} > {}/root.keys".format(rootName, securityDir))
+        sh("ndnsec-certgen -N {} -p {} {}/root.keys > {}/root.cert".format(rootName, rootName, securityDir, securityDir))
+
+        # Create necessary certificates for each site
+        for host in net.hosts:
+            nodeSecurityFolder = "{}/security".format(host.homeFolder)
+
+            if not os.path.exists(nodeSecurityFolder):
+                os.mkdir(nodeSecurityFolder)
+
+            shutil.copyfile("{}/root.cert".format(securityDir), "{}/root.cert".format(nodeSecurityFolder))
+
+            # Create site certificate
+            siteName = "/ndn/edu"
+            siteKeyFile = "{}/site.keys".format(nodeSecurityFolder)
+            siteCertFile = "{}/site.cert".format(nodeSecurityFolder)
+            Nlsr.createKey(host, siteName, siteKeyFile)
+
+            # Root key is in root namespace, must sign site key and then install on host
+            sh("ndnsec-certgen -N {} -s {} -p {} {} > {}".format(siteName, rootName, siteName, siteKeyFile, siteCertFile))
+            host.cmd("ndnsec-cert-install -f {}".format(siteCertFile))
+
+            # Create operator certificate
+            opName = "{}/%C1.Operator/op".format(siteName)
+            opKeyFile = "{}/op.keys".format(nodeSecurityFolder)
+            opCertFile = "{}/op.cert".format(nodeSecurityFolder)
+            Nlsr.createKey(host, opName, opKeyFile)
+            Nlsr.createCertificate(host, opName, opName, opKeyFile, opCertFile, signer=siteName)
+
+            # Create router certificate
+            routerName = "{}/%C1.Router/cs/{}".format(siteName, host.name)
+            routerKeyFile = "{}/router.keys".format(nodeSecurityFolder)
+            routerCertFile = "{}/router.cert".format(nodeSecurityFolder)
+            Nlsr.createKey(host, routerName, routerKeyFile)
+            Nlsr.createCertificate(host, routerName, routerName, routerKeyFile, routerCertFile, signer=opName)
+
 class NlsrConfigGenerator:
 
     ROUTING_LINK_STATE = "ls"
     ROUTING_HYPERBOLIC = "hr"
 
-    def __init__(self, node):
+    def __init__(self, node, isSecurityEnabled):
         node.cmd("sudo cp /usr/local/etc/mini-ndn/nlsr.conf nlsr.conf")
         self.node = node
+        self.isSecurityEnabled = isSecurityEnabled
 
         parameters = node.nlsrParameters
 
@@ -72,6 +135,7 @@ class NlsrConfigGenerator:
         newContent = newContent.replace("$HYPERBOLIC_SECTION", self.__getHyperbolicSection())
         newContent = newContent.replace("$FIB_SECTION", self.__getFibSection())
         newContent = newContent.replace("$ADVERTISING_SECTION", self.__getAdvertisingSection())
+        newContent = newContent.replace("$SECURITY_SECTION", self.__getSecuritySection())
 
         configFile = open(filePath, 'w')
         configFile.write(newContent)
@@ -162,16 +226,196 @@ class NlsrConfigGenerator:
         return advertising
 
     def __getSecuritySection(self):
+        if self.isSecurityEnabled is False:
+            security = textwrap.dedent("""\
+                security
+                {
+                  validator
+                  {
+                    trust-anchor
+                    {
+                      type any
+                    }
+                  }
+                  prefix-update-validator
+                  {
+                    trust-anchor
+                    {
+                      type any
+                    }
+                  }
+                }""")
+        else:
+            security = textwrap.dedent("""\
+                security
+                {
+                  validator
+                  {
+                    rule
+                    {
+                      id "NSLR Hello Rule"
+                      for data
+                      filter
+                      {
+                        type name
+                        regex ^[^<NLSR><INFO>]*<NLSR><INFO><><>$
+                      }
+                      checker
+                      {
+                        type customized
+                        sig-type rsa-sha256
+                        key-locator
+                        {
+                          type name
+                          hyper-relation
+                          {
+                            k-regex ^([^<KEY><NLSR>]*)<NLSR><KEY><ksk-.*><ID-CERT>$
+                            k-expand \\\\1
+                            h-relation equal
+                            p-regex ^([^<NLSR><INFO>]*)<NLSR><INFO><><>$
+                            p-expand \\\\1
+                          }
+                        }
+                      }
+                    }
 
-        security =  "security\n"
-        security += "{\n"
-        security += "  validator\n"
-        security += "  {\n"
-        security += "    trust-anchor\n"
-        security += "    {\n"
-        security += "      type any\n"
-        security += "    }\n"
-        security += "  }\n"
-        security += "}\n"
+                    rule
+                    {
+                      id "NSLR LSA Rule"
+                      for data
+                      filter
+                      {
+                        type name
+                        regex ^[^<NLSR><LSA>]*<NLSR><LSA>
+                      }
+                      checker
+                      {
+                        type customized
+                        sig-type rsa-sha256
+                        key-locator
+                        {
+                          type name
+                          hyper-relation
+                          {
+                            k-regex ^([^<KEY><NLSR>]*)<NLSR><KEY><ksk-.*><ID-CERT>$
+                            k-expand \\\\1
+                            h-relation equal
+                            p-regex ^([^<NLSR><LSA>]*)<NLSR><LSA>(<>*)<><><><>$
+                            p-expand \\\\1\\\\2
+                          }
+                        }
+                      }
+                    }
+
+                    rule
+                    {
+                      id "NSLR Hierarchy Exception Rule"
+                      for data
+                      filter
+                      {
+                        type name
+                        regex ^[^<KEY><%C1.Router>]*<%C1.Router>[^<KEY><NLSR>]*<KEY><ksk-.*><ID-CERT><>$
+                      }
+                      checker
+                      {
+                        type customized
+                        sig-type rsa-sha256
+                        key-locator
+                        {
+                          type name
+                          hyper-relation
+                          {
+                            k-regex ^([^<KEY><%C1.Operator>]*)<%C1.Operator>[^<KEY>]*<KEY><ksk-.*><ID-CERT>$
+                            k-expand \\\\1
+                            h-relation equal
+                            p-regex ^([^<KEY><%C1.Router>]*)<%C1.Router>[^<KEY>]*<KEY><ksk-.*><ID-CERT><>$
+                            p-expand \\\\1
+                          }
+                        }
+                      }
+                    }
+
+                    rule
+                    {
+                      id "NSLR Hierarchical Rule"
+                      for data
+                      filter
+                      {
+                        type name
+                        regex ^[^<KEY>]*<KEY><ksk-.*><ID-CERT><>$
+                      }
+                      checker
+                      {
+                        type hierarchical
+                        sig-type rsa-sha256
+                      }
+                    }
+
+                    trust-anchor
+                    {
+                      type file
+                      file-name "security/root.cert"
+                    }
+                  }
+
+                  prefix-update-validator
+                  {
+                    rule
+                    {
+                      id "NLSR ControlCommand Rule"
+                      for interest
+                      filter
+                      {
+                        type name
+                        regex ^<localhost><nlsr><prefix-update>[<advertise><withdraw>]<>$
+                      }
+                      checker
+                      {
+                        type customized
+                        sig-type rsa-sha256
+                        key-locator
+                        {
+                          type name
+                          regex ^([^<KEY><%C1.Operator>]*)<%C1.Operator>[^<KEY>]*<KEY><ksk-.*><ID-CERT>$
+                        }
+                      }
+                    }
+
+                    rule
+                    {
+                      id "NLSR Hierarchy Rule"
+                      for data
+                      filter
+                      {
+                        type name
+                        regex ^[^<KEY>]*<KEY><ksk-.*><ID-CERT><>$
+                      }
+                      checker
+                      {
+                        type hierarchical
+                        sig-type rsa-sha256
+                      }
+                    }
+
+                    trust-anchor
+                    {
+                      type file
+                      file-name "security/site.cert"
+                    }
+                  }
+                  ; cert-to-publish "security/root.cert"  ; optional, a file containing the root certificate
+                                                 ; Only the router that is designated to publish the root cert
+                                                 ; needs to specify this
+
+                  cert-to-publish "security/site.cert"  ; optional, a file containing the site certificate
+                                                 ; Only the router that is designated to publish the site cert
+                                                 ; needs to specify this
+
+                  cert-to-publish "security/op.cert" ; optional, a file containing the operator certificate
+                                                    ; Only the router that is designated to publish the operator
+                                                    ; cert needs to specify this
+
+                  cert-to-publish "security/router.cert"  ; required, a file containing the router certificate.
+                }""")
 
         return security
