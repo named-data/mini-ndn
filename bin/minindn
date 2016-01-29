@@ -250,7 +250,7 @@ def execute(options):
 
     # Update nfd.conf file used by Mini-NDN to match the currently installed version of NFD
     nfdConfFile = "%s/nfd.conf" % install_dir
-    os.system("sudo cp /usr/local/etc/ndn/nfd.conf.sample %s" % nfdConfFile)
+    os.system("sudo cp /usr/local/etc/ndn/nfd.conf %s" % nfdConfFile)
     os.system("sudo sed -i \'s|default_level [A-Z]*$|default_level $LOG_LEVEL|g\' %s" % nfdConfFile)
 
     if options.resultDir is not None:
