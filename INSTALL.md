@@ -40,13 +40,9 @@ else if you don't have the dependencies:
 
 ### Verification
 
-Once everything is installed, the following command can be issued for verification
+You can use these steps to verify your installation:
 
-    sudo minindn --pingall 50 --ctime 180 ndn_utils/hyperbolic_conf_file/minindn.caida.conf
-
-All the ping logs will be stored under /tmp/node-name/ping-data and the command will provide a
-command line interface at the end.
-
-When the "mininet>" CLI prompt appears, press CTRL+D to terminate the experiment.
-Then, execute `ls /tmp/*/ping-data/*.txt | wc -l`, and expect to see "90".
-Execute `cat /tmp/*/ping-data/*.txt | grep loss`, and expect to see "0% packet loss" on every line.
+1. Issue the command: `sudo minindn --experiment=pingall --nPings=50`
+2. When the `mininet>` CLI prompt appears, the experiment has finished. On the Mini-NDN CLI, issue the command `exit` to exit the experiment.
+3. Issue the command: `grep -c content /tmp/*/ping-data/*.txt`. Each file should report a count of 50.
+4. Issue the command: `grep -c timeout /tmp/*/ping-data/*.txt`. Each file should report a count of 0.
