@@ -71,10 +71,12 @@ from ndn.ndn_host import NdnHost, CpuLimitedNdnHost
 from ndn.conf_parser import parse_hosts, parse_switches, parse_links
 
 import os.path, time
+import shutil
 import optparse
 import datetime
 from os.path import expanduser
 import sys
+from subprocess import call
 
 from ndn.nlsr import Nlsr, NlsrConfigGenerator
 from ndn.nfd import Nfd
@@ -248,10 +250,17 @@ def execute(options):
         info('No template file given and default template file cannot be found. Exiting...\n')
         quit()
 
-    # Update nfd.conf file used by Mini-NDN to match the currently installed version of NFD
+    # Use nfd.conf as default configuration for NFD, else use the sample
+
     nfdConfFile = "%s/nfd.conf" % install_dir
-    os.system("sudo cp /usr/local/etc/ndn/nfd.conf.sample %s" % nfdConfFile)
-    os.system("sudo sed -i \'s|default_level [A-Z]*$|default_level $LOG_LEVEL|g\' %s" % nfdConfFile)
+    if os.path.isfile("/usr/local/etc/ndn/nfd.conf") == True:
+        shutil.copy2("/usr/local/etc/ndn/nfd.conf", nfdConfFile)
+    elif os.path.isfile("/usr/local/etc/ndn/nfd.conf.sample") == True:
+        shutil.copy2("/usr/local/etc/ndn/nfd.conf.sample", nfdConfFile)
+    else:
+        sys.exit("nfd.conf or nfd.conf.sample cannot be found in the expected directory. Exit.")
+
+    call(["sudo", "sed", "-i", 's|default_level [A-Z]*$|default_level $LOG_LEVEL|g', nfdConfFile])
 
     if options.resultDir is not None:
         options.resultDir = createResultsDir(options.resultDir, options.nFaces, options.hr)
