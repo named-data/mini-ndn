@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2016, The University of Memphis,
+# Copyright (C) 2015-2017, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -22,12 +22,15 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 from mininet.clean import sh
+from mininet.examples.cluster import RemoteMixin
 
 from ndn.ndn_application import NdnApplication
+from ndn.util import ssh, scp
 
-import os
 import shutil
+import os
 import textwrap
+from subprocess import call
 
 class Nlsr(NdnApplication):
     def __init__(self, node):
@@ -60,7 +63,7 @@ class Nlsr(NdnApplication):
         securityDir = "{}/security".format(workDir)
 
         if not os.path.exists(securityDir):
-                os.mkdir(securityDir)
+            os.mkdir(securityDir)
 
         # Create root certificate
         rootName = "/ndn"
@@ -71,8 +74,12 @@ class Nlsr(NdnApplication):
         for host in net.hosts:
             nodeSecurityFolder = "{}/security".format(host.homeFolder)
 
-            if not os.path.exists(nodeSecurityFolder):
-                os.mkdir(nodeSecurityFolder)
+            host.cmd("mkdir -p %s" % nodeSecurityFolder)
+
+            # Create temp folders for remote nodes on this machine (localhost) to store site.key file
+            # from RemoteNodes
+            if not os.path.exists(nodeSecurityFolder) and isinstance(host, RemoteMixin) and host.isRemote:
+                os.makedirs(nodeSecurityFolder)
 
             shutil.copyfile("{}/root.cert".format(securityDir), "{}/root.cert".format(nodeSecurityFolder))
 
@@ -82,8 +89,25 @@ class Nlsr(NdnApplication):
             siteCertFile = "{}/site.cert".format(nodeSecurityFolder)
             Nlsr.createKey(host, siteName, siteKeyFile)
 
+            # Copy siteKeyFile from remote for ndnsec-certgen
+            if isinstance(host, RemoteMixin) and host.isRemote:
+                login = "mininet@{}".format(host.server)
+                src = "{}:{}".format(login, siteKeyFile)
+                dst = siteKeyFile
+                scp(src, dst)
+
             # Root key is in root namespace, must sign site key and then install on host
             sh("ndnsec-certgen -N {} -s {} -p {} {} > {}".format(siteName, rootName, siteName, siteKeyFile, siteCertFile))
+
+            # Copy root.cert and site.cert from localhost to remote host
+            if isinstance(host, RemoteMixin) and host.isRemote:
+                login = "mininet@{}".format(host.server)
+                src = "{}/site.cert".format(nodeSecurityFolder)
+                src2 = "{}/root.cert".format(nodeSecurityFolder)
+                dst = "{}:/tmp/".format(login)
+                scp(src, src2, dst)
+                host.cmd("mv /tmp/*.cert {}".format(nodeSecurityFolder))
+
             host.cmd("ndnsec-cert-install -f {}".format(siteCertFile))
 
             # Create operator certificate
@@ -106,7 +130,6 @@ class NlsrConfigGenerator:
     ROUTING_HYPERBOLIC = "hr"
 
     def __init__(self, node, isSecurityEnabled):
-        node.cmd("sudo cp /usr/local/etc/mini-ndn/nlsr.conf nlsr.conf")
         self.node = node
         self.isSecurityEnabled = isSecurityEnabled
 
@@ -120,30 +143,29 @@ class NlsrConfigGenerator:
 
     def createConfigFile(self):
 
-        filePath = "%s/nlsr.conf" % self.node.homeFolder
+        tmp_conf = "/tmp/nlsr.conf"
 
-        configFile = open(filePath, 'r')
-        oldContent = configFile.read()
+        configFile = open(tmp_conf, 'w')
+        configFile.write(self.__getConfig())
         configFile.close()
 
-        newContent = oldContent.replace("$GENERAL_SECTION", self.__getGeneralSection())
-        newContent = newContent.replace("$NEIGHBORS_SECTION", self.__getNeighborsSection())
-        newContent = newContent.replace("$HYPERBOLIC_SECTION", self.__getHyperbolicSection())
-        newContent = newContent.replace("$FIB_SECTION", self.__getFibSection())
-        newContent = newContent.replace("$ADVERTISING_SECTION", self.__getAdvertisingSection())
-        newContent = newContent.replace("$SECURITY_SECTION", self.__getSecuritySection())
+        # If this node is a remote node scp the nlsr.conf file to its /tmp/nlsr.conf
+        if isinstance(self.node, RemoteMixin) and self.node.isRemote:
+            login = "mininet@%s" % self.node.server
+            src = tmp_conf
+            dst = "%s:%s" % (login, tmp_conf)
+            scp(src, dst)
 
-        configFile = open(filePath, 'w')
-        configFile.write(newContent)
-        configFile.close()
+        # Copy nlsr.conf to home folder
+        self.node.cmd("mv %s nlsr.conf" % tmp_conf)
 
     def __getConfig(self):
 
-        config =  self.__getGeneralSection()
-        config += self.__getNeighborsSection()
-        config += self.__getHyperbolicSection()
-        config += self.__getFibSection()
-        config += self.__getAdvertisingSection()
+        config  = self.__getGeneralSection() + "\n"
+        config += self.__getNeighborsSection() + "\n"
+        config += self.__getHyperbolicSection() + "\n"
+        config += self.__getFibSection() + "\n"
+        config += self.__getAdvertisingSection() + "\n"
         config += self.__getSecuritySection()
 
         return config

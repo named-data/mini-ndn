@@ -1,7 +1,7 @@
 #!/bin/bash
 # -*- Mode:bash; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2016, The University of Memphis,
+# Copyright (C) 2015-2017, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -25,9 +25,9 @@
 # This file incorporates work covered by the following copyright and
 # permission notice:
 #
-#   Mininet 2.2.1 License
+#   Mininet 2.3.0d1 License
 #
-#   Copyright (c) 2013-2015 Open Networking Laboratory
+#   Copyright (c) 2013-2016 Open Networking Laboratory
 #   Copyright (c) 2009-2012 Bob Lantz and The Board of Trustees of
 #   The Leland Stanford Junior University
 #
@@ -214,7 +214,6 @@ function minindn {
 
     sudo mkdir -p "$install_dir"
     sudo cp ndn_utils/client.conf.sample "$install_dir"
-    sudo cp ndn_utils/nlsr.conf "$install_dir"
     sudo cp ndn_utils/topologies/default-topology.conf "$install_dir"
     sudo cp ndn_utils/topologies/minindn.testbed.conf "$install_dir"
     sudo python setup.py install
