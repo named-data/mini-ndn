@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015 The University of Memphis,
+# Copyright (C) 2016 The University of Memphis,
 #                    Arizona Board of Regents,
 #                    Regents of the University of California.
 #
@@ -25,7 +25,7 @@ import time
 from ndn.ndn_application import NdnApplication
 
 class Nfd(NdnApplication):
-    STRATEGY_BEST_ROUTE_V3 = "best-route/%FD%03"
+    STRATEGY_BEST_ROUTE = "best-route"
     STRATEGY_NCC = "ncc"
 
     def __init__(self, node):

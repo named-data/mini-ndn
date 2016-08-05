@@ -359,7 +359,7 @@ def execute(options):
             "nodes": nodes,
             "ctime": options.ctime,
             "nPings": options.nPings,
-            "strategy": Nfd.STRATEGY_BEST_ROUTE_V3,
+            "strategy": Nfd.STRATEGY_BEST_ROUTE,
             "pctTraffic": options.pctTraffic
         }
 
