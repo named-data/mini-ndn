@@ -76,6 +76,7 @@ import optparse
 import datetime
 from os.path import expanduser
 import sys
+import signal
 from subprocess import call
 
 from ndn.nlsr import Nlsr, NlsrConfigGenerator
@@ -380,10 +381,18 @@ def execute(options):
         print("Moving results to %s" % options.resultDir)
         os.system("sudo mv /%s/* %s" % (options.workDir, options.resultDir))
 
+def signal_handler(signal, frame):
+    print('Cleaning up...')
+    call(["nfd-stop"])
+    call(["sudo", "mn", "--clean"])
+    sys.exit(1)
+
 if __name__ == '__main__':
 
     hosts_conf = []
     links_conf = []
+
+    signal.signal(signal.SIGINT, signal_handler)
 
     options = parse_args()
 

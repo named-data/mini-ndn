@@ -83,8 +83,7 @@ class Experiment:
             print("NLSR has successfully converged.")
         else:
             print("NLSR has not converged. Exiting...")
-            for host in self.net.hosts:
-                host.nfd.stop()
+            self.net.stop()
             sys.exit(1)
 
     def ping(self, source, dest, nPings):
