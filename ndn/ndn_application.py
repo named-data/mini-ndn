@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015 The University of Memphis,
+# Copyright (C) 2016 The University of Memphis,
 #                    Arizona Board of Regents,
 #                    Regents of the University of California.
 #
@@ -27,6 +27,7 @@ class NdnApplication:
     def __init__(self, node):
         self.node = node
         self.isRunning = False
+        self.processId = ""
 
     def start(self, command):
         if self.isRunning is True:

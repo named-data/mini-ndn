@@ -59,7 +59,7 @@ class Nfd(NdnApplication):
         node.cmd("export HOME=%s" % node.homeFolder)
 
     def start(self):
-        NdnApplication.start(self, "sudo nfd --config %s 2>> %s &" % (self.confFile, self.logFile))
+        NdnApplication.start(self, "nfd --config %s 2>> %s &" % (self.confFile, self.logFile))
         time.sleep(2)
 
     def setStrategy(self, name, strategy):
