@@ -200,8 +200,10 @@ function mininet {
 
 function minindn {
     if [[ updated != true ]]; then
-        $update
-        updated="true"
+        if [ ! -d "build" ]; then
+            $update
+            updated="true"
+        fi
     fi
 
     if [[ $pysetup != true ]]; then
