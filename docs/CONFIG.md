@@ -14,7 +14,7 @@ At the bare minimum, the node section describes the nodes present in the topolog
     a: _
     b: _
 
-Additionaly each node can take the following paramteres:
+Additionally each node can take the following parameters:
 
 * app   : Default application(s) to be started on a node (specify '_' if no app needs to be started - required).
 The app is the only parameter which needs double quotes (see example below).
@@ -44,7 +44,7 @@ The links section describes the links in the topology.
 This would create a link between a and b. 'b:a' would also result in the same.
 The following parameters can be configured for a node:
 
-* delay : Delay paramter is a required paramter which defines the delay of the link (1-1000ms)
+* delay : Delay parameter is a required parameter which defines the delay of the link (1-1000ms)
 
 * bw    : Bandwidth of a link (<1-1000> Mbps)
 
@@ -58,5 +58,7 @@ The following parameters can be configured for a node:
     [links]
     a:b delay=10ms bw=100
 
-See ``ndn_utils/topologies`` for more sample files
+Note that `sampleApp1` and `sampleApp2` must be either installed in the system (ex: /usr/bin)
+or an absolute path needs to be given.
 
+See `ndn_utils/topologies` for more sample files

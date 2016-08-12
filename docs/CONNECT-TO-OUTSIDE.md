@@ -11,10 +11,15 @@ For this simple example, we use the default topology:
 
     c----a----b----d
 
-If we want node "a" to connect to the host machine, we need to add a "root" node which has a link with
-node "a."
+If we want node "a" to connect to the host machine, we need to add a "root" node which has a link with node "a."
 
-To do so, the following lines can be added to bin/minindn before net.start():
+To do so, we need to add the following import statement at the top of `bin/minindn`:
+
+```python
+from mininet.node import Node
+```
+
+Then the following lines can be added to `bin/minindn` before net.start():
 
 ```python
 root = Node( 'root', inNamespace=False )

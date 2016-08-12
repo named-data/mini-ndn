@@ -6,9 +6,13 @@ Please see [INSTALL.md](../INSTALL.md) for instructions on installing Mini-NDN a
 
 ## Running Mini-NDN
 
-To run Mini-NDN with the default topology, ``ndn_utils/topologies/default-topology.conf``, type:
+To run Mini-NDN with the default topology, `ndn_utils/topologies/default-topology.conf`, type:
 
     sudo minindn
+
+A full list of options can be printed by using:
+
+    sudo minindn --help
 
 To run Mini-NDN with a topology file, provide the filename as the first argument:
 
@@ -36,7 +40,7 @@ To see the status of routing on the node:
 
     mininet> a nlsrc status
 
-To exit Mini-NDN, type ``quit`` in the CLI:
+To exit Mini-NDN, type `quit` in the CLI:
 
     mininet> quit
 
@@ -45,21 +49,51 @@ For a more in depth explanation of the CLI, please see the
 
 ## Command-line options
 
-To run Mini-NDN with a replica of the NDN testbed, use the ``--testbed`` parameter:
+To run Mini-NDN with a replica of the NDN testbed, use the `--testbed` parameter:
 
-    sudo mini-ndn --testbed
+    sudo minindn --testbed
+
+To change the working directory from default `/tmp` following option can be used:
+
+    sudo minindn --work-dir /home/mydir/test
 
 #### Routing options
 
-To run NLSR with hyperbolic routing enabled, use the ``--hr`` parameter:
+To run NLSR with hyperbolic routing enabled, use the `--hr` parameter:
 
-    sudo mini-ndn --hr
+    sudo minindn --hr
 
-To configure the max number of faces added by NLSR to reach each name prefix, use the ``--faces``
+Topology files given under ndn_utils/topologies/minindn* have hyperbolic coordinates configured and can be used with this option.
+
+To configure the max number of faces added by NLSR to reach each name prefix, use the `--faces`
 parameter:
 
-    sudo mini-ndn --faces 3
+    sudo minindn --faces 3
 
-``--faces`` can be an integer from 0 to 60; 0 indicates NLSR can add all available faces.
+`--faces` can be an integer from 0 to 60; 0 indicates NLSR can add all available faces.
 
+To run Mini-NDN with NLSR security configured
 
+    sudo minindn --nlsr-security
+
+## Working Directory Structure
+
+Currently Mini-NDN uses /tmp as the working directory if not specified otherwise by using the option --work-dir.
+
+Each node is given a HOME directory under /tmp/node-name
+where node-name is the name of the node specified in the [nodes] section of the conf file.
+
+### NFD
+NFD conf file is stored at `/tmp/node-name/node-name.conf`
+
+NFD log file is stored at `/tmp/node-name/node-name.log`
+
+`.ndn` folder is stored at `/tmp/node-name/.ndn`
+
+### NLSR
+NLSR conf file is stored at `/tmp/node-name/nlsr.conf`
+
+NLSR log file is stored at `/tmp/node-name/log/nlsr.log`
+
+When security is enabled, NLSR security certificates are stored in: `/tmp/node-name/security`
+Note that no NLSR publishes the root certificate, Mini-NDN installs root.cert in security folder for each NLSR.
