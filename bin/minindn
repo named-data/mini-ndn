@@ -82,7 +82,7 @@ from subprocess import call
 from ndn.nlsr import Nlsr, NlsrConfigGenerator
 from ndn.nfd import Nfd
 
-VERSION_NUMBER = "0.1.1"
+VERSION_NUMBER = "0.2.0"
 
 def printExperimentNames(option, opt, value, parser):
     experimentNames = ExperimentManager.getExperimentNames()

@@ -9,6 +9,7 @@ Mini-NDN is an open source project that includes contributions from the followin
 
     * Ashlesh Gawande <agawande@memphis.edu>
     * Vince Lehman    <http://vslehman.com>
+    * Yucheng Zhang   <yzhang@memphis.edu>
     * Lan Wang        <http://www.cs.memphis.edu/~lanwang/>
 
 * The University of Arizona

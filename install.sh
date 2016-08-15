@@ -1,9 +1,9 @@
 #!/bin/bash
 # -*- Mode:bash; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015 The University of Memphis,
-#                    Arizona Board of Regents,
-#                    Regents of the University of California.
+# Copyright (C) 2015-2016, The University of Memphis,
+#                          Arizona Board of Regents,
+#                          Regents of the University of California.
 #
 # This file is part of Mini-NDN.
 # See AUTHORS.md for a complete list of Mini-NDN authors and contributors.

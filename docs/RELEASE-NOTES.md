@@ -1,6 +1,32 @@
 Release Notes
 =============
 
+Mini-NDN version 0.2.0 (changes since version 0.1.1)
+
+Release date: August 18, 2016
+
+**New featues**:
+
+- Automatic security configuration for NLSR
+
+- Use /usr/local/etc/ndn/nfd.conf as default config file for NFD
+
+- Class to monitor /proc/$PID/stat file for PID
+
+- Mini-NDN exits gracefully on SIGINT and non-convergence
+
+- Faster Mini-NDN install script - does not do apt-get update everytime
+
+- NLSR is launched with explicit config file for easier process identification
+
+- Add and update more documentation
+
+**Bug fixes**:
+
+- NFD is killed correctly on exit
+
+- Best route strategy is set correctly
+
 Mini-NDN version 0.1.1 (changes since version 0.1.0)
 ----------------------------------------
 
