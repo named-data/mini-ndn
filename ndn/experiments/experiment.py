@@ -48,10 +48,10 @@ class Experiment:
     def setup(self):
         for host in self.net.hosts:
             # Set strategy
-            host.nfd.setStrategy("/ndn/edu", self.strategy)
+            host.nfd.setStrategy("/ndn/", self.strategy)
 
             # Start ping server
-            host.cmd("ndnpingserver /ndn/edu/" + str(host) + " > ping-server &")
+            host.cmd("ndnpingserver /ndn/" + str(host) + "-site/" + str(host) + " > ping-server &")
 
             # Create folder to store ping data
             host.cmd("mkdir ping-data")
@@ -66,16 +66,14 @@ class Experiment:
 
         # Checking for convergence
         for host in self.net.hosts:
-            statusRouter = host.cmd("nfd-status -b | grep /ndn/edu/%C1.Router/cs/")
-            statusPrefix = host.cmd("nfd-status -b | grep /ndn/edu/")
+            statusRouter = host.cmd("nfd-status -b | grep site/%C1.Router/cs/")
+            statusPrefix = host.cmd("nfd-status -b | grep ndn | grep site | grep -v Router")
             didNodeConverge = True
             for node in self.nodes.split(","):
-                    if ("/ndn/edu/%C1.Router/cs/" + node) not in statusRouter:
-                        didNodeConverge = False
-                        didNlsrConverge = False
-                    if str(host) != node and ("/ndn/edu/" + node) not in statusPrefix:
-                        didNodeConverge = False
-                        didNlsrConverge = False
+                if ( ("/ndn/" + node + "-site/%C1.Router/cs/" + node) not in statusRouter or
+                      str(host) != node and ("/ndn/" + node + "-site/" + node) not in statusPrefix ):
+                    didNodeConverge = False
+                    didNlsrConverge = False
 
             host.cmd("echo " + str(didNodeConverge) + " > convergence-result &")
 
@@ -89,7 +87,7 @@ class Experiment:
     def ping(self, source, dest, nPings):
         # Use "&" to run in background and perform parallel pings
         print "Scheduling ping(s) from %s to %s" % (source.name, dest.name)
-        source.cmd("ndnping -t -c "+ str(nPings) + " /ndn/edu/" + dest.name + " >> ping-data/" + dest.name + ".txt &")
+        source.cmd("ndnping -t -c "+ str(nPings) + " /ndn/" + dest.name + "-site/" + dest.name + " >> ping-data/" + dest.name + ".txt &")
         time.sleep(0.2)
 
     def startPings(self):
@@ -107,8 +105,8 @@ class Experiment:
         print("Bringing %s up" % host.name)
         host.nfd.start()
         host.nlsr.start()
-        host.nfd.setStrategy("/ndn/edu", self.strategy)
-        host.cmd("ndnpingserver /ndn/edu/" + str(host) + " > ping-server &")
+        host.nfd.setStrategy("/ndn/", self.strategy)
+        host.cmd("ndnpingserver /ndn/" + str(host) + "-site/" + str(host) + " > ping-server &")
 
     def startPctPings(self):
         nNodesToPing = int(round(len(self.net.hosts)*self.pctTraffic))
@@ -143,4 +141,3 @@ class Experiment:
     @staticmethod
     def register(name, experimentClass):
         ExperimentManager.register(name, experimentClass)
-

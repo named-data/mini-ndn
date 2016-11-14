@@ -39,13 +39,9 @@ class Nlsr(NdnApplication):
         self.logDir = "%s/log" % node.homeFolder
         node.cmd("mkdir %s" % self.logDir)
 
-        # Configure basic router information in nlsr.conf based on host name
-        node.cmd("sudo sed -i 's|router .*|router %s|g' %s" % (self.routerName, self.confFile))
-        node.cmd("sudo sed -i 's|log-dir .*|log-dir %s|g' %s" % (self.logDir, self.confFile))
-        node.cmd("sudo sed -i 's|seq-dir .*|seq-dir %s|g' %s" % (self.logDir, self.confFile))
-        node.cmd("sudo sed -i 's|prefix .*netlab|prefix /ndn/edu/%s|g' %s" % (node.name, self.confFile))
-
     def start(self):
+        # Removed & at the end, was giving key not found error
+        # This way NLSR is daemonized fully before continuing
         NdnApplication.start(self, "nlsr -d -f {}".format(self.confFile))
 
     @staticmethod
@@ -81,7 +77,7 @@ class Nlsr(NdnApplication):
             shutil.copyfile("{}/root.cert".format(securityDir), "{}/root.cert".format(nodeSecurityFolder))
 
             # Create site certificate
-            siteName = "/ndn/edu"
+            siteName = "ndn/{}-site".format(host.name)
             siteKeyFile = "{}/site.keys".format(nodeSecurityFolder)
             siteCertFile = "{}/site.cert".format(nodeSecurityFolder)
             Nlsr.createKey(host, siteName, siteKeyFile)
@@ -157,7 +153,7 @@ class NlsrConfigGenerator:
         general =  "general\n"
         general += "{\n"
         general += "  network /ndn/\n"
-        general += "  site /edu\n"
+        general += "  site /{}-site\n".format(self.node.name)
         general += "  router /%C1.Router/cs/" + self.node.name + "\n"
         general += "  log-level " + self.logLevel + "\n"
         general += "  log-dir " + self.node.homeFolder + "/log\n"
@@ -187,7 +183,7 @@ class NlsrConfigGenerator:
 
                 neighbors += "neighbor\n"
                 neighbors += "{\n"
-                neighbors += "  name /ndn/edu/%C1.Router/cs/" + other.name + "\n"
+                neighbors += "  name /ndn/" + other.name + "-site/%C1.Router/cs/" + other.name + "\n"
                 neighbors += "  face-uri udp://" + str(ip) + "\n"
                 neighbors += "  link-cost " + linkCost + "\n"
                 neighbors += "}\n"
@@ -220,7 +216,7 @@ class NlsrConfigGenerator:
 
         advertising =  "advertising\n"
         advertising += "{\n"
-        advertising += "  prefix /ndn/edu/" + self.node.name + "\n"
+        advertising += "  prefix /ndn/" + self.node.name + "-site/" + self.node.name + "\n"
         advertising += "}\n"
 
         return advertising
