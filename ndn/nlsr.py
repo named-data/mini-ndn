@@ -46,7 +46,7 @@ class Nlsr(NdnApplication):
         node.cmd("sudo sed -i 's|prefix .*netlab|prefix /ndn/edu/%s|g' %s" % (node.name, self.confFile))
 
     def start(self):
-        NdnApplication.start(self, "nlsr -d -f {} &".format(self.confFile))
+        NdnApplication.start(self, "nlsr -d -f {}".format(self.confFile))
 
     @staticmethod
     def createKey(host, name, outputFile):
