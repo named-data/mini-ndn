@@ -146,7 +146,7 @@ To create an experiment, follow these steps:
 
         def run(self):
             for host in self.net.hosts:
-                host.cmd("nfd-status > status.txt")
+                host.cmd("nfdc status report > status.txt")
 
 5. Register the experiment with the `ExperimentManager` to make the experiment runnable from the
 command line.
@@ -176,6 +176,6 @@ The experiment can then be run from the command-line using the name registered.
             for host in self.net.hosts:
                 # By default status.txt would be stored
                 # at /tmp/host/status.txt
-                host.cmd("nfd-status > status.txt")
+                host.cmd("nfdc status report > status.txt")
 
     Experiment.register("example-name", ExampleExperiment)

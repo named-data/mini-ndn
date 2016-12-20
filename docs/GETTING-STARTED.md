@@ -34,7 +34,7 @@ To interact with a node, first type the node's name and then the command to be e
 
 To see the status of the forwarder on the node:
 
-    mininet> a nfd-status
+    mininet> a nfdc status report
 
 To see the status of routing on the node:
 

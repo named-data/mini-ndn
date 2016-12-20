@@ -66,8 +66,8 @@ class Experiment:
 
         # Checking for convergence
         for host in self.net.hosts:
-            statusRouter = host.cmd("nfd-status -b | grep site/%C1.Router/cs/")
-            statusPrefix = host.cmd("nfd-status -b | grep ndn | grep site | grep -v Router")
+            statusRouter = host.cmd("nfdc fib list | grep site/%C1.Router/cs/")
+            statusPrefix = host.cmd("nfdc fib list | grep ndn | grep site | grep -v Router")
             didNodeConverge = True
             for node in self.nodes.split(","):
                 if ( ("/ndn/" + node + "-site/%C1.Router/cs/" + node) not in statusRouter or
