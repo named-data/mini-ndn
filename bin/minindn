@@ -72,7 +72,7 @@ from ndn.conf_parser import parse_hosts, parse_switches, parse_links
 
 import os.path, time
 import shutil
-import optparse
+import argparse
 import datetime
 from os.path import expanduser
 import sys
@@ -83,19 +83,20 @@ from ndn.nlsr import Nlsr, NlsrConfigGenerator
 from ndn.nfd import Nfd
 
 VERSION_NUMBER = "0.2.0"
+INSTALL_DIR='/usr/local/etc/mini-ndn/'
 
-def printExperimentNames(option, opt, value, parser):
-    experimentNames = ExperimentManager.getExperimentNames()
+class PrintExperimentNames(argparse.Action):
+    def __init__(self, option_strings, dest, nargs=0, help=None):
+        super(PrintExperimentNames, self).__init__(option_strings=option_strings, dest=dest, nargs=nargs, help=help)
 
-    print "Mini-NDN experiments:"
-    for experiment in experimentNames:
-        print "  %s" % experiment
+    def __call__(self, parser, namespace, values, option_string=None):
+        experimentNames = ExperimentManager.getExperimentNames()
 
-    sys.exit()
+        print("Mini-NDN experiments:")
+        for experiment in experimentNames:
+            print("  %s" % experiment)
 
-def printVersion(option, opt, value, parser):
-    print "Mini-NDN v%s" % VERSION_NUMBER
-    sys.exit()
+        sys.exit(0)
 
 class ProgramOptions:
     def __init__(self):
@@ -130,60 +131,60 @@ def createResultsDir(resultDir, faces, hr):
         print("Results directory (%s) already exists!" % resultDir)
         sys.exit(1);
 
-    print "Results will be stored at: %s" % resultDir
+    print("Results will be stored at: %s" % resultDir)
     return resultDir
 
 def parse_args():
-    usage = """Usage: minindn [template_file] [ -t | --testbed ]
-    If no template_file is given, ndn_utils/default-topology.conf (given sample file)
-    will be used.
-    If --testbed is used, minindn will run the NDN Project Testbed.
-    """
+    parser = argparse.ArgumentParser(prog='minindn')
 
-    parser = optparse.OptionParser(usage)
+    # nargs='?' required here since optional argument
+    parser.add_argument('tempfile', nargs='?', default=INSTALL_DIR + 'default-topology.conf',
+                        help="If no template_file is given, ndn_utils/default-topology.conf (given sample file) will be used.")
 
-    parser.add_option("--ctime", action="store", dest="ctime", type="int", default=60,
-    help="Specify convergence time for the topology (Default: 60 seconds)")
+    parser.add_argument("--ctime", type=int, default=60,
+                        help="Specify convergence time for the topology (Default: 60 seconds)")
 
-    parser.add_option("--experiment", action="store", dest="experiment",
-    help="Runs the specified experiment")
+    parser.add_argument("--experiment",
+                        help="Runs the specified experiment")
 
-    parser.add_option("--faces", action="store", dest="faces", type="int", default=3,
-    help="Specify number of faces 0-60")
+    parser.add_argument("--faces", type=int, default=3,
+                        help="Specify number of faces 0-60")
 
-    parser.add_option("--hr", action="store_true", dest="hr", default=False,
-    help="--hr is used to turn on hyperbolic routing")
+    # store_true stores default value of False
+    parser.add_argument("--hr", action="store_true",
+                        help="--hr is used to turn on hyperbolic routing")
 
-    parser.add_option("--list-experiments", action="callback", callback=printExperimentNames,
-    help="Lists the names of all available experiments")
+    parser.add_argument("--list-experiments", action=PrintExperimentNames,
+                        help="Lists the names of all available experiments")
 
-    parser.add_option("--no-cli", action="store_false", dest="isCliEnabled", default=True,
-    help="Run experiments and exit without showing the command line interface")
+    parser.add_argument("--no-cli", action="store_false", dest="isCliEnabled",
+                        help="Run experiments and exit without showing the command line interface")
 
-    parser.add_option("--nPings", action="store", dest="nPings", type="int", default=300,
-    help="Number of pings to perform between each node in the experiment")
+    parser.add_argument("--nPings", type=int, default=300,
+                        help="Number of pings to perform between each node in the experiment")
 
-    parser.add_option("--nlsr-security", action="store_true", dest="nlsrSecurity", default=False,
-    help="Enables NLSR security")
+    parser.add_argument("--nlsr-security", action="store_true", dest="nlsrSecurity",
+                        help="Enables NLSR security")
 
-    parser.add_option("-t", "--testbed", action="store_true", dest="testbed", default=False,
-    help="instantiates NDN Testbed")
+    parser.add_argument("-t", "--testbed", action="store_true", dest="testbed",
+                         help="Instantiates a snapshot of the NDN Testbed irrespective of the tempfile provided")
 
-    parser.add_option("--work-dir", action="store", dest="workDir", default="/tmp",
-    help="Specify the working directory; default is /tmp")
+    parser.add_argument("--work-dir", action="store", dest="workDir", default="/tmp",
+                        help="Specify the working directory; default is /tmp")
 
-    parser.add_option("--result-dir", action="store", dest="resultDir", default=None,
-    help="Specify the full path destination folder where experiment results will be moved")
+    parser.add_argument("--result-dir", action="store", dest="resultDir", default=None,
+                        help="Specify the full path destination folder where experiment results will be moved")
 
-    parser.add_option("--pct-traffic", action="store", dest="pctTraffic", type="float", default=1.0,
-    help="Specify the percentage of nodes each node should ping")
+    parser.add_argument("--pct-traffic", dest="pctTraffic", type=float, default=1.0,
+                        help="Specify the percentage of nodes each node should ping")
 
-    parser.add_option('--version', '-V', action='callback', callback=printVersion,
-    help='Displays version information')
+    parser.add_argument('--version', '-V', action='version', version='%(prog)s ' + VERSION_NUMBER,
+                        help='Displays version information')
 
-    (args, arg) = parser.parse_args()
+    args = parser.parse_args()
 
     options = ProgramOptions()
+    options.templateFile = args.tempfile
     options.ctime = args.ctime
     options.experimentName = args.experiment
     options.nFaces = args.faces
@@ -199,15 +200,10 @@ def parse_args():
 
     if options.experimentName is not None and options.experimentName not in ExperimentManager.getExperimentNames():
         print("No experiment named %s" % options.experimentName)
-        sys.exit()
+        sys.exit(1)
 
     if options.experimentName is not None and options.resultDir is None:
-        print "No results folder specified; experiment results will remain in the working directory"
-
-    if len(arg) == 0 or len(arg) > 2:
-        options.templateFile = ''
-    else:
-        options.templateFile = arg[0]
+        print("No results folder specified; experiment results will remain in the working directory")
 
     return options
 
@@ -244,22 +240,16 @@ class NdnTopo(Topo):
 def execute(options):
     "Create a network based on template_file"
 
-    template_file = options.templateFile
-    install_dir='/usr/local/etc/mini-ndn/'
-
-    if template_file == '':
-        template_file = install_dir + 'default-topology.conf'
-
     if options.testbed:
-        template_file = install_dir + 'minindn.testbed.conf'
+        options.templateFile = INSTALL_DIR + 'minindn.testbed.conf'
 
-    if os.path.exists(template_file) == False:
-        info('No template file given and default template file cannot be found. Exiting...\n')
-        quit()
+    if os.path.exists(options.templateFile) == False:
+        info('Template file cannot be found. Exiting...\n')
+        sys.exit(1)
 
     # Use nfd.conf as default configuration for NFD, else use the sample
 
-    nfdConfFile = "%s/nfd.conf" % install_dir
+    nfdConfFile = "%s/nfd.conf" % INSTALL_DIR
     if os.path.isfile("/usr/local/etc/ndn/nfd.conf") == True:
         shutil.copy2("/usr/local/etc/ndn/nfd.conf", nfdConfFile)
     elif os.path.isfile("/usr/local/etc/ndn/nfd.conf.sample") == True:
@@ -272,7 +262,7 @@ def execute(options):
     if options.resultDir is not None:
         options.resultDir = createResultsDir(options.resultDir, options.nFaces, options.hr)
 
-    topo = NdnTopo(template_file, options.workDir)
+    topo = NdnTopo(options.templateFile, options.workDir)
 
     t = datetime.datetime.now()
 
@@ -346,14 +336,14 @@ def execute(options):
         if 'app' in host.params:
             if host.params['app'] != '':
                 app = host.params['app']
-                print "Starting " + app + " on node " + host.name
+                print("Starting " + app + " on node " + host.name)
                 print(host.cmd(app))
 
     # Load experiment
     experimentName = options.experimentName
 
     if experimentName is not None:
-        print "Loading experiment: %s" % experimentName
+        print("Loading experiment: %s" % experimentName)
 
         experimentArgs = {
             "net": net,
@@ -369,7 +359,7 @@ def execute(options):
         if experiment is not None:
             experiment.start()
         else:
-            print "ERROR: Experiment '%s' does not exist" % experimentName
+            print("ERROR: Experiment '%s' does not exist" % experimentName)
             return
 
     if options.isCliEnabled is True:

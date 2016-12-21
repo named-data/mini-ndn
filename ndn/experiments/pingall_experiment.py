@@ -31,7 +31,6 @@ class PingallExperiment(Experiment):
 
         Experiment.__init__(self, args)
         self.COLLECTION_PERIOD_BUFFER = 10
-        self.pctTraffic = float(args["pctTraffic"])
         print "Using %f traffic" % self.pctTraffic
 
     def run(self):

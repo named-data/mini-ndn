@@ -35,7 +35,7 @@ class Experiment:
         self.convergenceTime = args["ctime"]
         self.nPings = args["nPings"]
         self.strategy = args["strategy"]
-        self.pctTraffic = float(args["pctTraffic"])
+        self.pctTraffic = args["pctTraffic"]
 
         # Used to restart pings on the recovered node if any
         self.pingedDict = {}
