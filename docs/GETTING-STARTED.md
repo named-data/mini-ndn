@@ -61,6 +61,8 @@ To change the working directory from default `/tmp/minindn` following option can
 
     sudo minindn --work-dir /home/mydir/test
 
+Autocomplete of command-line options is available for users of Bash and Zsh.
+
 #### Routing options
 
 To run minindn without NLSR, use the `--no-nlsr` parameter:

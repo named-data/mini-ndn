@@ -303,6 +303,24 @@ function jNDN {
     cd ..
 }
 
+function argcomplete {
+    if [[ $SHELL == "/bin/bash" ]]; then
+        $install python-argcomplete
+        if ! grep -q 'eval "$(register-python-argcomplete minindn)"' ~/.bashrc; then
+            echo 'eval "$(register-python-argcomplete minindn)"' >> ~/.bashrc
+        fi
+        source ~/.bashrc
+    elif [[ $SHELL == "/bin/zsh" ]] || [[ $SHELL == "/usr/bin/zsh" ]]; then
+        $install python-argcomplete
+        if ! grep -z -q 'autoload bashcompinit\sbashcompinit\seval "$(register-python-argcomplete minindn)"' ~/.zshrc; then
+            echo -e 'autoload bashcompinit\nbashcompinit\neval "$(register-python-argcomplete minindn)"' >> ~/.zshrc
+        fi
+        source ~/.zshrc
+    else
+        echo "Skipping argomplete install..."
+    fi
+}
+
 function commonClientLibraries {
     ndn_cpp
     pyNDN
@@ -315,6 +333,7 @@ function usage {
 
     printf 'options:\n' >&2
     printf -- ' -a: install all the required dependencies\n' >&2
+    printf -- ' -b: install autocomplete for Bash and Zsh users\n' >&2
     printf -- ' -e: install infoedit\n' >&2
     printf -- ' -f: install NFD\n' >&2
     printf -- ' -i: install mini-ndn\n' >&2
@@ -328,7 +347,7 @@ function usage {
 if [[ $# -eq 0 ]]; then
     usage
 else
-    while getopts 'aemfrtic' OPTION
+    while getopts 'abemfrtic' OPTION
     do
         case $OPTION in
         a)
@@ -338,9 +357,11 @@ else
         routing
         tools
         infoedit
+        argcomplete
         commonClientLibraries
         break
         ;;
+        b)    argcomplete;;
         e)    infoedit;;
         f)    forwarder;;
         i)    minindn;;

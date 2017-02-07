@@ -12,11 +12,11 @@ extra packages and also to execute **Mini-NDN**.
 
 If you have all the dependencies (see sections below) installed simply clone this repository and run:
 
-    sudo ./install.sh -i
+    ./install.sh -i
 
 else if you don't have the dependencies, the following command will install them along with Mini-NDN:
 
-    sudo ./install.sh -a
+    ./install.sh -a
 
 else if you want to install the dependencies manually, follow the instructions below:
 

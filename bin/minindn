@@ -89,6 +89,11 @@ import re
 from ndn.nlsr import Nlsr, NlsrConfigGenerator
 from ndn.nfd import Nfd
 
+try:
+    import argcomplete
+except ImportError:
+    pass
+
 VERSION_NUMBER = "0.3.0"
 INSTALL_DIR='/usr/local/etc/mini-ndn/'
 
@@ -145,7 +150,7 @@ def createResultsDir(resultDir, faces, rType):
         os.makedirs(resultDir)
     else:
         print("Results directory (%s) already exists!" % resultDir)
-        sys.exit(1);
+        sys.exit(1)
 
     print("Results will be stored at: %s" % resultDir)
     return resultDir
@@ -160,11 +165,11 @@ def parse_args():
     parser.add_argument("--ctime", type=int, default=60,
                         help="Specify convergence time for the topology (Default: 60 seconds)")
 
-    parser.add_argument("--experiment",
+    parser.add_argument("--experiment", choices=[experiment for experiment in ExperimentManager.getExperimentNames()],
                         help="Runs the specified experiment")
 
     parser.add_argument("--faces", type=int, default=3,
-                        help="Specify number of faces 0-60")
+                        help="Specify number of max faces per prefix for NLSR 0-60")
 
     parser.add_argument("--routing", dest="routingType", default='link-state', choices=['link-state', 'hr', 'dry'],
                         help="""choices for routing are 'link-state' for link state, 'hr' for hyperbolic, and 'dry'
@@ -218,6 +223,9 @@ def parse_args():
 
     parser.add_argument("--cs-size", dest='csSize', type=int, default=65536,
                         help="Set CS size in NFD's conf file")
+
+    if "argcomplete" in sys.modules:
+        argcomplete.autocomplete(parser)
 
     args, unknownArgs = parser.parse_known_args()
 
