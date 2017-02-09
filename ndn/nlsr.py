@@ -84,7 +84,7 @@ class Nlsr(NdnApplication):
             shutil.copyfile("{}/root.cert".format(securityDir), "{}/root.cert".format(nodeSecurityFolder))
 
             # Create site certificate
-            siteName = "ndn/{}-site".format(host.name)
+            siteName = "/ndn/{}-site".format(host.name)
             siteKeyFile = "{}/site.keys".format(nodeSecurityFolder)
             siteCertFile = "{}/site.cert".format(nodeSecurityFolder)
             Nlsr.createKey(host, siteName, siteKeyFile)
@@ -110,19 +110,21 @@ class Nlsr(NdnApplication):
 
             host.cmd("ndnsec-cert-install -f {}".format(siteCertFile))
 
-            # Create operator certificate
+            # Create and install operator certificate
             opName = "{}/%C1.Operator/op".format(siteName)
             opKeyFile = "{}/op.keys".format(nodeSecurityFolder)
             opCertFile = "{}/op.cert".format(nodeSecurityFolder)
             Nlsr.createKey(host, opName, opKeyFile)
             Nlsr.createCertificate(host, opName, opName, opKeyFile, opCertFile, signer=siteName)
+            host.cmd("ndnsec-cert-install -f {}".format(opCertFile))
 
-            # Create router certificate
+            # Create and install router certificate
             routerName = "{}/%C1.Router/cs/{}".format(siteName, host.name)
             routerKeyFile = "{}/router.keys".format(nodeSecurityFolder)
             routerCertFile = "{}/router.cert".format(nodeSecurityFolder)
             Nlsr.createKey(host, routerName, routerKeyFile)
             Nlsr.createCertificate(host, routerName, routerName, routerKeyFile, routerCertFile, signer=opName)
+            host.cmd("ndnsec-cert-install -f {}".format(routerCertFile))
 
 class NlsrConfigGenerator:
 
@@ -318,7 +320,7 @@ class NlsrConfigGenerator:
                             k-regex ^([^<KEY><NLSR>]*)<NLSR><KEY><ksk-.*><ID-CERT>$
                             k-expand \\\\1
                             h-relation equal
-                            p-regex ^([^<NLSR><LSA>]*)<NLSR><LSA>(<>*)<><><><>$
+                            p-regex ^<localhop>([^<NLSR><LSA>]*)<NLSR><LSA>(<>*)<><><><>$
                             p-expand \\\\1\\\\2
                           }
                         }
