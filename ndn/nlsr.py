@@ -32,6 +32,8 @@ import os
 import textwrap
 from subprocess import call
 
+NETWORK="/ndn/"
+
 class Nlsr(NdnApplication):
     def __init__(self, node):
         NdnApplication.__init__(self, node)
@@ -66,7 +68,7 @@ class Nlsr(NdnApplication):
             os.mkdir(securityDir)
 
         # Create root certificate
-        rootName = "/ndn"
+        rootName = NETWORK
         sh("ndnsec-keygen {} > {}/root.keys".format(rootName, securityDir))
         sh("ndnsec-certgen -N {} -p {} {}/root.keys > {}/root.cert".format(rootName, rootName, securityDir, securityDir))
 
@@ -84,7 +86,7 @@ class Nlsr(NdnApplication):
             shutil.copyfile("{}/root.cert".format(securityDir), "{}/root.cert".format(nodeSecurityFolder))
 
             # Create site certificate
-            siteName = "/ndn/{}-site".format(host.name)
+            siteName = "{}{}-site".format(NETWORK, host.name)
             siteKeyFile = "{}/site.keys".format(nodeSecurityFolder)
             siteCertFile = "{}/site.cert".format(nodeSecurityFolder)
             Nlsr.createKey(host, siteName, siteKeyFile)
@@ -176,7 +178,7 @@ class NlsrConfigGenerator:
 
         general =  "general\n"
         general += "{\n"
-        general += "  network /ndn/\n"
+        general += "  network {}\n".format(NETWORK)
         general += "  site /{}-site\n".format(self.node.name)
         general += "  router /%C1.Router/cs/" + self.node.name + "\n"
         general += "  log-level " + self.logLevel + "\n"
@@ -207,7 +209,7 @@ class NlsrConfigGenerator:
 
                 neighbors += "neighbor\n"
                 neighbors += "{\n"
-                neighbors += "  name /ndn/" + other.name + "-site/%C1.Router/cs/" + other.name + "\n"
+                neighbors += "  name " + NETWORK + other.name + "-site/%C1.Router/cs/" + other.name + "\n"
                 neighbors += "  face-uri udp://" + str(ip) + "\n"
                 neighbors += "  link-cost " + linkCost + "\n"
                 neighbors += "}\n"
@@ -240,7 +242,7 @@ class NlsrConfigGenerator:
 
         advertising =  "advertising\n"
         advertising += "{\n"
-        advertising += "  prefix /ndn/" + self.node.name + "-site/" + self.node.name + "\n"
+        advertising += "  prefix "+ NETWORK + self.node.name + "-site/" + self.node.name + "\n"
         advertising += "}\n"
 
         return advertising

@@ -31,7 +31,6 @@ class Experiment:
 
     def __init__(self, args):
         self.net = args["net"]
-        self.nodes = args["nodes"]
         self.convergenceTime = args["ctime"]
         self.nPings = args["nPings"]
         self.strategy = args["strategy"]
@@ -74,9 +73,10 @@ class Experiment:
             statusRouter = host.cmd("nfdc fib list | grep site/%C1.Router/cs/")
             statusPrefix = host.cmd("nfdc fib list | grep ndn | grep site | grep -v Router")
             didNodeConverge = True
-            for node in self.nodes.split(","):
-                if ( ("/ndn/" + node + "-site/%C1.Router/cs/" + node) not in statusRouter or
-                      str(host) != node and ("/ndn/" + node + "-site/" + node) not in statusPrefix ):
+            for node in self.net.hosts:
+                # Node has its own router name in the fib list, but not name prefix
+                if ( ("/ndn/" + node.name + "-site/%C1.Router/cs/" + node.name) not in statusRouter or
+                      host.name != node.name and ("/ndn/" + node.name + "-site/" + node.name) not in statusPrefix ):
                     didNodeConverge = False
                     didNlsrConverge = False
 

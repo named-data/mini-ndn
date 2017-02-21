@@ -385,16 +385,12 @@ def execute(options):
                 node2.setIP(ipStr(ipParse(ndnNetBase) + 2) + '/30', intf=link.intf2)
                 ndnNetBase = ipStr(ipParse(ndnNetBase) + 4)
 
-    nodes = ""    # Used later to check prefix name in checkFIB
-
     # NLSR Security
     if options.nlsrSecurity is True:
         Nlsr.createKeysAndCertificates(net, options.workDir)
 
     # NLSR initialization
     for host in net.hosts:
-        nodes += str(host.name) + ","
-
         conf = next(x for x in hosts_conf if x.name == host.name)
         host.nlsrParameters = conf.nlsrParameters
 
@@ -412,8 +408,6 @@ def execute(options):
         host.nlsr = Nlsr(host)
         host.nlsr.start()
 
-    nodes = nodes[0:-1]
-
     for host in net.hosts:
         if 'app' in host.params:
             if host.params['app'] != '':
@@ -429,7 +423,6 @@ def execute(options):
 
         experimentArgs = {
             "net": net,
-            "nodes": nodes,
             "ctime": options.ctime,
             "nPings": options.nPings,
             "strategy": Nfd.STRATEGY_BEST_ROUTE,
