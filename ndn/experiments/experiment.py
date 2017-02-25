@@ -1,8 +1,8 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015 The University of Memphis,
-#                    Arizona Board of Regents,
-#                    Regents of the University of California.
+# Copyright (C) 2015-2017 The University of Memphis,
+#                         Arizona Board of Regents,
+#                         Regents of the University of California.
 #
 # This file is part of Mini-NDN.
 # See AUTHORS.md for a complete list of Mini-NDN authors and contributors.
@@ -40,7 +40,6 @@ class Experiment:
         # Used to restart pings on the recovered node if any
         self.pingedDict = {}
 
-
     def start(self):
         self.setup()
         self.run()
@@ -56,9 +55,15 @@ class Experiment:
             # Create folder to store ping data
             host.cmd("mkdir ping-data")
 
+        self.checkConvergence()
+
+    def checkConvergence(self, convergenceTime = None):
+        if convergenceTime is None:
+            convergenceTime = self.convergenceTime
+
         # Wait for convergence time period
-        print "Waiting " + str(self.convergenceTime) + " seconds for convergence..."
-        time.sleep(self.convergenceTime)
+        print "Waiting " + str(convergenceTime) + " seconds for convergence..."
+        time.sleep(convergenceTime)
         print "...done"
 
         # To check whether all the nodes of NLSR have converged

@@ -22,27 +22,17 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 from ndn.experiments.experiment import Experiment
+from ndn.experiments.mcn_failure_experiment import MCNFailureExperiment
 
 import time
 
-class MCNFailureExperiment(Experiment):
+class MCNFailureConvergenceExperiment(MCNFailureExperiment):
 
     def __init__(self, args):
-        args["nPings"] = 300
-        Experiment.__init__(self, args)
-
-        self.PING_COLLECTION_TIME_BEFORE_FAILURE = 60
-        self.PING_COLLECTION_TIME_AFTER_RECOVERY = 120
-
-    def getMostConnectedNode(self):
-        mcn = max(self.net.hosts, key=lambda host: len(host.intfNames()))
-        print "The most connected node is: %s" % mcn.name
-        return mcn
+        MCNFailureExperiment.__init__(self, args)
 
     def run(self):
         mostConnectedNode = self.getMostConnectedNode()
-
-        self.startPctPings()
 
         # After the pings are scheduled, collect pings for 1 minute
         time.sleep(self.PING_COLLECTION_TIME_BEFORE_FAILURE)
@@ -56,11 +46,6 @@ class MCNFailureExperiment(Experiment):
         # Bring MCN back up
         self.recoverNode(mostConnectedNode)
 
-        # Restart pings
-        for nodeToPing in self.pingedDict[mostConnectedNode]:
-            self.ping(mostConnectedNode, nodeToPing, self.PING_COLLECTION_TIME_AFTER_RECOVERY)
+        self.checkConvergence()
 
-        # Collect pings for more seconds after MCN is up
-        time.sleep(self.PING_COLLECTION_TIME_AFTER_RECOVERY)
-
-Experiment.register("failure-mcn", MCNFailureExperiment)
+Experiment.register("mcn-failure-convergence", MCNFailureConvergenceExperiment)
