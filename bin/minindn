@@ -61,7 +61,6 @@
 from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.log import setLogLevel, output, info
-from mininet.cli import CLI
 from mininet.link import TCLink
 from mininet.util import ipStr, ipParse
 
@@ -73,7 +72,7 @@ from ndn.ndn_host import NdnHost, CpuLimitedNdnHost, RemoteNdnHost
 from ndn.conf_parser import parse_hosts, parse_switches, parse_links
 from ndn.remote_ndn_link import RemoteNdnLink, RemoteGRENdnLink
 from ndn.placer import GuidedPlacer, PopulatePlacement
-from ndn.util import ssh, scp
+from ndn.util import ssh, scp, MiniNDNCLI
 
 import os.path, time
 import shutil
@@ -446,7 +445,7 @@ def execute(options):
             return
 
     if options.isCliEnabled is True:
-        CLI(net)
+        MiniNDNCLI(net)
 
     net.stop()
 

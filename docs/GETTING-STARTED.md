@@ -25,24 +25,24 @@ During set up, the list of nodes in the network will be listed as they are initi
 
 After set up, the command-line interface (CLI) will display a prompt.
 
-    mininet>
+    mini-ndn>
 
 To interact with a node, first type the node's name and then the command to be executed:
 
-    mininet> a echo "Hello, world!"
+    mini-ndn> a echo "Hello, world!"
     Hello, world!
 
 To see the status of the forwarder on the node:
 
-    mininet> a nfdc status report
+    mini-ndn> a nfdc status report
 
 To see the status of routing on the node:
 
-    mininet> a nlsrc status
+    mini-ndn> a nlsrc status
 
 To exit Mini-NDN, type `quit` in the CLI:
 
-    mininet> quit
+    mini-ndn> quit
 
 For a more in depth explanation of the CLI, please see the
 [Mininet Walkthrough](http://mininet.org/walkthrough/).

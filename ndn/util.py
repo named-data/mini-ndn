@@ -22,6 +22,8 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 from subprocess import call
+from mininet.cli import CLI
+import sys
 
 sshbase = [ 'ssh', '-q', '-t', '-i/home/mininet/.ssh/id_rsa' ]
 scpbase = [ 'scp', '-i', '/home/mininet/.ssh/id_rsa' ]
@@ -37,3 +39,8 @@ def scp(*args):
         tmp.append(arg)
     rcmd = scpbase + tmp
     call(rcmd, stdout=devnull, stderr=devnull)
+
+class MiniNDNCLI(CLI):
+    prompt = 'mini-ndn> '
+    def __init__(self, mininet, stdin=sys.stdin, script=None):
+        CLI.__init__(self, mininet, stdin=sys.stdin, script=None)

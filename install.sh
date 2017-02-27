@@ -136,12 +136,11 @@ function ndncxx {
     fi
 
     if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
-        $install git libsqlite3-dev libboost-all-dev make g++
-        crypto
+        $install git libsqlite3-dev libboost-all-dev make g++ libssl-dev libcrypto++-dev
     fi
 
     if [[ $DIST == Fedora ]]; then
-        $install gcc-c++ sqlite-devel boost-devel
+        $install gcc-c++ sqlite-devel boost-devel openssl-devel cryptopp-devel
     fi
 
     git clone --depth 1 https://github.com/named-data/ndn-cxx
@@ -150,21 +149,6 @@ function ndncxx {
     ./waf
     sudo ./waf install
     sudo ldconfig
-    cd ../
-}
-
-function crypto {
-    mkdir crypto
-    cd crypto
-    $install unzip
-    wget http://www.cryptopp.com/cryptopp562.zip
-    unzip cryptopp562.zip
-
-    # Uncomments flags to build shared object
-    sed -i '/^# CXXFLAGS += -fPIC/s/^# //' GNUmakefile
-
-    make static dynamic
-    sudo make install
     cd ../
 }
 
@@ -218,7 +202,7 @@ function minindn {
     sudo cp ndn_utils/topologies/minindn.caida.conf "$install_dir"
     sudo cp ndn_utils/topologies/minindn.ucla.conf "$install_dir"
     sudo cp ndn_utils/topologies/minindn.testbed.conf "$install_dir"
-    sudo python setup.py install
+    sudo python setup.py clean --all install
 }
 
 

@@ -54,18 +54,18 @@ To make the IP address associated with this interface persistent, add the follow
 
 After rebooting, run Mini-NDN and issue the following command:
 
-    mininet>net
+    mini-ndn>net
     a a-eth0:b-eth0 a-eth1:c-eth0 a-eth2:root-eth0
 
 Node "a" is connected to "root-eth0". Now issue "ifconfig a-eth2" on node "a":
 
-    mininet>a ifconfig a-eth2
+    mini-ndn>a ifconfig a-eth2
     a-eth2    Link encap:Ethernet  HWaddr fa:76:d4:86:d3:ba
               inet addr:1.0.0.10  Bcast:1.0.0.11  Mask:255.255.255.252
 
 As learned from the previous step, the IP address of root-eth0 is 1.0.0.9.
 
-    mininet>a ping 1.0.0.9
+    mini-ndn>a ping 1.0.0.9
     PING 1.0.0.9 (1.0.0.9) 56(84) bytes of data.
     64 bytes from 1.0.0.9: icmp_seq=1 ttl=64 time=0.137 ms
     64 bytes from 1.0.0.9: icmp_seq=2 ttl=64 time=0.123 ms
