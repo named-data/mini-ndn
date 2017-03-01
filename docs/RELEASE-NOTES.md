@@ -1,7 +1,48 @@
 Release Notes
 =============
 
+Mini-NDN version 0.3.0 (changes since version 0.2.0)
+
+Release date: March 3, 2017
+
+**New featues**:
+
+- Mini-NDN cluster edition
+
+- New experiments for making NLSR testing easier
+
+**Bug fixes**:
+
+- Set site name correctly
+
+- Install missing certificates in NLSR security config
+
+- Fix quitting of NLSR due to key not found error
+
+**Misc changes**:
+
+- Removed nlsr.conf file, generate it within the code
+
+- Use argparse instead of deprecated optparse
+
+- Update security config section for NLSR
+
+- Change mininet prompt to mini-ndn
+
+- Set network name at one place
+
+- Update install.sh script to install openssl
+
+- Update install.sh script to install cryptopp from package instead of compiling from source
+
+- Update install.sh to clean build folder every time to get rid of removed files such as old experiments
+
+- Fix old code - use net.hosts instead of storing hosts in a variable
+
+- Use nfdc instead of deprecated nfd-status
+
 Mini-NDN version 0.2.0 (changes since version 0.1.1)
+----------------------------------------
 
 Release date: August 18, 2016
 

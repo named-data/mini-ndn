@@ -89,7 +89,7 @@ import re
 from ndn.nlsr import Nlsr, NlsrConfigGenerator
 from ndn.nfd import Nfd
 
-VERSION_NUMBER = "0.2.0"
+VERSION_NUMBER = "0.3.0"
 INSTALL_DIR='/usr/local/etc/mini-ndn/'
 
 class PrintExperimentNames(argparse.Action):
