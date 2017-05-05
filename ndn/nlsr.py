@@ -31,6 +31,7 @@ import shutil
 import os
 import textwrap
 from subprocess import call
+import time
 
 NETWORK="/ndn/"
 
@@ -45,9 +46,8 @@ class Nlsr(NdnApplication):
         node.cmd("mkdir %s" % self.logDir)
 
     def start(self):
-        # Removed & at the end, was giving key not found error
-        # This way NLSR is daemonized fully before continuing
-        NdnApplication.start(self, "nlsr -d -f {}".format(self.confFile))
+        NdnApplication.start(self, "nlsr -f {} > /dev/null 2>&1 &".format(self.confFile))
+        time.sleep(1)
 
     @staticmethod
     def createKey(host, name, outputFile):
