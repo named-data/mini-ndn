@@ -36,18 +36,28 @@ import time
 NETWORK="/ndn/"
 
 class Nlsr(NdnApplication):
-    def __init__(self, node):
+    def __init__(self, node, neighbors, faceType):
         NdnApplication.__init__(self, node)
+        self.node = node
+        self.neighbors = neighbors
+        self.faceType = faceType
         self.routerName = "/%sC1.Router/cs/%s" % ('%', node.name)
         self.confFile = "%s/nlsr.conf" % node.homeFolder
 
         # Make directory for log file
         self.logDir = "%s/log" % node.homeFolder
-        node.cmd("mkdir %s" % self.logDir)
+        self.node.cmd("mkdir %s" % self.logDir)
+
+        # Create faces in NFD
+        self.createFaces()
 
     def start(self):
         NdnApplication.start(self, "nlsr -f {} > /dev/null 2>&1 &".format(self.confFile))
         time.sleep(1)
+
+    def createFaces(self):
+        for ip in self.neighbors:
+            self.node.cmd("nfdc face create {}://{} permanent".format(self.faceType, ip))
 
     @staticmethod
     def createKey(host, name, outputFile):
@@ -133,9 +143,10 @@ class NlsrConfigGenerator:
     ROUTING_LINK_STATE = "ls"
     ROUTING_HYPERBOLIC = "hr"
 
-    def __init__(self, node, isSecurityEnabled):
+    def __init__(self, node, isSecurityEnabled, faceType):
         self.node = node
         self.isSecurityEnabled = isSecurityEnabled
+        self.faceType = faceType
 
         parameters = node.nlsrParameters
 
@@ -144,6 +155,7 @@ class NlsrConfigGenerator:
         self.hyperRadius = parameters.get("radius", 0.0)
         self.hyperAngle = parameters.get("angle", 0.0)
         self.logLevel = parameters.get("nlsr-log-level", "DEBUG")
+        self.neighborIPs = []
 
     def createConfigFile(self):
 
@@ -207,10 +219,13 @@ class NlsrConfigGenerator:
 
                 linkCost = intf.params.get("delay", "10ms").replace("ms", "")
 
+                # To be used later to create faces
+                self.neighborIPs.append(ip)
+
                 neighbors += "neighbor\n"
                 neighbors += "{\n"
                 neighbors += "  name " + NETWORK + other.name + "-site/%C1.Router/cs/" + other.name + "\n"
-                neighbors += "  face-uri udp://" + str(ip) + "\n"
+                neighbors += "  face-uri {}://{}\n".format(self.faceType, ip)
                 neighbors += "  link-cost " + linkCost + "\n"
                 neighbors += "}\n"
 

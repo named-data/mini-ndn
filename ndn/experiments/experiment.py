@@ -109,6 +109,7 @@ class Experiment:
     def recoverNode(self, host):
         print("Bringing %s up" % host.name)
         host.nfd.start()
+        host.nlsr.createFaces()
         host.nlsr.start()
         host.nfd.setStrategy("/ndn/", self.strategy)
         host.cmd("ndnpingserver /ndn/" + str(host) + "-site/" + str(host) + " > ping-server &")

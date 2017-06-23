@@ -124,6 +124,7 @@ class ProgramOptions:
         self.guided = None
         self.placer = None
         self.tunnelType = None
+        self.faceType = "udp"
 
 def createResultsDir(resultDir, faces, hr):
     if faces == 0:
@@ -206,6 +207,8 @@ def parse_args():
     parser.add_argument("--tunnel-type", dest="tunnelType", default='ssh',
                         choices=['ssh', 'gre'])
 
+    parser.add_argument("--face-type", dest='faceType', default='udp', choices=['udp', 'tcp'])
+
     args = parser.parse_args()
 
     options = ProgramOptions()
@@ -226,6 +229,7 @@ def parse_args():
     options.placement = args.placement
     options.tunnelType = args.tunnelType
     options.placeList = args.placeList
+    options.faceType = args.faceType
 
     if options.experimentName is not None and options.experimentName not in ExperimentManager.getExperimentNames():
         print("No experiment named %s" % options.experimentName)
@@ -401,11 +405,11 @@ def execute(options):
             host.nlsrParameters["hyperbolic-state"] = "on"
 
         # Generate NLSR configuration file
-        configGenerator = NlsrConfigGenerator(host, options.nlsrSecurity)
+        configGenerator = NlsrConfigGenerator(host, options.nlsrSecurity, options.faceType)
         configGenerator.createConfigFile()
 
         # Start NLSR
-        host.nlsr = Nlsr(host)
+        host.nlsr = Nlsr(host, configGenerator.neighborIPs, options.faceType)
         host.nlsr.start()
 
     for host in net.hosts:
