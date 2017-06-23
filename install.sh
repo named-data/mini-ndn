@@ -99,8 +99,13 @@ function forwarder {
         $install libpcap-devel
     fi
 
-    git clone --depth 1 https://github.com/named-data/NFD
+    git clone https://github.com/named-data/NFD
     cd NFD
+    current=$(git rev-parse HEAD)
+    if [[ $current != "f4056d0242536f85b7d7b4de1b5ac50dad65c233" ]]; then
+      git checkout f4056d0242536f85b7d7b4de1b5ac50dad65c233
+      git checkout -b fix-commit
+    fi
     ./waf configure --without-websocket
     ./waf
     sudo ./waf install
@@ -114,12 +119,19 @@ function routing {
     fi
 
     if [[ $DIST == Ubuntu ]]; then
-        $install liblog4cxx10-dev libprotobuf-dev protobuf-compiler
+        $install liblog4cxx10-dev
     fi
 
     if [[ $DIST == Fedora ]]; then
-        $install log4cxx log4cxx-devel openssl-devel protobuf-devel
+        $install log4cxx log4cxx-devel openssl-devel
     fi
+
+    git clone --depth 1 https://github.com/named-data/ChronoSync
+    cd ChronoSync
+    ./waf configure
+    ./waf
+    sudo ./waf install
+    cd ../
 
     git clone --depth 1 https://github.com/named-data/NLSR
     cd NLSR
@@ -143,8 +155,13 @@ function ndncxx {
         $install gcc-c++ sqlite-devel boost-devel openssl-devel cryptopp-devel
     fi
 
-    git clone --depth 1 https://github.com/named-data/ndn-cxx
+    git clone https://github.com/named-data/ndn-cxx
     cd ndn-cxx
+    current=$(git rev-parse HEAD)
+    if [[ $current != "b555b00c280b9c9ed46f24a1fbebc73b720601af" ]]; then
+      git checkout b555b00c280b9c9ed46f24a1fbebc73b720601af
+      git checkout -b fix-commit
+    fi
     ./waf configure
     ./waf
     sudo ./waf install
