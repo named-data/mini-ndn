@@ -1,2 +1,2 @@
 # minindn-wifi
-Minindn-wifi: To implement WiFI function based on minindn and mininet-wifi
+Minindn-wifi: To implement WiFi function based on minindn and mininet-wifi.
