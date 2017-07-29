@@ -126,8 +126,13 @@ function routing {
         $install log4cxx log4cxx-devel openssl-devel
     fi
 
-    git clone --depth 1 https://github.com/named-data/ChronoSync
+    git clone https://github.com/named-data/ChronoSync
     cd ChronoSync
+    current=$(git rev-parse HEAD)
+    if [[ $current != "097bb448f46b8bd9a5c1f431e824f8f6a169b650" ]]; then
+      git checkout 097bb448f46b8bd9a5c1f431e824f8f6a169b650
+      git checkout -b fix-commit
+    fi
     ./waf configure
     ./waf
     sudo ./waf install
@@ -177,7 +182,7 @@ function tools {
 
     git clone --depth 1 https://github.com/named-data/ndn-tools
     cd ndn-tools
-    ./waf configure
+    ./waf configure --enable-dump --enable-ping
     ./waf
     sudo ./waf install
     cd ../
