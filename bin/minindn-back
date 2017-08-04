@@ -58,7 +58,6 @@
 #   The name and trademarks of copyright holder(s) may NOT be used in
 #   advertising or publicity pertaining to the Software or any derivatives
 #   without specific, written prior permission.
-# Xian: add the following 2 code lines
 
 from mininet.topo import Topo
 from mininet.net import Mininet
@@ -71,8 +70,8 @@ from mininet.examples.clustercli import ClusterCLI
 
 from ndn import ExperimentManager
 from ndn.ndn_host import NdnHost, CpuLimitedNdnHost, RemoteNdnHost
-from ndn.conf_parser import parse_hosts, parse_switches, parse_links, parse_stations, parse_accessPoints
-from ndn.remote_ndn_link import RemoteNdnLink, RemoteGRENdnLink
+from ndn.conf_parser import parse_hosts, parse_switches, parse_links
+# from ndn.remote_ndn_link import RemoteNdnLink, RemoteGRENdnLink
 from ndn.placer import GuidedPlacer, PopulatePlacement
 from ndn.util import ssh, scp, MiniNDNCLI
 
@@ -211,14 +210,6 @@ def parse_args():
 
     parser.add_argument("--face-type", dest='faceType', default='udp', choices=['udp', 'tcp'])
 
-    # Xian: add the following 6 code lines for wifi
-    parser.add_argument('--wifi', '-w', action='store_true', default=False, help='activate wifi')
-    parser.add_argument('--radios',  default=0, help='starting k radios')
-    parser.add_argument('--wmediumd', action='store_true', default=False, help='activate wmediumd')
-    parser.add_argument('--channel', default=1, help='wireless channel configuration')
-    parser.add_argument('--mode', default="g", help='wireless mode configuration')
-    parser.add_argument('--ssid', default="my-ssid", help='wireless ssid configuration')
-
     args = parser.parse_args()
 
     options = ProgramOptions()
@@ -240,21 +231,6 @@ def parse_args():
     options.tunnelType = args.tunnelType
     options.placeList = args.placeList
     options.faceType = args.faceType
-    #Xian: add the following code lines for wifi
-    options.isWiFi=args.wifi
-#    options.ipBase = args.ipbase (error: 'Namespace' object has no this following attribute)
-#    options.xterms = args.xterms
-#    options.mac = args.mac
-#    options.arp = args.arp
-#    options.pin = args.pin
-    options.channel = args.channel
-    options.mode = args.mode
-    options.ssid= args.ssid
-    options.wmediumd=args.wmediumd
-    #Xian: add the following code lines for wifi 
-    # Use wifi default topopology configure file if no default file is specified.
-    if options.isWiFi and 'default-topology.conf' in options.templateFile:
-        options.templateFile = INSTALL_DIR + 'singleapwifi-topology.conf'
 
     if options.experimentName is not None and options.experimentName not in ExperimentManager.getExperimentNames():
         print("No experiment named %s" % options.experimentName)
@@ -322,35 +298,26 @@ class NdnTopo(Topo):
 
         info('Parse of ' + conf_arq + ' done.\n')
 
-# Xian: add NdnWifiTopo() class for wifi
 class NdnWifiTopo(Topo):
     def __init__(self, conf_arq, workDir, **opts):
         Topo.__init__(self, **opts)
 
         global stations_conf
-        global accessPoints_conf
-        global switches_conf
+        global accesspoints_conf
         global links_conf
-
         stations_conf = parse_stations(conf_arq)
         accessPoints_conf = parse_accessPoints(conf_arq)
-        switches_conf = parse_switches(conf_arq)
         links_conf = parse_links(conf_arq)
+
         self.isTCLink = False
         self.isLimited = False
-        print "minindn-------------------------------NdnWifiTopo() cla-----------------------------add topology object before"
-
-        for station in stations_conf:
+        for station in staions_conf:
             if station.cpu != None and self.isLimited != True:
                 self.isLimited = True
-            self.addStation(station.name, app=station.app, params=station.uri_tuples,\
-                            cpu=station.cpu,cores=station.cores,cache=station.cache, workdir=workDir)
+                self.addStation(station.name, app=station.app, params=station.uri_tuples, cpu=station.cpu,cores=station.cores,cache=station.cache, workdir=workDir)
 
         for accessPoint in accessPoints_conf:
-            self.addAccessPoint(accessPoint.name, workdir=workDir)
-
-        for switch in switches_conf:
-            self.addSwitch(switch.name)
+            self.addAccessPoint(accessPoint.name)
 
         for link in links_conf:
             if len(link.linkDict) == 0:
@@ -358,7 +325,6 @@ class NdnWifiTopo(Topo):
             else:
                 self.addLink(link.h1, link.h2, **link.linkDict)
                 self.isTCLink = True
-        print "minindn-------------------------- NdnWifiTopo()---------------------------------------add topology object after"
 
         info('Parse of ' + conf_arq + ' done.\n')
 
@@ -409,31 +375,19 @@ def execute(options):
 
     if options.resultDir is not None:
         options.resultDir = createResultsDir(options.resultDir, options.nFaces, options.hr)
-    # Xian: modify the following codes for wifi
-    if options.isWiFi:
-        topo=NdnWifiTopo(options.templateFile, options.workDir)
-    else:
-        topo = NdnTopo(options.templateFile, options.workDir)
+
+    topo = NdnTopo(options.templateFile, options.workDir)
 
     t = datetime.datetime.now()
 
-    if  topo.isTCLink == True and topo.isLimited == True:
+    if topo.isTCLink == True and topo.isLimited == True:
         net = Mininet(topo,host=CpuLimitedNdnHost,link=TCLink)
     elif topo.isTCLink == True and topo.isLimited == False:
         if options.cluster is not None:
             mn = partial(MininetCluster, servers=options.servers, placement=options.placement)
             net = mn(topo=topo, host=RemoteNdnHost, link=options.tunnelType)
-    #Xian: add the following condition decision for wifi
-        elif options.isWiFi:
-            print "minindn ===============================================execute()========================call mininet before"
-            net = Mininet(topo, host=NdnHost, link=TCLink, isWiFi=options.isWiFi,
-                           channel=options.channel,
-                           ssid=options.ssid,
-                           enable_wmediumd=options.wmediumd)
-            print "minindn ===============================================execute()========================call mininet after"
         else:
             net = Mininet(topo, host=NdnHost, link=TCLink)
-
     elif topo.isTCLink == False and topo.isLimited == True:
         net = Mininet(topo, host=CpuLimitedNdnHost)
     else:
@@ -450,55 +404,45 @@ def execute(options):
     # Giving proper IPs to intf so neighbor nodes can communicate
     # This is one way of giving connectivity, another way could be
     # to insert a switch between each pair of neighbors
+    ndnNetBase = "1.0.0.0"
+    interfaces = []
     for host in net.hosts:
         for intf in host.intfList():
             link = intf.link
-            print "minindn -------------------------execute()---------------link interface intf1, intf2:", link,' ', link.intf1,'', link.intf2
+            node1, node2 = link.intf1.node, link.intf2.node
 
-    if not options.isWiFi: # Xian: add this code line for wifi
-        ndnNetBase = "1.0.0.0"
-        interfaces = []
-        for host in net.hosts:
-            for intf in host.intfList():
-                link = intf.link
-                node1, node2 = link.intf1.node, link.intf2.node
+            if node1 in net.switches or node2 in net.switches:
+                continue
 
-                if node1 in net.switches or node2 in net.switches:
-                    continue
-
-                if link.intf1 not in interfaces and link.intf2 not in interfaces:
-                    interfaces.append(link.intf1)
-                    interfaces.append(link.intf2)
-                    node1.setIP(ipStr(ipParse(ndnNetBase) + 1) + '/30', intf=link.intf1)
-                    node2.setIP(ipStr(ipParse(ndnNetBase) + 2) + '/30', intf=link.intf2)
-                    ndnNetBase = ipStr(ipParse(ndnNetBase) + 4)
-
+            if link.intf1 not in interfaces and link.intf2 not in interfaces:
+                interfaces.append(link.intf1)
+                interfaces.append(link.intf2)
+                node1.setIP(ipStr(ipParse(ndnNetBase) + 1) + '/30', intf=link.intf1)
+                node2.setIP(ipStr(ipParse(ndnNetBase) + 2) + '/30', intf=link.intf2)
+                ndnNetBase = ipStr(ipParse(ndnNetBase) + 4)
 
     # NLSR Security
     if options.nlsrSecurity is True:
         Nlsr.createKeysAndCertificates(net, options.workDir)
 
     # NLSR initialization
-    if not options.isWiFi: #xian: add this code line for wifi
-        # hosts_conf = stations_conf (do wifi network need NLSR?)
-        for host in net.hosts:
-            global hosts_conf
-            conf = next(x for x in hosts_conf if x.name == host.name)
-            host.nlsrParameters = conf.nlsrParameters
+    for host in net.hosts:
+        conf = next(x for x in hosts_conf if x.name == host.name)
+        host.nlsrParameters = conf.nlsrParameters
 
-            if options.nFaces is not None:
-                host.nlsrParameters["max-faces-per-prefix"] = options.nFaces
+        if options.nFaces is not None:
+            host.nlsrParameters["max-faces-per-prefix"] = options.nFaces
 
-            if options.hr is True:
-                host.nlsrParameters["hyperbolic-state"] = "on"
-            # Generate NLSR configuration file
-            configGenerator = NlsrConfigGenerator(host, options.nlsrSecurity, options.faceType)
-            if not options.isWiFi: # Xian: add this code line for wifi
-                configGenerator.createConfigFile()
+        if options.hr is True:
+            host.nlsrParameters["hyperbolic-state"] = "on"
 
-            # Start NLSR
-            host.nlsr = Nlsr(host, configGenerator.neighborIPs, options.faceType)
-            host.nlsr.start()
+        # Generate NLSR configuration file
+        configGenerator = NlsrConfigGenerator(host, options.nlsrSecurity, options.faceType)
+        configGenerator.createConfigFile()
+
+        # Start NLSR
+        host.nlsr = Nlsr(host, configGenerator.neighborIPs, options.faceType)
+        host.nlsr.start()
 
     for host in net.hosts:
         if 'app' in host.params:

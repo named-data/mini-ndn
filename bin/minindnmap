@@ -61,10 +61,12 @@
 # Xian: add the following 2 code lines
 
 from mininet.topo import Topo
-from mininet.net import Mininet
+# from mininet.net import Mininet
+from mininet.multiAPNet import Mininet #Xian: add this code line
 from mininet.log import setLogLevel, output, info
 from mininet.link import TCLink
 from mininet.util import ipStr, ipParse
+from mininet.node import Controller, UserAP, RemoteController
 
 from mininet.examples.cluster import MininetCluster, RoundRobinPlacer, ClusterCleanup
 from mininet.examples.clustercli import ClusterCLI
@@ -329,12 +331,11 @@ class NdnWifiTopo(Topo):
 
         global stations_conf
         global accessPoints_conf
-        global switches_conf
         global links_conf
 
         stations_conf = parse_stations(conf_arq)
         accessPoints_conf = parse_accessPoints(conf_arq)
-        switches_conf = parse_switches(conf_arq)
+#        switches_conf = parse_switches(conf_arq)
         links_conf = parse_links(conf_arq)
         self.isTCLink = False
         self.isLimited = False
@@ -347,10 +348,8 @@ class NdnWifiTopo(Topo):
                             cpu=station.cpu,cores=station.cores,cache=station.cache, workdir=workDir)
 
         for accessPoint in accessPoints_conf:
-            self.addAccessPoint(accessPoint.name, workdir=workDir)
-
-        for switch in switches_conf:
-            self.addSwitch(switch.name)
+            self.addAccessPoint(accessPoint.name, app=station.app, params=station.uri_tuples,\
+                                cpu=station.cpu,cores=station.cores,cache=station.cache, workdir=workDir)
 
         for link in links_conf:
             if len(link.linkDict) == 0:
@@ -425,8 +424,9 @@ def execute(options):
             net = mn(topo=topo, host=RemoteNdnHost, link=options.tunnelType)
     #Xian: add the following condition decision for wifi
         elif options.isWiFi:
+            print "minindnmap)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))minindnmap"
             print "minindn ===============================================execute()========================call mininet before"
-            net = Mininet(topo, host=NdnHost, link=TCLink, isWiFi=options.isWiFi,
+            net = Mininet(topo, host=NdnHost, link=TCLink, isWiFi=options.isWiFi, accessPoint=NdnHost,
                            channel=options.channel,
                            ssid=options.ssid,
                            enable_wmediumd=options.wmediumd)
@@ -454,6 +454,13 @@ def execute(options):
         for intf in host.intfList():
             link = intf.link
             print "minindn -------------------------execute()---------------link interface intf1, intf2:", link,' ', link.intf1,'', link.intf2
+
+
+    for ap in net.accessPoints:
+        for intf in ap.intfList():
+            link = intf.link
+#            print "minindn -------------------------execute()---------------link interface intf1, intf2:", link,' ', link.intf1,'', link.intf2
+
 
     if not options.isWiFi: # Xian: add this code line for wifi
         ndnNetBase = "1.0.0.0"

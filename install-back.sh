@@ -199,25 +199,6 @@ function mininet {
     cd ../
 }
 
-# Xian: mininetwifi function for install mininetwifi moudul
-function mininetwifi {
-    if [[ updated != true ]]; then
-        $update
-        updated="true"
-    fi
-
-    if [[ $pysetup != true ]]; then
-        pysetup="true"
-    fi
-
-#    git clone --depth 1 https://github.com/intrig-unicamp/mininet-wifi
-    cd mininet-wifi
-#    sudo ./util/install.sh -Wnfvl
-    sudo ./util/install.sh
-    cd ../
-}
-
-
 function minindn {
     if [[ updated != true ]]; then
         if [ ! -d "build" ]; then
@@ -257,13 +238,12 @@ function usage {
 if [[ $# -eq 0 ]]; then
     usage
 else
-    while getopts 'mfrtiw' OPTION
+    while getopts 'mfrti' OPTION
     do
         case $OPTION in
         f)    forwarder;;
         i)    minindn;;
         m)    mininet;;
-        w)    mininetwifi;;
         r)    routing;;
         t)    tools;;
         ?)    usage;;

@@ -217,8 +217,8 @@ def parse_args():
     parser.add_argument('--wmediumd', action='store_true', default=False, help='activate wmediumd')
     parser.add_argument('--channel', default=1, help='wireless channel configuration')
     parser.add_argument('--mode', default="g", help='wireless mode configuration')
-    parser.add_argument('--ssid', default="my-ssid", help='wireless ssid configuration')
-
+#    parser.add_argument('--ssid', default="my-ssid", help='wireless ssid configuration')
+    parser.add_argument('--ssid', default="adhocNet", help='wireless ssid configuration')
     args = parser.parse_args()
 
     options = ProgramOptions()
@@ -359,6 +359,24 @@ class NdnWifiTopo(Topo):
                 self.addLink(link.h1, link.h2, **link.linkDict)
                 self.isTCLink = True
         print "minindn-------------------------- NdnWifiTopo()---------------------------------------add topology object after"
+        
+
+        info('Parse of ' + conf_arq + ' done.\n')
+
+# Xian: add NdnAdhocTopo() class for wifi
+class NdnAdhocTopo(Topo):
+    def __init__(self, conf_arq, workDir, **opts):
+        Topo.__init__(self, **opts)
+
+        global stations_conf
+        stations_conf = parse_stations(conf_arq)
+        self.isTCLink = False
+        self.isLimited = False
+        for station in stations_conf:
+            if station.cpu != None and self.isLimited != True:
+                self.isLimited = True
+            self.addStation(station.name, app=station.app, params=station.uri_tuples,\
+                            cpu=station.cpu,cores=station.cores,cache=station.cache, workdir=workDir)
 
         info('Parse of ' + conf_arq + ' done.\n')
 
@@ -409,36 +427,14 @@ def execute(options):
 
     if options.resultDir is not None:
         options.resultDir = createResultsDir(options.resultDir, options.nFaces, options.hr)
-    # Xian: modify the following codes for wifi
-    if options.isWiFi:
-        topo=NdnWifiTopo(options.templateFile, options.workDir)
-    else:
-        topo = NdnTopo(options.templateFile, options.workDir)
-
+    topo = NdnAdhocTopo(options.templateFile, options.workDir)
     t = datetime.datetime.now()
-
-    if  topo.isTCLink == True and topo.isLimited == True:
-        net = Mininet(topo,host=CpuLimitedNdnHost,link=TCLink)
-    elif topo.isTCLink == True and topo.isLimited == False:
-        if options.cluster is not None:
-            mn = partial(MininetCluster, servers=options.servers, placement=options.placement)
-            net = mn(topo=topo, host=RemoteNdnHost, link=options.tunnelType)
-    #Xian: add the following condition decision for wifi
-        elif options.isWiFi:
-            print "minindn ===============================================execute()========================call mininet before"
-            net = Mininet(topo, host=NdnHost, link=TCLink, isWiFi=options.isWiFi,
-                           channel=options.channel,
+    #Xian: delete if-elif codes 
+    net = Mininet(topo, host=NdnHost, isWiFi=options.isWiFi, channel=options.channel,
                            ssid=options.ssid,
                            enable_wmediumd=options.wmediumd)
-            print "minindn ===============================================execute()========================call mininet after"
-        else:
-            net = Mininet(topo, host=NdnHost, link=TCLink)
 
-    elif topo.isTCLink == False and topo.isLimited == True:
-        net = Mininet(topo, host=CpuLimitedNdnHost)
-    else:
-        net = Mininet(topo, host=NdnHost)
-
+    #Xian: delete if-elif codes
     t2 = datetime.datetime.now()
 
     delta = t2 - t

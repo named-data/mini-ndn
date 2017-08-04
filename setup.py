@@ -6,5 +6,5 @@ setup(
     name = "Mini-NDN",
     version = '0.3.0',
     packages = find_packages(),
-    scripts = ['bin/minindn', 'bin/minindnedit'],
+    scripts = ['bin/minindn', 'bin/minindnedit', 'bin/minindnwifi', 'bin/minindnadhoc','bin/minindnmap'],
 )

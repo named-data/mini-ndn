@@ -71,6 +71,7 @@ class NdnHostCommon():
 
     def buildPeerIp(self):
         for iface in self.intfList():
+            print "ndn_host.py------------------NdnHostCommon()-C--------------buildPeerIp() method---iface:=", iface,"|iface.link=", iface.link
             link = iface.link
             if link:
                 node1, node2 = link.intf1.node, link.intf2.node
@@ -96,11 +97,12 @@ class NdnHost(Host, NdnHostCommon):
             NdnHostCommon.init()
 
         # Create home directory for a node
-        self.homeFolder = "%s/%s" % (self.params['workdir'], self.name)
+        self.homeFolder = "%s/%s" % (self.params['workdir'], self.name) # Xian: using workDir will occur erro
         self.cmd("mkdir -p %s" % self.homeFolder)
         self.cmd("cd %s" % self.homeFolder)
 
         self.nfd = Nfd(self)
+        print "ndn_host.py--------------------------Ndnhost() cla---- init"
         self.nfd.start()
 
         self.peerList = {}
@@ -111,7 +113,7 @@ class NdnHost(Host, NdnHostCommon):
 
         self.setParam(r, 'app', app=app)
         self.setParam(r, 'cache', cache=cache)
-
+        print "ndn_host.py------------NdnHost cla-----config() method-----------"  
         return r
 
     def terminate(self):

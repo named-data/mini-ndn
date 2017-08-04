@@ -85,10 +85,38 @@ class confNDNHost():
                ' Radius: ' + str(self.radius) + \
                ' Angle: '  + str(self.angle) + \
                ' NLSR Parameters: ' + self.nlsrParameters
+class confNdnStation():
+
+    def __init__(self, name, app='', params='', cpu=None, cores=None, cache=None):
+        self.name = name
+        self.app = app
+        self.uri_tuples = params
+        self.params = params
+        self.cpu = cpu
+        self.cores = cores
+        self.cache = cache
+
+        # For now assume leftovers are NLSR configuration parameters
+        self.nlsrParameters = params
+
+    def __repr__(self):
+        return 'Name: '    + self.name + \
+               ' App: '    + self.app + \
+               ' URIS: '   + str(self.uri_tuples) + \
+               ' CPU: '    + str(self.cpu) + \
+               ' Cores: '  + str(self.cores) + \
+               ' Cache: '  + str(self.cache) + \
+               ' Radius: ' + str(self.radius) + \
+               ' Angle: '  + str(self.angle) + \
+               ' NLSR Parameters: ' + self.nlsrParameters
 
 class confNdnSwitch:
     def __init__(self, name):
         self.name = name
+# Xian add class confNdnAccessPoint
+class confNdnAccessPoint:
+    def __init__(self, name):
+        self.name=name
 
 class confNDNLink():
 
@@ -150,6 +178,74 @@ def parse_hosts(conf_arq):
         hosts.append(confNDNHost(name, app, params, cpu, cores, cache))
 
     return hosts
+# Xian: add the parse_stations() and parse_accessPoint() for wifi 
+def parse_stations(conf_arq):
+    'Parse hosts section from the conf file.'
+    config = ConfigParser.RawConfigParser()
+    config.read(conf_arq)
+
+    stations = []
+
+    items = config.items('stations')
+
+        #makes a first-pass read to stations section to find empty station sections
+    for item in items:
+        name = item[0]
+        rest = item[1].split()
+        if len(rest) == 0:
+            config.set('stations', name, '_')
+        #updates 'items' list
+    items = config.items('stations')
+
+        #makes a second-pass read to stations section to properly add stations
+    for item in items:
+        name = item[0]
+
+        rest = shlex.split(item[1])
+
+        uris = rest
+        params = {}
+        cpu = None
+        cores = None
+        cache = None
+
+        for uri in uris:
+            if re.match("cpu",uri):
+                cpu = float(uri.split('=')[1])
+            elif re.match("cores",uri):
+                cores = uri.split('=')[1]
+            elif re.match("cache",uri):
+                cache = uri.split('=')[1]
+            elif re.match("mem",uri):
+                mem = uri.split('=')[1]
+            elif re.match("app",uri):
+                app = uri.split('=')[1]
+            elif re.match("_", uri):
+                app = ""
+            else:
+                params[uri.split('=')[0]] = uri.split('=')[1]
+
+        stations.append(confNdnStation(name, app, params, cpu, cores, cache))
+
+    return stations
+def parse_accessPoints(conf_arq):
+    'Parse accessPoints section from the conf file.'
+    config = ConfigParser.RawConfigParser()
+    config.read(conf_arq)
+
+    accessPoints = []
+
+    try:
+        items = config.items('accessPoints')
+    except ConfigParser.NoSectionError:
+        return accessPoints
+
+    for item in items:
+        name = item[0]
+        accessPoints.append(confNdnAccessPoint(name))
+
+    return accessPoints
+
 
 def parse_switches(conf_arq):
     'Parse switches section from the conf file.'
@@ -168,6 +264,7 @@ def parse_switches(conf_arq):
         switches.append(confNdnSwitch(name))
 
     return switches
+
 
 def parse_links(conf_arq):
     'Parse links section from the conf file.'

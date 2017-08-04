@@ -1,0 +1,11 @@
+#2017-7-19
+
+1.modify cluster.py
+
+#Xian: copy RemoteGRELink() from mininet/examples
+
+#2017-7-23
+
+minindnmap, execute command for multi Ap. modify net.py as multiAPNet.py
+minindnadhoc, execute command for ad hoc network. modify net.py as adhocNet.py
+  
