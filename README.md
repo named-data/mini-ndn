@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Mini-NDN
 ========
 
@@ -27,3 +28,6 @@ Bug reports and feedback are highly appreciated and can be made through our
 * [Mini-NDN Edit](docs/GUI.md)
 * [Running Experiments](docs/EXPERIMENTS.md)
 * [Mini-NDN Redmine](http://redmine.named-data.net/projects/mini-ndn)
+
+# minindn-wifi
+Minindn-wifi: To implement WiFi function based on minindn and mininet-wifi.
