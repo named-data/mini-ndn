@@ -219,6 +219,7 @@ function minindn {
     sudo cp ndn_utils/topologies/minindn.caida.conf "$install_dir"
     sudo cp ndn_utils/topologies/minindn.ucla.conf "$install_dir"
     sudo cp ndn_utils/topologies/minindn.testbed.conf "$install_dir"
+    sudo cp ndn_utils/topologies/adhoc-topology.conf "$install_dir"
     sudo python setup.py clean --all install
 }
 
