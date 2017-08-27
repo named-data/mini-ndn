@@ -44,3 +44,8 @@ class MiniNDNCLI(CLI):
     prompt = 'mini-ndn> '
     def __init__(self, mininet, stdin=sys.stdin, script=None):
         CLI.__init__(self, mininet, stdin=sys.stdin, script=None)
+
+class MiniNdnWifiCLI(CLI): #add this line for Wifi network 
+    prompt='minindn-wifi>'
+    def __init__(self, mininet, stdin=sys.stdin, script=None):
+        CLI.__init__(self, mininet, stdin=sys.stdin, script=None)
