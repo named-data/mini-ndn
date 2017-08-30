@@ -195,10 +195,10 @@ function mininetwifi {
         pysetup="true"
     fi
 
-    #git clone --depth 1 https://github.com/intrig-unicamp/mininet-wifi
+    git clone --depth 1 https://github.com/intrig-unicamp/mininet-wifi
     cd mininet-wifi
-    #sudo ./util/install.sh -Wnfvl
-    sudo ./util/install.sh
+    sudo ./util/install.sh -Wnfvl
+    #sudo ./util/install.sh
     cd ../
 }
 
