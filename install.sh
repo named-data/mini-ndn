@@ -216,8 +216,9 @@ function minindn {
         pysetup="true"
     fi
     git clone --depth 1 https://github.com/named-data/mini-ndn
-    sudo mv mini-ndn mini_ndn
+    sudo mv mini-ndn mini_ndn # name mini-ndn is not allowed in python 
     cd mini_ndn
+    sudo cp ../ndn/__init__.py ./ #inorder to import module in the subdirecorty mini_ndn
     sudo ./install.sh -i
     cd ../
 }
