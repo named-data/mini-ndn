@@ -3,8 +3,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name = "Mini-NDN",
-    version = '0.3.0',
+    name = "MiniNDN-WiFi",
+    version = '0.1.0',
     packages = find_packages(),
-    scripts = ['bin/minindn', 'bin/minindnedit', 'bin/minindnwifi', 'bin/minindnadhoc','bin/minindnmap'],
+    scripts = ['bin/minindn', 'bin/minindnedit'],
 )
