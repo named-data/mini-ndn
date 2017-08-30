@@ -218,7 +218,7 @@ function minindn {
     git clone --depth 1 https://github.com/named-data/mini-ndn
     sudo mv mini-ndn mini_ndn # name mini-ndn is not allowed in python 
     cd mini_ndn
-    sudo cp ../ndn/__init__.py ./ #inorder to import module in the subdirecorty mini_ndn
+    sudo cp ../ndnwifi/__init__.py ./ #inorder to import module in the subdirecorty mini_ndn
     sudo ./install.sh -i
     cd ../
 }
@@ -234,7 +234,7 @@ function minindnwifi {
     fi
     install_dir="/usr/local/etc/mini-ndn/wifi/"
     sudo mkdir -p "$install_dir"
-    sudo cp ndn_utils/topologies/adhoc-topology.conf "$install_dir"
+    sudo cp ndnwifi_utils/topologies/adhoc-topology.conf "$install_dir"
     sudo python setup.py clean --all install
 }
 
