@@ -24,9 +24,7 @@ Bug reports and feedback are highly appreciated and can be made through our
 
 * [Installation](INSTALL.md)
 * [Getting Started](docs/GETTING-STARTED.md)
-* [Mini-NDN Edit](docs/GUI.md)
-* [Running Experiments](docs/EXPERIMENTS.md)
-* [Mini-NDN Redmine](http://redmine.named-data.net/projects/mini-ndn)
+* [MiniNDN-WiFi Redmine](http://redmine.named-data.net/projects/)
 
 # minindn-wifi
 Minindn-wifi: To implement WiFi function based on minindn and mininet-wifi.
