@@ -6,47 +6,48 @@ Please see [INSTALL.md](../INSTALL.md) for instructions on installing MiniNDN-Wi
 
 ## Running MiniNDN-WiFi
 
-In MiniNDN-WiFi, We can emulate a wireless network with Access Points (APs), Ad Hoc Network and Mobile Ad Hoc Network.
+In MiniNDN-WiFi, We can emulate a wireless network with Access Points (APs), ad hoc network or mobile ad hoc network.
 
-We can use the two default configuration file for topology in directory ndnwifi_utils/topologies/: `singleap-topology.conf`, 'adhoc-topology.conf'.
+We can use the two default configuration file for topology in directory ndnwifi_utils/topologies/: `singleap-topology.conf`, 'adhoc-topology.conf'. We can also use customized topology.
 
-type:
+Based on the two topology file, a WiFI network with one AP, ad hoc network or mobile ad hoc network will be created when you type the following command: 
 
-    sudo minindn
+    sudo minindn --wifi [--adhoc] [--manet] 
+    
+A full list of other options can be printed by using:
 
-A full list of options can be printed by using:
+    sudo minindn --wifi --help
 
-    sudo minindn --help
+To run MiniNDN-WiFi with a customized topology file, provide the filename as the first argument:
 
-To run Mini-NDN with a topology file, provide the filename as the first argument:
-
-    sudo minindn my-topology.conf
+    sudo minindn --wifi my-topology.conf
 
 During set up, the list of nodes in the network will be listed as they are initialized:
 
-    *** Adding hosts:
-    a b c d
+*** Adding hosts and stations:
+
+sta1 sta2 sta3 sta4
 
 After set up, the command-line interface (CLI) will display a prompt.
 
-    mini-ndn>
+    minindn-wifi>
 
 To interact with a node, first type the node's name and then the command to be executed:
 
-    mini-ndn> a echo "Hello, world!"
+    minindn-wifi> sta1 echo "Hello, world!"
     Hello, world!
 
-To see the status of the forwarder on the node:
+To see the status of the forwarder NFD on the node:
 
-    mini-ndn> a nfdc status report
+    minindn-wifi> sta1 nfdc status report
 
-To see the status of routing on the node:
+Assume that we have created an ad hoc network with 4 nodes. We can use NDN's tools to test running. Please see the detail explanation [ndn-tools] (https://github.com/named-data/ndn-tools)
 
-    mini-ndn> a nlsrc status
+To move a node to the specified posit
 
-To exit Mini-NDN, type `quit` in the CLI:
+To exit MiniNDN-WiFi, type `quit` in the CLI:
 
-    mini-ndn> quit
+    minindn-wifi> quit
 
 For a more in depth explanation of the CLI, please see the
 [Mininet Walkthrough](http://mininet.org/walkthrough/).
