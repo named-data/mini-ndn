@@ -16,7 +16,7 @@ If you didn't istall any dependency of MninNDN-WiFi, Please you install accordin
     
     step 2: $ git clone https://github.com/iamxg/minindn-wifi/
  
-    step 3: $ cd mininet-wifi
+    step 3: $ cd minindn-wifi
     
     step 4: $ sudo ./install.sh -drtmiw
 install.sh options:
