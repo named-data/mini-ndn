@@ -11,6 +11,7 @@ extra packages and also to execute **MiniNDN-WiFi**.
 ### Installing **MiniNDN-WiFi**
 
 If you didn't istall any dependency of MninNDN-WiFi, Please you install according to the following setps. Otherwise, you can only select moudules that you want to install.
+
     step 1: $ sudo apt-get install git
     
     step 2: $ git clone https://github.com/iamxg/minindn-wifi/
@@ -19,9 +20,16 @@ If you didn't istall any dependency of MninNDN-WiFi, Please you install accordin
     
     step 4: $ sudo ./install.sh -Wnfvl
 install.sh options:
+
     -d: NFD
+    
     -r: NLSR
+    
     -t: NDN tools
+    
     -m: mininet-wifi and dependencies
+    
     -i: mini-ndn and dependencies
+    
     -w: minindn-wifi
+    
