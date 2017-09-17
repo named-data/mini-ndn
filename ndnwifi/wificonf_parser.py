@@ -86,7 +86,7 @@ class confNDNHost():
                ' Radius: ' + str(self.radius) + \
                ' Angle: '  + str(self.angle) + \
                ' NLSR Parameters: ' + self.nlsrParameters
-# Xian add class confNdnStation
+# add class confNdnStation
 class confNdnStation():
 
     def __init__(self, name, app='', params='', cpu=None, cores=None, cache=None):
@@ -112,7 +112,7 @@ class confNdnStation():
                ' Angle: '  + str(self.angle) + \
                ' NLSR Parameters: ' + self.nlsrParameters
 
-# Xian add class confNdnAccessPoint
+# add class confNdnAccessPoint
 class confNdnAccessPoint:
     def __init__(self, name):
         self.name=name
@@ -181,7 +181,7 @@ def parse_hosts(conf_arq):
         hosts.append(confNDNHost(name, app, params, cpu, cores, cache))
 
     return hosts
-# Xian: add the parse_stations() and parse_accessPoint() for wifi 
+# add the parse_stations() and parse_accessPoint() for wifi 
 def parse_stations(conf_arq):
     'Parse hosts section from the conf file.'
     config = ConfigParser.RawConfigParser()
