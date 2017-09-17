@@ -2,11 +2,15 @@ Getting Started
 ===============
 
 ## Installation
-Please see [INSTALL.md](../INSTALL.md) for instructions on installing Mini-NDN and its dependencies.
+Please see [INSTALL.md](../INSTALL.md) for instructions on installing MiniNDN-WiFi and its dependencies.
 
-## Running Mini-NDN
+## Running MiniNDN-WiFi
 
-To run Mini-NDN with the default topology, `ndn_utils/topologies/default-topology.conf`, type:
+In MiniNDN-WiFi, We can emulate a wireless network with Access Points (APs), Ad Hoc Network and Mobile Ad Hoc Network.
+
+We can use the two default configuration file for topology in directory ndnwifi_utils/topologies/: `singleap-topology.conf`, 'adhoc-topology.conf'.
+
+type:
 
     sudo minindn
 
