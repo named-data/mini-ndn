@@ -184,7 +184,7 @@ function tools {
 }
 
 
-# Xian: mininetwifi function for install mininetwifi moudul
+# mininetwifi function for install mininetwifi moudul
 function mininetwifi {
     if [[ updated != true ]]; then
         $update
@@ -195,9 +195,9 @@ function mininetwifi {
         pysetup="true"
     fi
 
-#    git clone --depth 1 https://github.com/intrig-unicamp/mininet-wifi
+    git clone --depth 1 https://github.com/intrig-unicamp/mininet-wifi
     cd mininet-wifi
-#    sudo ./util/install.sh -Wnfvl
+    sudo ./util/install.sh -Wnfvl
     sudo ./util/install.sh
     cd ../
 }
@@ -215,10 +215,10 @@ function minindn {
         $install python-setuptools
         pysetup="true"
     fi
-#    git clone --depth 1 https://github.com/named-data/mini-ndn
-#    sudo mv mini-ndn mini_ndn # name mini-ndn is not allowed in python 
+    git clone --depth 1 https://github.com/named-data/mini-ndn
+    sudo mv mini-ndn mini_ndn # name mini-ndn is not allowed in python 
     cd mini_ndn
-#    sudo cp ../ndnwifi/__init__.py ./ #inorder to import module in the subdirecorty mini_ndn
+    sudo cp ../ndnwifi/__init__.py ./ #inorder to import module in the subdirecorty mini_ndn
     sudo ./install.sh -i
     cd ../
 }
