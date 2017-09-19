@@ -72,7 +72,7 @@ from mini_ndn.ndn import ExperimentManager
 from mini_ndn.ndn.ndn_host import NdnHost, CpuLimitedNdnHost, RemoteNdnHost
 from mini_ndn.ndn.conf_parser import parse_hosts, parse_switches, parse_links
 from ndnwifi.wificonf_parser import parse_stations, parse_accessPoints # add parse_stations,accessPoints 
-#from ndn.remote_ndn_link import RemoteNdnLink, RemoteGRENdnLink
+from ndn.remote_ndn_link import RemoteNdnLink, RemoteGRENdnLink
 from mini_ndn.ndn.placer import GuidedPlacer, PopulatePlacement
 from mini_ndn.ndn.util import ssh, scp, MiniNDNCLI
 from ndnwifi.wifiutil import MiniNdnWifiCLI
