@@ -236,6 +236,7 @@ function minindnwifi {
     sudo mkdir -p "$install_dir"
     sudo cp ndnwifi_utils/topologies/adhoc-topology.conf "$install_dir"
     sudo cp ndnwifi_utils/topologies/singleap-topology.conf "$install_dir"
+    sudo cp ndnwifi_utils/topologies/multiap-topology.conf "$install_dir"
     sudo python setup.py clean --all install
 }
 
