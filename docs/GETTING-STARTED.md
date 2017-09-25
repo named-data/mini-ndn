@@ -8,11 +8,11 @@ Please see [INSTALL.md](../INSTALL.md) for instructions on installing MiniNDN-Wi
 
 In MiniNDN-WiFi, We can emulate a wireless network with Access Points (APs), ad hoc network or mobile ad hoc network.
 
-We can use the two default configuration file for topology in directory ndnwifi_utils/topologies/: `singleap-topology.conf`, 'adhoc-topology.conf'. We can also use customized topology.
+We can use the two default configuration files for topology in directory ndnwifi_utils/topologies/: `singleap-topology.conf`, 'adhoc-topology.conf'. We can also use customized topology.
 
-Based on the two topology file, a WiFI network with one AP, ad hoc network or mobile ad hoc network will be created when you type the following command: 
+Based on these topology files, a WiFI network with one AP, ad hoc network or mobile ad hoc network will be created when you type the following command: 
 
-    sudo minindn --wifi [--adhoc] [--manet] 
+    sudo minindn --wifi [--adhoc] [--manet]
     
 A full list of other options can be printed by using:
 
