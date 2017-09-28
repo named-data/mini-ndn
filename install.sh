@@ -136,6 +136,7 @@ function routing {
     ./waf configure
     ./waf
     sudo ./waf install
+    sudo ldconfig
     cd ../
 
     git clone --depth 1 https://github.com/named-data/NLSR
