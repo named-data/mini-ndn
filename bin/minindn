@@ -111,7 +111,7 @@ class ProgramOptions:
         self.experimentName = None
         self.nFaces = 3
         self.templateFile = "minindn.conf"
-        self.hr = False
+        self.routingType = "link-state"
         self.isCliEnabled = True
         self.nlsrSecurity = False
         self.nPings = 300
@@ -126,16 +126,13 @@ class ProgramOptions:
         self.tunnelType = None
         self.faceType = "udp"
 
-def createResultsDir(resultDir, faces, hr):
+def createResultsDir(resultDir, faces, rType):
     if faces == 0:
         faces = "all"
 
-    if hr:
-        routingType = "/hr/"
-    else:
-        routingType = "/ls/"
+    routingChoice = "/{}/".format(rType)
 
-    resultDir = "%s/%s/faces-%s" % (str(resultDir), routingType, str(faces))
+    resultDir = "{}/{}/faces-{}".format(resultDir, routingChoice, faces)
     resultDir = os.path.abspath(resultDir)
 
     if not os.path.isdir(resultDir):
@@ -163,9 +160,9 @@ def parse_args():
     parser.add_argument("--faces", type=int, default=3,
                         help="Specify number of faces 0-60")
 
-    # store_true stores default value of False
-    parser.add_argument("--hr", action="store_true",
-                        help="--hr is used to turn on hyperbolic routing")
+    parser.add_argument("--routing", dest="routingType", default='link-state', choices=['link-state', 'hr', 'dry'],
+                        help="""choices for routing are 'link-state' for link state, 'hr' for hyperbolic, and 'dry'
+                        to test hyperbolic routing and compare with link state. Default is link-state.""")
 
     parser.add_argument("--list-experiments", action=PrintExperimentNames,
                         help="Lists the names of all available experiments")
@@ -176,6 +173,7 @@ def parse_args():
     parser.add_argument("--nPings", type=int, default=300,
                         help="Number of pings to perform between each node in the experiment")
 
+    # store_true stores default value of False
     parser.add_argument("--nlsr-security", action="store_true", dest="nlsrSecurity",
                         help="Enables NLSR security")
 
@@ -216,7 +214,7 @@ def parse_args():
     options.ctime = args.ctime
     options.experimentName = args.experiment
     options.nFaces = args.faces
-    options.hr = args.hr
+    options.routingType = args.routingType
     options.isCliEnabled = args.isCliEnabled
     options.nlsrSecurity = args.nlsrSecurity
     options.nPings = args.nPings
@@ -342,7 +340,7 @@ def execute(options):
                 ssh(login, "sudo cp /tmp/nfd.conf %s" % src)
 
     if options.resultDir is not None:
-        options.resultDir = createResultsDir(options.resultDir, options.nFaces, options.hr)
+        options.resultDir = createResultsDir(options.resultDir, options.nFaces, options.routingType)
 
     topo = NdnTopo(options.templateFile, options.workDir)
 
@@ -401,7 +399,10 @@ def execute(options):
         if options.nFaces is not None:
             host.nlsrParameters["max-faces-per-prefix"] = options.nFaces
 
-        if options.hr is True:
+        if options.routingType == 'dry':
+            host.nlsrParameters["hyperbolic-state"] = "dry-run"
+
+        elif options.routingType == 'hr':
             host.nlsrParameters["hyperbolic-state"] = "on"
 
         # Generate NLSR configuration file

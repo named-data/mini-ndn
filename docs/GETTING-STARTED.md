@@ -59,11 +59,16 @@ To change the working directory from default `/tmp` following option can be used
 
 #### Routing options
 
-To run NLSR with hyperbolic routing enabled, use the `--hr` parameter:
+To run NLSR with hyperbolic routing enabled, use the `--routing` parameter:
 
-    sudo minindn --hr
+    sudo minindn --routing hr
 
-Topology files given under ndn_utils/topologies/minindn* have hyperbolic coordinates configured and can be used with this option.
+Topology files given under ndn_utils/topologies/minindn* have hyperbolic coordinates configured
+and can be used with this option.
+
+To run NLSR in dry-run mode, use the `--routing` parameter:
+
+    sudo minindn --routing dry
 
 To configure the max number of faces added by NLSR to reach each name prefix, use the `--faces`
 parameter:
