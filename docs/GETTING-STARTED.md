@@ -59,6 +59,10 @@ To change the working directory from default `/tmp` following option can be used
 
 #### Routing options
 
+To run minindn without NLSR, use the `--no-nlsr` parameter:
+
+    sudo minindn --no-nlsr
+
 To run NLSR with hyperbolic routing enabled, use the `--routing` parameter:
 
     sudo minindn --routing hr

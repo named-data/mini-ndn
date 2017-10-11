@@ -112,6 +112,7 @@ class ProgramOptions:
         self.nFaces = 3
         self.templateFile = "minindn.conf"
         self.routingType = "link-state"
+        self.isNlsrEnabled = True
         self.isCliEnabled = True
         self.nlsrSecurity = False
         self.nPings = 300
@@ -164,6 +165,9 @@ def parse_args():
                         help="""choices for routing are 'link-state' for link state, 'hr' for hyperbolic, and 'dry'
                         to test hyperbolic routing and compare with link state. Default is link-state.""")
 
+    parser.add_argument("--no-nlsr", action="store_false", dest="isNlsrEnabled",
+                        help="Run mini-ndn without NLSR routing")
+
     parser.add_argument("--list-experiments", action=PrintExperimentNames,
                         help="Lists the names of all available experiments")
 
@@ -215,6 +219,7 @@ def parse_args():
     options.experimentName = args.experiment
     options.nFaces = args.faces
     options.routingType = args.routingType
+    options.isNlsrEnabled = args.isNlsrEnabled
     options.isCliEnabled = args.isCliEnabled
     options.nlsrSecurity = args.nlsrSecurity
     options.nPings = args.nPings
@@ -387,17 +392,19 @@ def execute(options):
                 node2.setIP(ipStr(ipParse(ndnNetBase) + 2) + '/30', intf=link.intf2)
                 ndnNetBase = ipStr(ipParse(ndnNetBase) + 4)
 
-    # NLSR Security
-    if options.nlsrSecurity is True:
-        Nlsr.createKeysAndCertificates(net, options.workDir)
+    if options.isNlsrEnabled is True:
 
-    # NLSR initialization
-    for host in net.hosts:
-        conf = next(x for x in hosts_conf if x.name == host.name)
-        host.nlsrParameters = conf.nlsrParameters
+        # NLSR Security
+        if options.nlsrSecurity is True:
+            Nlsr.createKeysAndCertificates(net, options.workDir)
 
-        if options.nFaces is not None:
-            host.nlsrParameters["max-faces-per-prefix"] = options.nFaces
+        # NLSR initialization
+        for host in net.hosts:
+            conf = next(x for x in hosts_conf if x.name == host.name)
+            host.nlsrParameters = conf.nlsrParameters
+
+            if options.nFaces is not None:
+                host.nlsrParameters["max-faces-per-prefix"] = options.nFaces
 
         if options.routingType == 'dry':
             host.nlsrParameters["hyperbolic-state"] = "dry-run"
@@ -405,13 +412,13 @@ def execute(options):
         elif options.routingType == 'hr':
             host.nlsrParameters["hyperbolic-state"] = "on"
 
-        # Generate NLSR configuration file
-        configGenerator = NlsrConfigGenerator(host, options.nlsrSecurity, options.faceType)
-        configGenerator.createConfigFile()
+            # Generate NLSR configuration file
+            configGenerator = NlsrConfigGenerator(host, options.nlsrSecurity, options.faceType)
+            configGenerator.createConfigFile()
 
-        # Start NLSR
-        host.nlsr = Nlsr(host, configGenerator.neighborIPs, options.faceType)
-        host.nlsr.start()
+            # Start NLSR
+            host.nlsr = Nlsr(host, configGenerator.neighborIPs, options.faceType)
+            host.nlsr.start()
 
     for host in net.hosts:
         if 'app' in host.params:
