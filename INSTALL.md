@@ -1,7 +1,7 @@
 Mini-NDN Installing Instructions
 ================================
 
-### What equipment will I need ?
+### What equipment will I need?
 
 Basically, you'll need a laptop/desktop with a recent Linux distro (Ubuntu, Fedora).
 We recommend Ubuntu. For this guide, the _Ubuntu 14.04 LTS_ was used.
@@ -17,6 +17,8 @@ If you have all the dependencies (see sections below) installed simply clone thi
 else if you don't have the dependencies, the following command will install them along with Mini-NDN:
 
     sudo ./install.sh -mrfti
+
+else if you want to install the dependencies manually, follow the instructions below:
 
 ### Installing NDN
 
@@ -36,7 +38,23 @@ https://github.com/named-data/ndn-tools
 ### Installing Mininet
 
 **Mini-NDN** is based on Mininet. To install Mininet:
-https://github.com/mininet/mininet/blob/master/INSTALL
+
+First, clone Mininet from github:
+
+    git clone --depth 1 https://github.com/mininet/mininet.git
+
+After Mininet source is on your system, run the following command to install
+Mininet core dependencies and Open vSwitch:
+
+    ./util/install.sh -nv
+
+To check if Mininet is working correctly, run this test:
+
+    sudo mn --test pingall
+
+This will print out a series of statements that show the test setup and the results of the test. Look
+for `Results:` two-thirds of the way down where it will indicate the percentage of dropped packets.
+Your results should show "0% dropped (2/2 received)".
 
 ### Verification
 
