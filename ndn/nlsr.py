@@ -64,11 +64,8 @@ class Nlsr(NdnApplication):
         host.cmd("ndnsec-keygen {} > {}".format(name, outputFile))
 
     @staticmethod
-    def createCertificate(host, name, prefix, keyFile, outputFile, signer=None):
-        if signer is None:
-            host.cmd("ndnsec-certgen -N {} -p {} {} > {}".format(name, prefix, keyFile, outputFile))
-        else:
-            host.cmd("ndnsec-certgen -N {} -p {} -s {} {} > {}".format(name, prefix, signer, keyFile, outputFile))
+    def createCertificate(host, signer, keyFile, outputFile):
+        host.cmd("ndnsec-certgen -s {} -r {} > {}".format(signer, keyFile, outputFile))
 
     @staticmethod
     def createKeysAndCertificates(net, workDir):
@@ -79,8 +76,8 @@ class Nlsr(NdnApplication):
 
         # Create root certificate
         rootName = NETWORK
-        sh("ndnsec-keygen {} > {}/root.keys".format(rootName, securityDir))
-        sh("ndnsec-certgen -N {} -p {} {}/root.keys > {}/root.cert".format(rootName, rootName, securityDir, securityDir))
+        sh("ndnsec-keygen {}".format(rootName)) # Installs a self-signed cert into the system
+        sh("ndnsec-cert-dump -i {} > {}/root.cert".format(rootName, securityDir, securityDir))
 
         # Create necessary certificates for each site
         for host in net.hosts:
@@ -109,7 +106,7 @@ class Nlsr(NdnApplication):
                 scp(src, dst)
 
             # Root key is in root namespace, must sign site key and then install on host
-            sh("ndnsec-certgen -N {} -s {} -p {} {} > {}".format(siteName, rootName, siteName, siteKeyFile, siteCertFile))
+            sh("ndnsec-certgen -s {} -r {} > {}".format(rootName, siteKeyFile, siteCertFile))
 
             # Copy root.cert and site.cert from localhost to remote host
             if isinstance(host, RemoteMixin) and host.isRemote:
@@ -127,7 +124,7 @@ class Nlsr(NdnApplication):
             opKeyFile = "{}/op.keys".format(nodeSecurityFolder)
             opCertFile = "{}/op.cert".format(nodeSecurityFolder)
             Nlsr.createKey(host, opName, opKeyFile)
-            Nlsr.createCertificate(host, opName, opName, opKeyFile, opCertFile, signer=siteName)
+            Nlsr.createCertificate(host, siteName, opKeyFile, opCertFile)
             host.cmd("ndnsec-cert-install -f {}".format(opCertFile))
 
             # Create and install router certificate
@@ -135,7 +132,7 @@ class Nlsr(NdnApplication):
             routerKeyFile = "{}/router.keys".format(nodeSecurityFolder)
             routerCertFile = "{}/router.cert".format(nodeSecurityFolder)
             Nlsr.createKey(host, routerName, routerKeyFile)
-            Nlsr.createCertificate(host, routerName, routerName, routerKeyFile, routerCertFile, signer=opName)
+            Nlsr.createCertificate(host, opName, routerKeyFile, routerCertFile)
             host.cmd("ndnsec-cert-install -f {}".format(routerCertFile))
 
 class NlsrConfigGenerator:
@@ -306,7 +303,7 @@ class NlsrConfigGenerator:
                           type name
                           hyper-relation
                           {
-                            k-regex ^([^<KEY><NLSR>]*)<NLSR><KEY><ksk-.*><ID-CERT>$
+                            k-regex ^([^<KEY><NLSR>]*)<NLSR><KEY><>$
                             k-expand \\\\1
                             h-relation equal
                             p-regex ^([^<NLSR><INFO>]*)<NLSR><INFO><><>$
@@ -334,7 +331,7 @@ class NlsrConfigGenerator:
                           type name
                           hyper-relation
                           {
-                            k-regex ^([^<KEY><NLSR>]*)<NLSR><KEY><ksk-.*><ID-CERT>$
+                            k-regex  ^([^<KEY><NLSR>]*)<NLSR><KEY><>$
                             k-expand \\\\1
                             h-relation equal
                             p-regex ^<localhop>([^<NLSR><LSA>]*)<NLSR><LSA>(<>*)<><><><>$
@@ -351,7 +348,7 @@ class NlsrConfigGenerator:
                       filter
                       {
                         type name
-                        regex ^[^<KEY><%C1.Router>]*<%C1.Router>[^<KEY><NLSR>]*<KEY><ksk-.*><ID-CERT><>$
+                        regex ^[^<KEY><%C1.Router>]*<%C1.Router>[^<KEY><NLSR>]*<KEY><><><>$
                       }
                       checker
                       {
@@ -362,10 +359,10 @@ class NlsrConfigGenerator:
                           type name
                           hyper-relation
                           {
-                            k-regex ^([^<KEY><%C1.Operator>]*)<%C1.Operator>[^<KEY>]*<KEY><ksk-.*><ID-CERT>$
+                            k-regex ^([^<KEY><%C1.Operator>]*)<%C1.Operator>[^<KEY>]*<KEY><>$
                             k-expand \\\\1
                             h-relation equal
-                            p-regex ^([^<KEY><%C1.Router>]*)<%C1.Router>[^<KEY>]*<KEY><ksk-.*><ID-CERT><>$
+                            p-regex ^([^<KEY><%C1.Router>]*)<%C1.Router>[^<KEY>]*<KEY><><><>$
                             p-expand \\\\1
                           }
                         }
@@ -379,7 +376,7 @@ class NlsrConfigGenerator:
                       filter
                       {
                         type name
-                        regex ^[^<KEY>]*<KEY><ksk-.*><ID-CERT><>$
+                        regex ^[^<KEY>]*<KEY><><><>$
                       }
                       checker
                       {
@@ -404,7 +401,7 @@ class NlsrConfigGenerator:
                       filter
                       {
                         type name
-                        regex ^<localhost><nlsr><prefix-update>[<advertise><withdraw>]<>$
+                        regex ^<localhost><nlsr><prefix-update>[<advertise><withdraw>]<><><>$
                       }
                       checker
                       {
@@ -413,7 +410,7 @@ class NlsrConfigGenerator:
                         key-locator
                         {
                           type name
-                          regex ^([^<KEY><%C1.Operator>]*)<%C1.Operator>[^<KEY>]*<KEY><ksk-.*><ID-CERT>$
+                          regex ^([^<KEY><%C1.Operator>]*)<%C1.Operator>[^<KEY>]*<KEY><>$
                         }
                       }
                     }
@@ -425,7 +422,7 @@ class NlsrConfigGenerator:
                       filter
                       {
                         type name
-                        regex ^[^<KEY>]*<KEY><ksk-.*><ID-CERT><>$
+                        regex ^[^<KEY>]*<KEY><><><>$
                       }
                       checker
                       {

@@ -99,13 +99,8 @@ function forwarder {
         $install libpcap-devel
     fi
 
-    git clone https://github.com/named-data/NFD
+    git clone --depth 1 https://github.com/named-data/NFD
     cd NFD
-    current=$(git rev-parse HEAD)
-    if [[ $current != "f4056d0242536f85b7d7b4de1b5ac50dad65c233" ]]; then
-      git checkout f4056d0242536f85b7d7b4de1b5ac50dad65c233
-      git checkout -b fix-commit
-    fi
     ./waf configure --without-websocket
     ./waf
     sudo ./waf install
@@ -126,13 +121,8 @@ function routing {
         $install log4cxx log4cxx-devel openssl-devel
     fi
 
-    git clone https://github.com/named-data/ChronoSync
+    git clone --depth 1 https://github.com/named-data/ChronoSync
     cd ChronoSync
-    current=$(git rev-parse HEAD)
-    if [[ $current != "097bb448f46b8bd9a5c1f431e824f8f6a169b650" ]]; then
-      git checkout 097bb448f46b8bd9a5c1f431e824f8f6a169b650
-      git checkout -b fix-commit
-    fi
     ./waf configure
     ./waf
     sudo ./waf install
@@ -154,20 +144,15 @@ function ndncxx {
     fi
 
     if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
-        $install git libsqlite3-dev libboost-all-dev make g++ libssl-dev libcrypto++-dev
+        $install git libsqlite3-dev libboost-all-dev make g++ libssl-dev
     fi
 
     if [[ $DIST == Fedora ]]; then
-        $install gcc-c++ sqlite-devel boost-devel openssl-devel cryptopp-devel
+        $install gcc-c++ sqlite-devel boost-devel openssl-devel
     fi
 
-    git clone https://github.com/named-data/ndn-cxx
+    git clone --depth 1 https://github.com/named-data/ndn-cxx
     cd ndn-cxx
-    current=$(git rev-parse HEAD)
-    if [[ $current != "b555b00c280b9c9ed46f24a1fbebc73b720601af" ]]; then
-      git checkout b555b00c280b9c9ed46f24a1fbebc73b720601af
-      git checkout -b fix-commit
-    fi
     ./waf configure
     ./waf
     sudo ./waf install
@@ -183,7 +168,7 @@ function tools {
 
     git clone --depth 1 https://github.com/named-data/ndn-tools
     cd ndn-tools
-    ./waf configure --enable-dump --enable-ping
+    ./waf configure
     ./waf
     sudo ./waf install
     cd ../
