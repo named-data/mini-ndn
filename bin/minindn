@@ -406,11 +406,11 @@ def execute(options):
             if options.nFaces is not None:
                 host.nlsrParameters["max-faces-per-prefix"] = options.nFaces
 
-        if options.routingType == 'dry':
-            host.nlsrParameters["hyperbolic-state"] = "dry-run"
+            if options.routingType == 'dry':
+                host.nlsrParameters["hyperbolic-state"] = "dry-run"
 
-        elif options.routingType == 'hr':
-            host.nlsrParameters["hyperbolic-state"] = "on"
+            elif options.routingType == 'hr':
+                host.nlsrParameters["hyperbolic-state"] = "on"
 
             # Generate NLSR configuration file
             configGenerator = NlsrConfigGenerator(host, options.nlsrSecurity, options.faceType)
