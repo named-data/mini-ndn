@@ -179,3 +179,23 @@ The experiment can then be run from the command-line using the name registered.
                 host.cmd("nfdc status report > status.txt")
 
     Experiment.register("example-name", ExampleExperiment)
+
+## Passing arbitrary arguments to experiments
+
+One can pass any arbitrary argument to the Mini-NDN command line
+as long as the arguments don't clash with Mini-NDN's arguments.
+This feature allows users to pass any argument to Mini-NDN and process
+them in an experiment without modifying Mini-NDN's core.
+
+Please look at `ndn/experiments/arbitrary_arguments_experiment.py`
+to see how these arguments can be accessed. To have the experiment
+options printed in `sudo minindn --list-experiments` when using
+arbitrary arguments one can add the static `arguments` method as
+shown in the aforementioned experiment.
+
+To run the experiment:
+
+    sudo minindn --experiment arbitrary-arguments --ds 400 --logging false
+
+The experiment will print out the supplied arbitrary values which are --ds
+and --logging. --experiment is a fixed argument of Mini-NDN.

@@ -98,10 +98,13 @@ class PrintExperimentNames(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
         experimentNames = ExperimentManager.getExperimentNames()
+        experimentArgs = ExperimentManager.getExperimentArgs()
 
         print("Mini-NDN experiments:")
         for experiment in experimentNames:
-            print("  %s" % experiment)
+            print("  {}".format(experiment))
+            if experiment in experimentArgs:
+                print("      ({})".format(experimentArgs[experiment]))
 
         sys.exit(0)
 
@@ -126,6 +129,7 @@ class ProgramOptions:
         self.placer = None
         self.tunnelType = None
         self.faceType = "udp"
+        self.arbArgs = {}
 
 def createResultsDir(resultDir, faces, rType):
     if faces == 0:
@@ -211,6 +215,14 @@ def parse_args():
 
     parser.add_argument("--face-type", dest='faceType', default='udp', choices=['udp', 'tcp'])
 
+    args, unknownArgs = parser.parse_known_args()
+
+    unknownArgsList = []
+    for arg in unknownArgs:
+        if arg.startswith(("--")):
+            parser.add_argument(arg)
+            unknownArgsList.append(arg.split("--")[1])
+
     args = parser.parse_args()
 
     options = ProgramOptions()
@@ -233,6 +245,10 @@ def parse_args():
     options.tunnelType = args.tunnelType
     options.placeList = args.placeList
     options.faceType = args.faceType
+
+    for k in args.__dict__:
+        if k in unknownArgsList:
+            options.arbArgs[k] = args.__dict__[k]
 
     if options.experimentName is not None and options.experimentName not in ExperimentManager.getExperimentNames():
         print("No experiment named %s" % options.experimentName)
@@ -439,7 +455,9 @@ def execute(options):
             "nPings": options.nPings,
             "strategy": Nfd.STRATEGY_BEST_ROUTE,
             "pctTraffic": options.pctTraffic,
-            "nlsrSecurity": options.nlsrSecurity
+            "nlsrSecurity": options.nlsrSecurity,
+            "workDir": options.workDir,
+            "arbArgs" : options.arbArgs
         }
 
         experiment = ExperimentManager.create(experimentName, experimentArgs)
