@@ -479,7 +479,7 @@ if __name__ == '__main__':
     hosts_conf = []
     links_conf = []
 
-    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGQUIT, signal_handler)
 
     options = parse_args()
 

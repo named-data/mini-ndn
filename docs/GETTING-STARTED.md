@@ -44,6 +44,10 @@ To exit Mini-NDN, type `quit` in the CLI:
 
     mini-ndn> quit
 
+Another option to quit Mini-NDN is sending a SIGQUIT (ctrl+\). SIGINT (ctrl+c)
+is reserved for the purpose of stopping applications initiated on the minindn command
+line.
+
 For a more in depth explanation of the CLI, please see the
 [Mininet Walkthrough](http://mininet.org/walkthrough/).
 
