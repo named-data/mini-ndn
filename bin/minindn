@@ -120,7 +120,7 @@ class ProgramOptions:
         self.nlsrSecurity = False
         self.nPings = 300
         self.testbed = False
-        self.workDir = "/tmp"
+        self.workDir = "/tmp/minindn"
         self.resultDir = None
         self.pctTraffic = 1.0
         self.cluster = None
@@ -188,8 +188,8 @@ def parse_args():
     parser.add_argument("-t", "--testbed", action="store_true", dest="testbed",
                          help="Instantiates a snapshot of the NDN Testbed irrespective of the tempfile provided")
 
-    parser.add_argument("--work-dir", action="store", dest="workDir", default="/tmp",
-                        help="Specify the working directory; default is /tmp")
+    parser.add_argument("--work-dir", action="store", dest="workDir", default="/tmp/minindn",
+                        help="Specify the working directory; default is /tmp/minindn")
 
     parser.add_argument("--result-dir", action="store", dest="resultDir", default=None,
                         help="Specify the full path destination folder where experiment results will be moved")

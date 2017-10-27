@@ -57,7 +57,7 @@ To run Mini-NDN with a replica of the NDN testbed, use the `--testbed` parameter
 
     sudo minindn --testbed
 
-To change the working directory from default `/tmp` following option can be used:
+To change the working directory from default `/tmp/minindn` following option can be used:
 
     sudo minindn --work-dir /home/mydir/test
 
@@ -91,22 +91,23 @@ To run Mini-NDN with NLSR security configured
 
 ## Working Directory Structure
 
-Currently Mini-NDN uses /tmp as the working directory if not specified otherwise by using the option --work-dir.
+Currently Mini-NDN uses /tmp/minindn as the working directory if not specified otherwise by using
+the option --work-dir.
 
-Each node is given a HOME directory under /tmp/node-name
+Each node is given a HOME directory under /tmp/minindn/node-name
 where node-name is the name of the node specified in the [nodes] section of the conf file.
 
 ### NFD
-NFD conf file is stored at `/tmp/node-name/node-name.conf`
+NFD conf file is stored at `/tmp/minindn/node-name/node-name.conf`
 
-NFD log file is stored at `/tmp/node-name/node-name.log`
+NFD log file is stored at `/tmp/minindn/node-name/node-name.log`
 
-`.ndn` folder is stored at `/tmp/node-name/.ndn`
+`.ndn` folder is stored at `/tmp/minindn/node-name/.ndn`
 
 ### NLSR
-NLSR conf file is stored at `/tmp/node-name/nlsr.conf`
+NLSR conf file is stored at `/tmp/minindn/node-name/nlsr.conf`
 
-NLSR log file is stored at `/tmp/node-name/log/nlsr.log`
+NLSR log file is stored at `/tmp/minindn/node-name/log/nlsr.log`
 
-When security is enabled, NLSR security certificates are stored in: `/tmp/node-name/security`
+When security is enabled, NLSR security certificates are stored in: `/tmp/minindn/node-name/security`
 Note that no NLSR publishes the root certificate, Mini-NDN installs root.cert in security folder for each NLSR.

@@ -105,9 +105,9 @@ Experiment ID: `--failure-mcn`
 
 ### Experiment data
 
-The ping data is stored at `/tmp/node-name/ping-data`.
+The ping data is stored at `/tmp/minindn/node-name/ping-data`.
 
-The ping server log is stored at `/tmp/node-name/ping-server`
+The ping server log is stored at `/tmp/minindn/node-name/ping-server`
 
 ## Creating custom experiments
 
@@ -175,7 +175,7 @@ The experiment can then be run from the command-line using the name registered.
         def run(self):
             for host in self.net.hosts:
                 # By default status.txt would be stored
-                # at /tmp/host/status.txt
+                # at /tmp/minindn/host/status.txt
                 host.cmd("nfdc status report > status.txt")
 
     Experiment.register("example-name", ExampleExperiment)

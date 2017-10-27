@@ -62,5 +62,5 @@ You can use these steps to verify your installation:
 
 1. Issue the command: `sudo minindn --experiment=pingall --nPings=50`
 2. When the `mini-ndn>` CLI prompt appears, the experiment has finished. On the Mini-NDN CLI, issue the command `exit` to exit the experiment.
-3. Issue the command: `grep -c content /tmp/*/ping-data/*.txt`. Each file should report a count of 50.
-4. Issue the command: `grep -c timeout /tmp/*/ping-data/*.txt`. Each file should report a count of 0.
+3. Issue the command: `grep -c content /tmp/minindn/*/ping-data/*.txt`. Each file should report a count of 50.
+4. Issue the command: `grep -c timeout /tmp/minindn/*/ping-data/*.txt`. Each file should report a count of 0.
