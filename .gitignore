@@ -13,3 +13,4 @@ openflow
 examples
 util
 .DS_Store
+.vagrant
