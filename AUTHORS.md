@@ -7,16 +7,17 @@ Mini-NDN is an open source project that includes contributions from the followin
 
 * The University of Memphis
 
-    * Ashlesh Gawande      <agawande@memphis.edu>
+    * Ashlesh Gawande      <https://www.linkedin.com/in/agawande>
     * Vince Lehman         <http://vslehman.com>
     * Yucheng Zhang        <yzhang@memphis.edu>
     * Muktadir R Chowdhury <mrchwdhr@memphis.edu>
     * Nicholas Gordon      <nmgordon@memphis.edu>
     * Lan Wang             <http://www.cs.memphis.edu/~lanwang/>
+    * Damian Coomes        <dmcoomes@memphis.edu>
 
 * The University of Arizona
 
-    * Junxiao Shi    <http://www.cs.arizona.edu/people/shijunxiao/>
+    * Junxiao Shi    <https://www.linkedin.com/in/shijunxiao>
     * Beichuan Zhang <http://www.cs.arizona.edu/~bzhang/>
 
 * University of California, Los Angeles
