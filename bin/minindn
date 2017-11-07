@@ -302,7 +302,13 @@ class NdnTopo(Topo):
         for host in hosts_conf:
             if host.cpu != None and self.isLimited != True:
                 self.isLimited = True
-            self.addHost(host.name, app=host.app, params=host.uri_tuples, cpu=host.cpu,cores=host.cores,cache=host.cache, workdir=workDir)
+            self.addHost(host.name, app=host.app, params=host.uri_tuples, cpu=host.cpu,
+                         cores=host.cores,cache=host.cache, workdir=workDir)
+            if (options.routingType != 'link-state' and (host.params.get('radius') is None
+                or host.params.get('angle') is None)):
+                info('Hyperbolic coordinates in topology file are either missing or misconfigured.\n' \
+                     'Check that each node has one radius value and one or two angle value(s).\n')
+                sys.exit(1)
 
         for switch in switches_conf:
             self.addSwitch(switch.name)
