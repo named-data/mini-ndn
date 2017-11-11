@@ -1,4 +1,4 @@
-Mini-NDN Installing Instructions
+MiniNDN-WiFi Installing Instructions
 ================================
 
 ### What equipment will I need ?
