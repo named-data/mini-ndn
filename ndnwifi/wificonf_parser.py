@@ -84,12 +84,13 @@ class confNDNHost():
                ' Cores: '  + str(self.cores) + \
                ' Cache: '  + str(self.cache) + \
                ' Radius: ' + str(self.radius) + \
-               ' Angle: '  + str(self.angle) + \
+               ' Angle: '  + str(self.angle) +\
                ' NLSR Parameters: ' + self.nlsrParameters
-# add class confNdnStation
-class confNdnStation():
 
-    def __init__(self, name, app='', params='', cpu=None, cores=None, cache=None):
+# add class confNdnCar for vndn
+class confNdnCar():
+
+    def __init__(self, name, app='', params='', cpu=None, cores=None, cache=None, radius=0, angle=0):
         self.name = name
         self.app = app
         self.uri_tuples = params
@@ -97,9 +98,12 @@ class confNdnStation():
         self.cpu = cpu
         self.cores = cores
         self.cache = cache
+        # add the following parameters because a error
+        self.radius = radius 
+        self.angle = angle 
 
         # For now assume leftovers are NLSR configuration parameters
-        self.nlsrParameters = params
+        #self.nlsrParameters = params
 
     def __repr__(self):
         return 'Name: '    + self.name + \
@@ -109,8 +113,36 @@ class confNdnStation():
                ' Cores: '  + str(self.cores) + \
                ' Cache: '  + str(self.cache) + \
                ' Radius: ' + str(self.radius) + \
-               ' Angle: '  + str(self.angle) + \
-               ' NLSR Parameters: ' + self.nlsrParameters
+               ' Angle: '  + str(self.angle)
+               #' NLSR Parameters: ' + self.nlsrParameters
+
+# add class confNdnStation
+class confNdnStation():
+    def __init__(self, name, app='', params='', cpu=None, cores=None, cache=None, radius=0, angle=0):
+        self.name = name
+        self.app = app
+        self.uri_tuples = params
+        self.params = params
+        self.cpu = cpu
+        self.cores = cores
+        self.cache = cache
+       # add the following parameters because a error
+        self.radius = radius 
+        self.angle = angle 
+
+        # For now assume leftovers are NLSR configuration parameters
+        #self.nlsrParameters = params
+
+    def __repr__(self):
+        return 'Name: '    + self.name + \
+               ' App: '    + self.app + \
+               ' URIS: '   + str(self.uri_tuples) + \
+               ' CPU: '    + str(self.cpu) + \
+               ' Cores: '  + str(self.cores) + \
+               ' Cache: '  + str(self.cache) + \
+               ' Radius: ' + str(self.radius) + \
+               ' Angle: '  + str(self.angle)
+               #' NLSR Parameters: ' + self.nlsrParameters
 
 # add class confNdnAccessPoint
 class confNdnAccessPoint:
@@ -181,9 +213,57 @@ def parse_hosts(conf_arq):
         hosts.append(confNDNHost(name, app, params, cpu, cores, cache))
 
     return hosts
+
+# Add the parse_cars() for vndn
+def parse_cars(conf_arq):
+    'Parse cars section from the conf file.'
+    config = ConfigParser.RawConfigParser()
+    config.read(conf_arq)
+    cars = []
+    items = config.items('cars')
+
+    #makes a first-pass read to cars section to find empty car sections
+    for item in items:
+        name = item[0]
+        rest = item[1].split()
+        if len(rest) == 0:
+            config.set('cars', name, '_')
+
+    #updates 'items' list
+    items = config.items('cars')
+    #makes a second-pass read to cars section to properly add cars
+    for item in items:
+        name = item[0]
+
+        rest = shlex.split(item[1])
+
+        uris = rest
+        params = {}
+        cpu = None
+        cores = None
+        cache = None
+        for uri in uris:
+            if re.match("cpu",uri):
+                cpu = float(uri.split('=')[1])
+            elif re.match("cores",uri):
+                cores = uri.split('=')[1]
+            elif re.match("cache",uri):
+                cache = uri.split('=')[1]
+            elif re.match("mem",uri):
+                mem = uri.split('=')[1]
+            elif re.match("app",uri):
+                app = uri.split('=')[1]
+            elif re.match("_", uri):
+                app = ""
+            else:
+                params[uri.split('=')[0]] = uri.split('=')[1]
+
+        cars.append(confNdnCar(name, app, params, cpu, cores, cache))
+    return cars
+
 # add the parse_stations() and parse_accessPoint() for wifi 
 def parse_stations(conf_arq):
-    'Parse hosts section from the conf file.'
+    'Parse stations section from the conf file.'
     config = ConfigParser.RawConfigParser()
     config.read(conf_arq)
 
@@ -229,7 +309,6 @@ def parse_stations(conf_arq):
                 params[uri.split('=')[0]] = uri.split('=')[1]
 
         stations.append(confNdnStation(name, app, params, cpu, cores, cache))
-
     return stations
 def parse_accessPoints(conf_arq):
     'Parse accessPoints section from the conf file.'
