@@ -192,7 +192,7 @@ def build_sumo_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
 
         experimentArgs = {
             "isWiFi":True,
-            "net": adhocnet,
+            "net": sumo_vndn,
             "ctime": ctime,
             "nPings": nPings,
             "strategy": Nfd.STRATEGY_BEST_ROUTE,
