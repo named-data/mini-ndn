@@ -197,7 +197,7 @@ def build_sumo_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
             "nPings": nPings,
             "strategy": Nfd.STRATEGY_BEST_ROUTE,
             "pctTraffic": pctTraffic,
-            #"nlsrSecurity": nlsrSecurity
+            "nlsrSecurity": nlsrSecurity
         }
 
         experiment = WifiExperimentManager.create(experimentName, experimentArgs)
