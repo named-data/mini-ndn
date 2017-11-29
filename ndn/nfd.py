@@ -32,7 +32,7 @@ class Nfd(NdnApplication):
     def __init__(self, node):
         NdnApplication.__init__(self, node)
 
-        self.logLevel = node.params["params"].get("nfd-log-level", "NONE")
+        self.logLevel = node.params["params"].get("nfd-log-level", "INFO")
 
         self.confFile = "{}/{}.conf".format(node.homeFolder, node.name)
         self.logFile = "{}/{}.log".format(node.homeFolder, node.name)

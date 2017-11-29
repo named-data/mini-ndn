@@ -5,7 +5,7 @@ $script = <<SCRIPT
 
 git clone --depth 1 https://github.com/named-data/mini-ndn.git
 cd mini-ndn
-sudo ./install.sh -mrfti
+sudo ./install.sh -emrfti
 SCRIPT
 
 Vagrant.configure(2) do |config|
