@@ -205,6 +205,13 @@ function mininet {
     cd ../
 }
 
+function infoedit {
+    git clone --depth 1 https://github.com/NDN-Routing/infoedit.git
+    cd infoedit
+    sudo make install
+    cd ../
+}
+
 function minindn {
     if [[ updated != true ]]; then
         if [ ! -d "build" ]; then
@@ -220,7 +227,6 @@ function minindn {
     install_dir="/usr/local/etc/mini-ndn/"
 
     sudo mkdir -p "$install_dir"
-    sudo cp ndn_utils/client.conf.sample "$install_dir"
     sudo cp ndn_utils/topologies/default-topology.conf "$install_dir"
     sudo cp ndn_utils/topologies/minindn.caida.conf "$install_dir"
     sudo cp ndn_utils/topologies/minindn.ucla.conf "$install_dir"
@@ -228,11 +234,11 @@ function minindn {
     sudo python setup.py clean --all install
 }
 
-
 function usage {
     printf '\nUsage: %s [-mfrti]\n\n' $(basename $0) >&2
 
     printf 'options:\n' >&2
+    printf -- ' -e: install infoedit\n' >&2
     printf -- ' -f: install NFD\n' >&2
     printf -- ' -i: install mini-ndn\n' >&2
     printf -- ' -m: install mininet and dependencies\n' >&2
@@ -244,9 +250,10 @@ function usage {
 if [[ $# -eq 0 ]]; then
     usage
 else
-    while getopts 'mfrti' OPTION
+    while getopts 'emfrti' OPTION
     do
         case $OPTION in
+        e)    infoedit;;
         f)    forwarder;;
         i)    minindn;;
         m)    mininet;;

@@ -21,8 +21,9 @@
 # along with Mini-NDN, e.g., in COPYING.md file.
 # If not, see <http://www.gnu.org/licenses/>.
 
-import time
+import time, sys, os
 from ndn.ndn_application import NdnApplication
+
 
 class Nfd(NdnApplication):
     STRATEGY_BEST_ROUTE = "best-route"
@@ -33,35 +34,42 @@ class Nfd(NdnApplication):
 
         self.logLevel = node.params["params"].get("nfd-log-level", "NONE")
 
-        self.confFile = "%s/%s.conf" % (node.homeFolder, node.name)
-        self.logFile = "%s/%s.log" % (node.homeFolder, node.name)
-        self.sockFile = "/var/run/%s.sock" % node.name
-        self.ndnFolder = "%s/.ndn" % node.homeFolder
-        self.clientConf = "%s/client.conf" % self.ndnFolder
+        self.confFile = "{}/{}.conf".format(node.homeFolder, node.name)
+        self.logFile = "{}/{}.log".format(node.homeFolder, node.name)
+        self.sockFile = "/var/run/{}.sock".format(node.name)
+        self.ndnFolder = "{}/.ndn".format(node.homeFolder)
+        self.clientConf = "{}/client.conf".format(self.ndnFolder)
 
-        # Copy nfd.conf file from /usr/local/etc/mini-ndn to the node's home
-        node.cmd("sudo cp /usr/local/etc/mini-ndn/nfd.conf %s" % self.confFile)
+        # Copy nfd.conf file from /usr/local/etc/ndn to the node's home
+
+        # Use nfd.conf as default configuration for NFD, else use the sample
+        if os.path.isfile("/usr/local/etc/ndn/nfd.conf") == True:
+            node.cmd("sudo cp /usr/local/etc/ndn/nfd.conf {}".format(self.confFile))
+        elif os.path.isfile("/usr/local/etc/ndn/nfd.conf.sample") == True:
+            node.cmd("sudo cp /usr/local/etc/ndn/nfd.conf.sample {}".format(self.confFile))
+        else:
+            sys.exit("nfd.conf or nfd.conf.sample cannot be found in the expected directory. Exit.")
 
         # Set log level
-        node.cmd("sudo sed -i \'s|$LOG_LEVEL|%s|g\' %s" % (self.logLevel, self.confFile))
-
+        node.cmd("infoedit -f {} -s log.default_level -v {}".format(self.confFile, self.logLevel))
         # Open the conf file and change socket file name
-        node.cmd("sudo sed -i 's|nfd.sock|%s.sock|g' %s" % (node.name, self.confFile))
+        node.cmd("infoedit -f {} -s face_system.unix.path -v /var/run/{}.sock".format(self.confFile, node.name))
 
         # Make NDN folder
-        node.cmd("sudo mkdir %s" % self.ndnFolder)
+        node.cmd("sudo mkdir {}".format(self.ndnFolder))
 
         # Copy the client.conf file and change the unix socket
-        node.cmd("sudo cp /usr/local/etc/mini-ndn/client.conf.sample %s" % self.clientConf)
-        node.cmd("sudo sed -i 's|nfd.sock|%s.sock|g' %s" % (node.name, self.clientConf))
+        node.cmd("sudo cp /usr/local/etc/ndn/client.conf.sample {}".format(self.clientConf))
+
+        node.cmd("sudo sed -i 's|nfd.sock|{}.sock|g' {}".format(node.name, self.clientConf))
 
         # Change home folder
-        node.cmd("export HOME=%s" % node.homeFolder)
+        node.cmd("export HOME={}".format(node.homeFolder))
 
     def start(self):
-        NdnApplication.start(self, "setsid nfd --config %s >> %s 2>&1 &" % (self.confFile, self.logFile))
+        NdnApplication.start(self, "setsid nfd --config {} >> {} 2>&1 &".format(self.confFile, self.logFile))
         time.sleep(2)
 
     def setStrategy(self, name, strategy):
-        self.node.cmd("nfdc set-strategy %s ndn:/localhost/nfd/strategy/%s" % (name, strategy))
+        self.node.cmd("nfdc strategy set {} ndn:/localhost/nfd/strategy/{}".format(name, strategy))
         time.sleep(0.5)

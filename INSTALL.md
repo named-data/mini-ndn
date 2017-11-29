@@ -16,7 +16,7 @@ If you have all the dependencies (see sections below) installed simply clone thi
 
 else if you don't have the dependencies, the following command will install them along with Mini-NDN:
 
-    sudo ./install.sh -mrfti
+    sudo ./install.sh -emrfti
 
 else if you want to install the dependencies manually, follow the instructions below:
 
@@ -55,6 +55,13 @@ To check if Mininet is working correctly, run this test:
 This will print out a series of statements that show the test setup and the results of the test. Look
 for `Results:` two-thirds of the way down where it will indicate the percentage of dropped packets.
 Your results should show "0% dropped (2/2 received)".
+
+### Installing Infoedit
+
+Infoedit is used to edit configuration files such as NFD configuration file.
+
+To install infoedit:
+https://github.com/NDN-Routing/infoedit
 
 ### Verification
 

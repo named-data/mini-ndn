@@ -343,18 +343,6 @@ def execute(options):
             print("Placement list sum is not equal to number of nodes!")
             sys.exit(1)
 
-    # Use nfd.conf as default configuration for NFD, else use the sample
-
-    nfdConfFile = "%s/nfd.conf" % INSTALL_DIR
-    if os.path.isfile("/usr/local/etc/ndn/nfd.conf") == True:
-        shutil.copy2("/usr/local/etc/ndn/nfd.conf", nfdConfFile)
-    elif os.path.isfile("/usr/local/etc/ndn/nfd.conf.sample") == True:
-        shutil.copy2("/usr/local/etc/ndn/nfd.conf.sample", nfdConfFile)
-    else:
-        sys.exit("nfd.conf or nfd.conf.sample cannot be found in the expected directory. Exit.")
-
-    call(["sudo", "sed", "-i", 's|default_level [A-Z]*$|default_level $LOG_LEVEL|g', nfdConfFile])
-
     # Copy nfd.conf to remote hosts - this assumes that NDN versions across
     # the cluster are at least compatible if not the same
     if options.cluster is not None:
