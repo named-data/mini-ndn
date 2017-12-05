@@ -59,7 +59,6 @@ class _WifiExperimentManager:
             return None
 
 def __getInstance():
-    print _WifiExperimentManager.instance
     if _WifiExperimentManager.instance is None:
         _WifiExperimentManager.instance = _WifiExperimentManager()
         _WifiExperimentManager.instance.loadModules()
