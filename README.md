@@ -27,4 +27,5 @@ Bug reports and feedback are highly appreciated and can be made through our
 * [MiniNDN-WiFi Redmine](http://redmine.named-data.net/projects/)
 
 # minindn-wifi
-Minindn-wifi: To implement WiFi function based on minindn and mininet-wifi.
+Minindn-wifi: 1. To implement WiFi function based on minindn and mininet-wifi.
+              2. To emulate NDN-VANET (vndn)
