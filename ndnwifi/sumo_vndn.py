@@ -10,7 +10,7 @@ import datetime
 import random # This line for graph
 from subprocess import call
 from mnwifi.wifi.mininet_wifi import Mininet_Wifi
-from mini_ndn.ndn.ndn_host import NdnHost
+from ndn.ndn_host import NdnHost
 from mininet.link import TCLink
 from mininet.node import Controller, OVSKernelSwitch
 from mininet.log import setLogLevel, output, info

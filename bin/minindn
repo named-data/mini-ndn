@@ -70,18 +70,19 @@ from mininet.examples.cluster import MininetCluster, RoundRobinPlacer, ClusterCl
 from mininet.examples.clustercli import ClusterCLI
 
 from ndnwifi import WifiExperimentManager
-from mini_ndn.ndn.ndn_host import NdnHost, CpuLimitedNdnHost, RemoteNdnHost, NdnStation
-from mini_ndn.ndn.conf_parser import parse_hosts, parse_switches, parse_links
+from ndn.ndn_host import NdnHost, CpuLimitedNdnHost, RemoteNdnHost
+from ndn.conf_parser import parse_hosts, parse_switches, parse_links
 from ndnwifi.wificonf_parser import parse_stations, parse_cars, parse_accessPoints # add parse_stations,prase_cars and parse_accessPoints
 # from ndn.remote_ndn_link import RemoteNdnLink, RemoteGRENdnLink
-from mini_ndn.ndn.placer import GuidedPlacer, PopulatePlacement
-from mini_ndn.ndn.util import ssh, scp, MiniNDNCLI
+from ndn.placer import GuidedPlacer, PopulatePlacement
+from ndn.util import ssh, scp, MiniNDNCLI
 from ndnwifi.wifiutil import MiniNdnWifiCLI
 from ndnwifi.ndnadhoc import build_adhocnet
 from ndnwifi.vndn import build_vndn
 from ndnwifi.sumo_vndn import build_sumo_vndn
 from mininet.node import Controller
 from mnwifi.wifi.node_wifi import UserAP, OVSKernelAP
+from ndnwifi.ndn_host import NdnStation
 
 import os.path, time
 import shutil
