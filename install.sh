@@ -110,6 +110,7 @@ function forwarder {
     ./waf
     sudo ./waf install
     cd ../
+    sudo rm -rf NFD
 }
 
 function routing {
@@ -138,6 +139,7 @@ function routing {
     sudo ./waf install
     sudo ldconfig
     cd ../
+    sudo rm -rf ChronoSync
 
     git clone --depth 1 https://github.com/named-data/NLSR
     cd NLSR
@@ -145,6 +147,7 @@ function routing {
     ./waf
     sudo ./waf install
     cd ../
+    sudo rm -rf NLSR
 }
 
 function ndncxx {
@@ -173,6 +176,7 @@ function ndncxx {
     sudo ./waf install
     sudo ldconfig
     cd ../
+    sudo rm -rf ndn-cxx
 }
 
 function tools {
@@ -187,6 +191,7 @@ function tools {
     ./waf
     sudo ./waf install
     cd ../
+    sudo rm -rf ndn-tools
 }
 
 
@@ -205,6 +210,7 @@ function mininetwifi {
     cd mininet-wifi
     sudo ./util/install.sh -Wnfvl
     cd ../
+    sudo rm -rf mininet-wifi
 }
 
 
@@ -226,6 +232,7 @@ function minindn {
     sudo cp ../ndnwifi/experiments/__init__.py ./ #inorder to import module in the subdirecorty mini_ndn
     sudo ./install.sh -i
     cd ../
+    sudo rm -rf mini_ndn
 }
 
 function minindnwifi {
