@@ -60,6 +60,7 @@
 
 from mininet.node import CPULimitedHost, Host, Node
 from mininet.examples.cluster import RemoteMixin
+from mnwifi.wifi.node_wifi import Station
 
 from ndn.nfd import Nfd
 
@@ -113,7 +114,7 @@ class NdnHost(Host, NdnHostCommon):
 
         self.setParam(r, 'app', app=app)
         self.setParam(r, 'cache', cache=cache)
-        print "ndn_host.py------------NdnHost cla-----config() method-----------"  
+        print "ndn_host.py------------NdnHost cla-----config() method-----------"
         return r
 
     def terminate(self):
@@ -148,6 +149,40 @@ class CpuLimitedNdnHost(CPULimitedHost, NdnHostCommon):
         self.setParam(r, 'app', app=app)
         self.setParam(r, 'cache', cache=cache)
 
+        return r
+
+    def terminate(self):
+        "Stop node."
+        self.nfd.stop()
+        Host.terminate(self)
+
+class NdnStation(Station, NdnHostCommon):
+    "NDNStation is a Host that always runs NFD, and is wifi-enabled"
+
+    def __init__(self, name, **kwargs):
+
+        Host.__init__(self, name, **kwargs)
+        if not NdnHost.inited:
+            NdnHostCommon.init()
+
+        # Create home directory for a node
+        self.homeFolder = "%s/%s" % (self.params['workdir'], self.name) # Xian: using workDir will occur erro
+        self.cmd("mkdir -p %s" % self.homeFolder)
+        self.cmd("cd %s" % self.homeFolder)
+
+        self.nfd = Nfd(self)
+        print "ndn_host.py--------------------------Ndnhost() cla---- init"
+        self.nfd.start()
+
+        self.peerList = {}
+
+    def config(self, app=None, cache=None, **params):
+
+        r = Node.config(self, **params)
+
+        self.setParam(r, 'app', app=app)
+        self.setParam(r, 'cache', cache=cache)
+        print "ndn_host.py------------NdnHost cla-----config() method-----------"
         return r
 
     def terminate(self):

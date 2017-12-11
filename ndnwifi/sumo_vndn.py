@@ -9,13 +9,13 @@ import sys
 import datetime
 import random # This line for graph
 from subprocess import call
-from mininet.net import Mininet
+from mnwifi.wifi.mininet_wifi import Mininet_Wifi
 from mini_ndn.ndn.ndn_host import NdnHost
 from mininet.link import TCLink
 from mininet.node import Controller, OVSKernelSwitch
 from mininet.log import setLogLevel, output, info
 from mininet.examples.cluster import MininetCluster, RoundRobinPlacer, ClusterCleanup
-from mininet.wifiLink import Association
+from mnwifi.wifiLink import Association
 from ndnwifi.wifiutil import MiniNdnWifiCLI
 import matplotlib.pyplot as plt
 from ndn.nfd import Nfd
@@ -67,7 +67,7 @@ def build_sumo_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
         #               mode=mode, enable_wmediumd=wmediumd, enable_interference=interference)
 
 #    else:
-    sumo_vndn = Mininet(host=NdnHost, station=NdnHost, car=NdnHost, controller=Controller, switch=OVSKernelSwitch ,ssid=ssid, channel=channel,
+    sumo_vndn = Mininet_Wifi(host=NdnHost, station=NdnStation, car=NdnHost, controller=Controller, switch=OVSKernelSwitch ,ssid=ssid, channel=channel,
                    mode=mode, enable_wmediumd=wmediumd, enable_interference=interference)
 
 

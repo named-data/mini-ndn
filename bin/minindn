@@ -59,8 +59,9 @@
 #   advertising or publicity pertaining to the Software or any derivatives
 #   without specific, written prior permission.
 
+from mnwifi.wifi.topo_wifi import Topo_WiFi
 from mininet.topo import Topo
-from mininet.net import Mininet
+from mnwifi.wifi.mininet_wifi import Mininet_Wifi
 from mininet.log import setLogLevel, output, info
 from mininet.link import TCLink
 from mininet.util import ipStr, ipParse
@@ -69,7 +70,7 @@ from mininet.examples.cluster import MininetCluster, RoundRobinPlacer, ClusterCl
 from mininet.examples.clustercli import ClusterCLI
 
 from ndnwifi import WifiExperimentManager
-from mini_ndn.ndn.ndn_host import NdnHost, CpuLimitedNdnHost, RemoteNdnHost
+from mini_ndn.ndn.ndn_host import NdnHost, CpuLimitedNdnHost, RemoteNdnHost, NdnStation
 from mini_ndn.ndn.conf_parser import parse_hosts, parse_switches, parse_links
 from ndnwifi.wificonf_parser import parse_stations, parse_cars, parse_accessPoints # add parse_stations,prase_cars and parse_accessPoints
 # from ndn.remote_ndn_link import RemoteNdnLink, RemoteGRENdnLink
@@ -79,7 +80,8 @@ from ndnwifi.wifiutil import MiniNdnWifiCLI
 from ndnwifi.ndnadhoc import build_adhocnet
 from ndnwifi.vndn import build_vndn
 from ndnwifi.sumo_vndn import build_sumo_vndn
-from mininet.node import Controller, UserAP, OVSKernelAP #add this line inorder to Controller
+from mininet.node import Controller
+from mnwifi.wifi.node_wifi import UserAP, OVSKernelAP
 
 import os.path, time
 import shutil
@@ -342,9 +344,9 @@ class NdnTopo(Topo):
         info('Parse of ' + conf_arq + ' done.\n')
 
 # NdnWifiTopo() class for wifi
-class NdnWifiTopo(Topo):
+class NdnWifiTopo(Topo_WiFi):
     def __init__(self, conf_arq, workDir, **opts):
-        Topo.__init__(self, **opts)
+        Topo_WiFi.__init__(self, **opts)
 
         global stations_conf
         global cars_conf
@@ -374,13 +376,11 @@ class NdnWifiTopo(Topo):
             self.addStation(car.name, app=car.app, params=car.uri_tuples,\
                             cpu=car.cpu,cores=car.cores,cache=car.cache, workdir=workDir, func='adhoc') 
                             # params 'func' is for v2v communication in adhoc mode
-        # Add accessPoint object in wifi network topology
-        for accessPoint in accessPoints_conf:
-            self.addAccessPoint(accessPoint.name)
 
-        # Add switch object in wifi network topology
-        for switch in switches_conf:
-            self.addSwitch(switch.name)
+        # Add switches and access points to the wifi topology
+        switches = accessPoints_conf + switches_conf
+        for node in switches:
+            self.addSwitch(node.name)
 
         # Add link object in wifi network topology
         for link in links_conf:
@@ -474,7 +474,7 @@ def execute(options):
                     #for a simple wireless network with APs
                     if not (options.ssid =='my-ssid'):
                         options.ssid='my-ssid'
-                        net = Mininet(wifiTopo, host=NdnHost, station=NdnHost, link=TCLink, isWiFi=options.isWiFi, 
+                        net = Mininet_Wifi(wifiTopo, host=NdnHost, station=NdnStation, link=TCLink, isWiFi=options.isWiFi, 
                                       channel=options.channel, ssid=options.ssid, controller=Controller, accessPoint=OVSKernelAP)
                     t2 = datetime.datetime.now()
                     delta = t2 - t
@@ -485,17 +485,17 @@ def execute(options):
 
     else: # for a wire network
         if topo.isTCLink == True and topo.isLimited == True:
-            net = Mininet(topo,host=CpuLimitedNdnHost,link=TCLink)
+            net = Mininet_Wifi(topo,host=CpuLimitedNdnHost,link=TCLink)
         elif topo.isTCLink == True and topo.isLimited == False:
             if options.cluster is not None:
                 mn = partial(MininetCluster, servers=options.servers, placement=options.placement)
                 net = mn(topo=topo, host=RemoteNdnHost, link=options.tunnelType)
             else:
-                net = Mininet(topo, host=NdnHost, link=TCLink)
+                net = Mininet_Wifi(topo, host=NdnHost, link=TCLink)
         elif topo.isTCLink == False and topo.isLimited == True:
-                 net = Mininet(topo, host=CpuLimitedNdnHost)
+                 net = Mininet_Wifi(topo, host=CpuLimitedNdnHost)
         else:
-                 net = Mininet(topo, host=NdnHost)
+                 net = Mininet_Wifi(topo, host=NdnHost)
         t2 = datetime.datetime.now()
         delta = t2 - t
         info('Setup time: ' + str(delta.seconds) + '\n')
