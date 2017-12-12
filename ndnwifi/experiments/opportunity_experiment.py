@@ -20,10 +20,10 @@ class OpportunityExperiment(wifiExperiment):
 
         # Randomly select a producuer
         if self.isVndn or self.isSumoVndn:
-            producerNo = random.randrange(1, len(self.net.cars), 1)
+            producerNo = random.randrange(0, len(self.net.cars), 1)
             self.producerName=self.net.cars[producerNo]
         else:
-            self.producerName=self.net.stations[random.randrange(1, len(self.net.stations), 1)]
+            self.producerName=self.net.stations[random.randrange(0, len(self.net.stations), 1)]
         print "The randomly seleted producer %s is producing a content chunck..." % self.producerName
         if self.isVndn or self.isSumoVndn:
             # for V2V communication
@@ -37,12 +37,12 @@ class OpportunityExperiment(wifiExperiment):
         wileFlag=True
         while wileFlag:
             if self.isVndn or self.isSumoVndn:
-                consumerNo = random.randrange(1, len(self.net.cars), 1)
+                consumerNo = random.randrange(0, len(self.net.cars), 1)
                 self.consumerName = self.net.cars[consumerNo] #for V2I communication
                 self.consumerSTA = self.net.carsSTA[consumerNo] #for V2V communication
             else:
-                self.consumerName=self.net.stations[random.randrange(1, len(self.net.stations), 1)]
-            if self.consumerName != self.producerName:
+                self.consumerName=self.net.stations[random.randrange(0, len(self.net.stations), 1)]
+            if self.consumerName.name != self.producerName.name:
                 wileFlag=False
         i=1
         print "The randomly seleted consumer %s will send %s interest packets. waiting ...." % (self.consumerName, str(self.nPings))
@@ -50,10 +50,10 @@ class OpportunityExperiment(wifiExperiment):
             print "%s send the %s interest packet ..." % (self.consumerName, str(i))
             #self.consumerName.cmd("ndnping -t -c1 " + "/ndnwifi/sw" + " >> peek-data/" + str(self.consumerName) + ".txt &")
             if self.isVndn or self.isSumoVndn:
-                # for V2V communication 
+                # for V2V communication
                 self.producerSTA.cmd("echo 'hello UoM!' | ndnpoke -f /ndnwifi/hello >opportunity-producer.txt &")
                 self.consumerSTA.cmd("ndnpeek -p /ndnwifi/hello" + " >> peek-data/" + str(self.consumerSTA) + ".txt &")
-            # for V2I communication 
+            # for V2I communication
             self.producerName.cmd("echo 'hello UoM!' | ndnpoke -f /ndnwifi/hello >opportunity-producer.txt &")
             self.consumerName.cmd("ndnpeek -p /ndnwifi/hello" + " >> peek-data/" + str(self.consumerName) + ".txt &")
             time.sleep(3)
