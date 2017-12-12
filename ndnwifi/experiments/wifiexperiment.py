@@ -39,8 +39,8 @@ class wifiExperiment:
         self.strategy = args["strategy"]
         self.pctTraffic = args["pctTraffic"]
         self.nlsrSecurity = args["nlsrSecurity"]
-        self.nodeSet = " " # for cars or stations 
-        self.carSTASet = " " # for car station
+        self.nodeSet = [] # for cars or stations
+        self.carSTASet = [] # for car station
         # Used to restart pings on the recovered node if any
         self.pingedDict = {}
 
@@ -81,24 +81,25 @@ class wifiExperiment:
         print "...done"
         # To check whether converged and to create car/station FIB table
         didNetworkCoverge=True
-        for sta in self.nodeSet:
-            wlanFaceList = sta.cmd("nfdc face list | grep wlan")
-            if "wlan" in wlanFaceList:
-                wlanFaceId=re.search("faceid=(.*?) ", str(wlanFaceList)).group(1)
-                sta.cmd("nfdc route add /ndnwifi/" + " " + wlanFaceId + " >> add-route.txt &")
-                sta.cmd("mkdir peek-data")
-            else:
-               didNetworkCoverge = False
+        if self.nodeSet:
+            for sta in self.nodeSet:
+                wlanFaceList = sta.cmd("nfdc face list | grep wlan")
+                if "wlan" in wlanFaceList:
+                    wlanFaceId=re.search("faceid=(.*?) ", str(wlanFaceList)).group(1)
+                    sta.cmd("nfdc route add /ndnwifi/" + " " + wlanFaceId + " >> add-route.txt &")
+                    sta.cmd("mkdir peek-data")
+                else:
+                   didNetworkCoverge = False
         # To check whether converged and to create car station FIB table
-        for carsta in self.carSTASet:
-            wlanFaceList = carsta.cmd("nfdc face list | grep wlan")
-            if "wlan" in wlanFaceList:
-                wlanFaceId=re.search("faceid=(.*?) ", str(wlanFaceList)).group(1)
-                carsta.cmd("nfdc route add /ndnwifi/" + " " + wlanFaceId + " >> add-route.txt &")
-                carsta.cmd("mkdir peek-data")
-            else:
-               didNetworkCoverge = False
-
+        if self.carSTASet:
+            for carsta in self.carSTASet:
+                wlanFaceList = carsta.cmd("nfdc face list | grep wlan")
+                if "wlan" in wlanFaceList:
+                    wlanFaceId=re.search("faceid=(.*?) ", str(wlanFaceList)).group(1)
+                    carsta.cmd("nfdc route add /ndnwifi/" + " " + wlanFaceId + " >> add-route.txt &")
+                    carsta.cmd("mkdir peek-data")
+                else:
+                   didNetworkCoverge = False
         if didNetworkCoverge:
             print("WiFi network successfully converged.")
         else:

@@ -556,7 +556,9 @@ def execute(options):
         print("Loading experiment: %s" % experimentName)
 
         experimentArgs = {
-            "isWiFi":options.isWiFi,
+            "isWiFi": options.isWiFi,
+            "isVndn": options.isVndn,
+            "isSumoVndn": options.isSumoVndn,
             "net": net,
             "ctime": options.ctime,
             "nPings": options.nPings,
