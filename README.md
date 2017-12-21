@@ -1,6 +1,9 @@
 Mini-NDN
 ========
 
+If you are new to the NDN community of software generally, read the
+[Contributor's Guide](https://github.com/named-data/NFD/blob/master/CONTRIBUTING.md).
+
 ### What is Mini-NDN?
 
 Mini-NDN is a lightweight networking emulation tool that enables testing, experimentation, and
@@ -27,3 +30,4 @@ Bug reports and feedback are highly appreciated and can be made through our
 * [Mini-NDN Edit](docs/GUI.md)
 * [Running Experiments](docs/EXPERIMENTS.md)
 * [Mini-NDN Redmine](http://redmine.named-data.net/projects/mini-ndn)
+* [Contributor's Guide](https://github.com/named-data/NFD/blob/master/CONTRIBUTING.md)
