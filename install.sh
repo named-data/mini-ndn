@@ -1,7 +1,7 @@
 #!/bin/bash
 # -*- Mode:bash; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2017, The University of Memphis,
+# Copyright (C) 2015-2018, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -219,6 +219,105 @@ function minindn {
     sudo python setup.py clean --all install
 }
 
+function ndn_cpp {
+    if [[ updated != true ]]; then
+        $update
+        updated="true"
+    fi
+
+    if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
+        $install git build-essential libssl-dev libsqlite3-dev libboost-all-dev libprotobuf-dev protobuf-compiler
+    fi
+
+    if [[ $DIST == Fedora ]]; then
+        printf '\nNDN-CPP does not support Fedora yet.\n'
+        return
+    fi
+
+    git clone --depth 1 https://github.com/named-data/ndn-cpp
+    cd ndn-cpp
+    ./configure
+    proc=$(nproc)
+    make -j$proc
+    sudo make install
+    sudo ldconfig
+    cd ..
+}
+
+function pyNDN {
+    if [[ updated != true ]]; then
+        $update
+        updated="true"
+    fi
+
+    if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
+        $install git build-essential libssl-dev libffi-dev python-dev python-pip
+    fi
+
+    if [[ $DIST == Fedora ]]; then
+        printf '\nPyNDN does not support Fedora yet.\n'
+        return
+    fi
+
+    sudo pip install cryptography trollius protobuf pytest mock
+    git clone --depth 1 https://github.com/named-data/PyNDN2
+    cd PyNDN2
+    # Update the user's PYTHONPATH.
+    echo "export PYTHONPATH=\$PYTHONPATH:`pwd`/python" >> ~/.bashrc
+    # Also update root's PYTHONPATH in case of running under sudo.
+    echo "export PYTHONPATH=\$PYTHONPATH:`pwd`/python" | sudo tee -a /root/.bashrc > /dev/null
+    cd ..
+}
+
+function ndn_js {
+    if [[ updated != true ]]; then
+        $update
+        updated="true"
+    fi
+
+    if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
+        $install git nodejs npm
+    fi
+
+    if [[ $DIST == Fedora ]]; then
+        printf '\nNDN-JS does not support Fedora yet.\n'
+        return
+    fi
+
+    sudo ln -fs /usr/bin/nodejs /usr/bin/node
+    sudo npm install -g mocha
+    sudo npm install rsa-keygen sqlite3
+    git clone --depth 1 https://github.com/named-data/ndn-js
+}
+
+function jNDN {
+    if [[ updated != true ]]; then
+        $update
+        updated="true"
+    fi
+
+    if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
+        $install git openjdk-8-jdk maven
+    fi
+
+    if [[ $DIST == Fedora ]]; then
+        printf '\nNDN-JS does not support Fedora yet.\n'
+        return
+    fi
+
+    git clone --depth 1 https://github.com/named-data/jndn
+    cd jndn
+    mvn install
+    cd ..
+}
+
+function commonClientLibraries {
+    ndn_cpp
+    pyNDN
+    ndn_js
+    jNDN
+}
+
 function usage {
     printf '\nUsage: %s [-a]\n\n' $(basename $0) >&2
 
@@ -230,22 +329,24 @@ function usage {
     printf -- ' -m: install mininet and dependencies\n' >&2
     printf -- ' -r: install NLSR\n' >&2
     printf -- ' -t: install tools\n' >&2
+    printf -- ' -c: install Common Client Libraries\n' >&2
     exit 2
 }
 
 if [[ $# -eq 0 ]]; then
     usage
 else
-    while getopts 'aemfrti' OPTION
+    while getopts 'aemfrtic' OPTION
     do
         case $OPTION in
         a)
-        infoedit
         forwarder
         minindn
         mininet
         routing
         tools
+        infoedit
+        commonClientLibraries
         break
         ;;
         e)    infoedit;;
@@ -254,6 +355,7 @@ else
         m)    mininet;;
         r)    routing;;
         t)    tools;;
+        c)    commonClientLibraries;;
         ?)    usage;;
         esac
     done

@@ -7,12 +7,16 @@ doc/latex
 .DS_Store
 examples
 infoedit
+jndn
 Mini_NDN.egg-info
 mininet
 NFD
 NLSR
+ndn-cpp
 ndn-cxx
+ndn-js
 ndn-tools
 openflow
+PyNDN2
 util
 .vagrant
