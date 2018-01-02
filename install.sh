@@ -220,9 +220,10 @@ function minindn {
 }
 
 function usage {
-    printf '\nUsage: %s [-mfrti]\n\n' $(basename $0) >&2
+    printf '\nUsage: %s [-a]\n\n' $(basename $0) >&2
 
     printf 'options:\n' >&2
+    printf -- ' -a: install all the required dependencies\n' >&2
     printf -- ' -e: install infoedit\n' >&2
     printf -- ' -f: install NFD\n' >&2
     printf -- ' -i: install mini-ndn\n' >&2
@@ -235,9 +236,18 @@ function usage {
 if [[ $# -eq 0 ]]; then
     usage
 else
-    while getopts 'emfrti' OPTION
+    while getopts 'aemfrti' OPTION
     do
         case $OPTION in
+        a)
+        infoedit
+        forwarder
+        minindn
+        mininet
+        routing
+        tools
+        break
+        ;;
         e)    infoedit;;
         f)    forwarder;;
         i)    minindn;;

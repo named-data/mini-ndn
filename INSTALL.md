@@ -16,7 +16,7 @@ If you have all the dependencies (see sections below) installed simply clone thi
 
 else if you don't have the dependencies, the following command will install them along with Mini-NDN:
 
-    sudo ./install.sh -emrfti
+    sudo ./install.sh -a
 
 else if you want to install the dependencies manually, follow the instructions below:
 
