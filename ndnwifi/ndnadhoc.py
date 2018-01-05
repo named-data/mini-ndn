@@ -10,6 +10,7 @@ import random # This line for graph
 from subprocess import call
 from mnwifi.wifi.mininet_wifi import Mininet_Wifi
 from ndn.ndn_host import NdnHost
+from ndnwifi.ndn_host import NdnStation
 from mininet.link import TCLink
 from mininet.node import Controller
 from mininet.log import setLogLevel, output, info
