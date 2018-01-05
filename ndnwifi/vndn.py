@@ -11,6 +11,7 @@ import random
 from subprocess import call
 from mnwifi.wifi.mininet_wifi import Mininet_Wifi
 from ndn.ndn_host import NdnHost
+from ndnwifi.ndn_host import NdnStation, NdnCar
 from mininet.link import TCLink
 from mininet.node import Controller, OVSKernelSwitch
 from mnwifi.wifi.node_wifi import OVSKernelAP
@@ -68,7 +69,7 @@ def build_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
         #               mode=mode, enable_wmediumd=wmediumd, enable_interference=interference)
 
 #    else:
-    vndn = Mininet_Wifi(host=NdnHost, station=NdnStation, car=NdnHost, controller=Controller, switch=OVSKernelSwitch, ssid=ssid, channel=channel,
+    vndn = Mininet_Wifi(host=NdnHost, station=NdnStation, car=NdnCar, controller=Controller, switch=OVSKernelSwitch, ssid=ssid, channel=channel,
                     mode=mode, enable_wmediumd=wmediumd, enable_interference=interference)
 
 
@@ -98,7 +99,7 @@ def build_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
         min = random.randint(1, 5)
         max = random.randint(5, 15)
         if 'car' in str(carName):
-            vndn.addCar(carName, ip='10.0.0.%s/8'% (x + 1), wlans=1, range='100', 
+            vndn.addCar(carName, ip='10.0.0.%s/8'% (x + 1), wlans=1, range='100',
                         min_speed=min, max_speed=max, **vndnTopo.nodeInfo(carName))
         else:
             vndn.addHost(carName, **vndnTopo.nodeInfo(carName))
@@ -108,7 +109,7 @@ def build_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
     info('\n*** Adding Road Sides Units:\n')
     channelValueList = [1, 6, 11]
     i=0
-    for accessPointName in vndnTopo.accessPoints():
+    for accessPointName in vndnTopo.switches():
         # A bit ugly: add batch parameter if appropriate
         i = i+1
         #randomly select a channel value
@@ -151,7 +152,7 @@ def build_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
     print "start network......"
     vndn.build()
     vndn.controllers[0].start()
-    for rsu in vndn.aps:
+    for rsu in vndn.accessPoints:
         rsu.start(vndn.controllers)
 
     i = 201
