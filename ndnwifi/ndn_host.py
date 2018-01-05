@@ -58,7 +58,7 @@
 #   advertising or publicity pertaining to the Software or any derivatives
 #   without specific, written prior permission.
 
-from mnwifi.wifi.node_wifi import Station
+from mnwifi.wifi.node_wifi import Station, Car
 from ndn.ndn_host import NdnHostCommon
 from ndn.nfd import Nfd
 
@@ -72,7 +72,8 @@ class NdnStation(Station, NdnHostCommon):
             NdnHostCommon.init()
 
         # Create home directory for a node
-        self.homeFolder = "%s/%s" % (self.params['workdir'], self.name) # Xian: using workDir will occur erro
+        #self.homeFolder = "%s/%s" % (self.params['workdir'], self.name) # Xian: using workDir will occur erro
+        self.homeFolder = "%s/%s" % ("/tmp/minindn", self.name) # Xian: using workDir will occur erro
         self.cmd("mkdir -p %s" % self.homeFolder)
         self.cmd("cd %s" % self.homeFolder)
 
@@ -85,7 +86,6 @@ class NdnStation(Station, NdnHostCommon):
     def config(self, app=None, cache=None, **params):
 
         r = super(NdnStation, self).config(**params)
-        #r = config(self, **params)
 
         self.setParam(r, 'app', app=app)
         self.setParam(r, 'cache', cache=cache)
@@ -96,4 +96,36 @@ class NdnStation(Station, NdnHostCommon):
         "Stop node."
         self.nfd.stop()
         super(NdnStation, self).terminate()
-        #Station.terminate(self)
+
+class NdnCar(Car, NdnHostCommon):
+    "NdnCar is a Car that always runs NFD, and is wifi-enabled."
+
+    def __init__(self, name, **kwargs):
+        Car.__init__(self, name, **kwargs)
+        if not self.inited:
+            NdnHostCommon.init()
+
+        # Create home directory for a node
+        self.homeFolder = "%s/%s" % ("/tmp/minindn", self.name) # Xian: using workDir will occur erro
+        self.cmd("mkdir -p %s" % self.homeFolder)
+        self.cmd("cd %s" % self.homeFolder)
+
+        self.nfd = Nfd(self)
+        print "ndn_host.py--------------------------NdnCar() cla---- init"
+        self.nfd.start()
+
+        self.peerList = {}
+
+    def config(self, app=None, cache=None, **params):
+
+        r = super(NdnCar, self).config(**params)
+
+        self.setParam(r, 'app', app=app)
+        self.setParam(r, 'cache', cache=cache)
+        print "ndn_host.py------------NdnCar cla-----config() method-----------"
+        return r
+
+    def terminate(self):
+        "Stop node."
+        self.nfd.stop()
+        super(NdnCar, self).terminate()
