@@ -14,6 +14,7 @@ Mini-NDN is an open source project that includes contributions from the followin
     * Nicholas Gordon      <nmgordon@memphis.edu>
     * Lan Wang             <http://www.cs.memphis.edu/~lanwang/>
     * Damian Coomes        <dmcoomes@memphis.edu>
+    * Saurab Dulal         <sdulal@memphis.edu>
 
 * The University of Arizona
 
@@ -23,6 +24,7 @@ Mini-NDN is an open source project that includes contributions from the followin
 * University of California, Los Angeles
 
     * Alexander Afanasyev <http://lasr.cs.ucla.edu/afanasyev/index.html>
+    * Jeff Thompson       <jefft0@remap.ucla.edu>
 
 ## The Mini-CCNx team:
 
