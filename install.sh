@@ -113,14 +113,6 @@ function routing {
         cxx="true"
     fi
 
-    if [[ $DIST == Ubuntu ]]; then
-        $install liblog4cxx10-dev
-    fi
-
-    if [[ $DIST == Fedora ]]; then
-        $install log4cxx log4cxx-devel openssl-devel
-    fi
-
     git clone --depth 1 https://github.com/named-data/ChronoSync
     cd ChronoSync
     ./waf configure
