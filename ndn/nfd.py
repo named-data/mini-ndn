@@ -34,8 +34,8 @@ class Nfd(NdnApplication):
 
         self.logLevel = node.params["params"].get("nfd-log-level", "INFO")
 
-        self.confFile = "{}/{}.conf".format(node.homeFolder, node.name)
-        self.logFile = "{}/{}.log".format(node.homeFolder, node.name)
+        self.confFile = "{}/nfd.conf".format(node.homeFolder)
+        self.logFile = "{}/nfd.log".format(node.homeFolder)
         self.sockFile = "/var/run/{}.sock".format(node.name)
         self.ndnFolder = "{}/.ndn".format(node.homeFolder)
         self.clientConf = "{}/client.conf".format(self.ndnFolder)
