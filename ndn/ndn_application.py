@@ -43,7 +43,7 @@ class NdnApplication:
             self.isRunning = True
 
     def stop(self):
-        if self.isRunning:
-            self.node.cmd("sudo kill %s" % self.processId)
+        if self.isRunning and self.processId != "":
+            self.node.cmd("sudo kill {}".format(self.processId))
 
             self.isRunning = False

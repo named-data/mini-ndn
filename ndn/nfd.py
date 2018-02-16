@@ -24,12 +24,11 @@
 import time, sys, os
 from ndn.ndn_application import NdnApplication
 
-
 class Nfd(NdnApplication):
     STRATEGY_BEST_ROUTE = "best-route"
     STRATEGY_NCC = "ncc"
 
-    def __init__(self, node):
+    def __init__(self, node, csSize):
         NdnApplication.__init__(self, node)
 
         self.logLevel = node.params["params"].get("nfd-log-level", "INFO")
@@ -55,6 +54,9 @@ class Nfd(NdnApplication):
         # Open the conf file and change socket file name
         node.cmd("infoedit -f {} -s face_system.unix.path -v /var/run/{}.sock".format(self.confFile, node.name))
 
+        # Set CS size
+        node.cmd("infoedit -f {} -s tables.cs_max_packets -v {}".format(self.confFile, csSize))
+
         # Make NDN folder
         node.cmd("sudo mkdir {}".format(self.ndnFolder))
 
@@ -68,7 +70,7 @@ class Nfd(NdnApplication):
         node.cmd("ndnsec-keygen /localhost/operator | ndnsec-install-cert -")
 
     def start(self):
-        NdnApplication.start(self, "setsid nfd --config {} >> {} 2>&1 &".format(self.confFile, self.logFile))
+        NdnApplication.start(self, "setsid nfd --config {} > {} 2>&1 &".format(self.confFile, self.logFile))
         time.sleep(2)
 
     def setStrategy(self, name, strategy):

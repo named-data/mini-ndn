@@ -130,6 +130,7 @@ class ProgramOptions:
         self.tunnelType = None
         self.faceType = "udp"
         self.arbArgs = {}
+        self.csSize = 65536
 
 def createResultsDir(resultDir, faces, rType):
     if faces == 0:
@@ -154,7 +155,7 @@ def parse_args():
 
     # nargs='?' required here since optional argument
     parser.add_argument('tempfile', nargs='?', default=INSTALL_DIR + 'default-topology.conf',
-                        help="If no template_file is given, ndn_utils/default-topology.conf (given sample file) will be used.")
+                        help="If no template_file is given, topologies/default-topology.conf (given sample file) will be used.")
 
     parser.add_argument("--ctime", type=int, default=60,
                         help="Specify convergence time for the topology (Default: 60 seconds)")
@@ -215,6 +216,9 @@ def parse_args():
 
     parser.add_argument("--face-type", dest='faceType', default='udp', choices=['udp', 'tcp'])
 
+    parser.add_argument("--cs-size", dest='csSize', type=int, default=65536,
+                        help="Set CS size in NFD's conf file")
+
     args, unknownArgs = parser.parse_known_args()
 
     unknownArgsList = []
@@ -245,6 +249,7 @@ def parse_args():
     options.tunnelType = args.tunnelType
     options.placeList = args.placeList
     options.faceType = args.faceType
+    options.csSize = args.csSize
 
     for k in args.__dict__:
         if k in unknownArgsList:
@@ -402,6 +407,12 @@ def execute(options):
                 node2.setIP(ipStr(ipParse(ndnNetBase) + 2) + '/30', intf=link.intf2)
                 ndnNetBase = ipStr(ipParse(ndnNetBase) + 4)
 
+    time.sleep(2)
+    info('Starting NFD on nodes\n')
+    for host in net.hosts:
+        host.nfd = Nfd(host, options.csSize)
+        host.nfd.start()
+
     if options.isNlsrEnabled is True:
 
         # NLSR Security
@@ -409,6 +420,7 @@ def execute(options):
             Nlsr.createKeysAndCertificates(net, options.workDir)
 
         # NLSR initialization
+        info('Starting NLSR on nodes\n')
         for host in net.hosts:
             conf = next(x for x in hosts_conf if x.name == host.name)
             host.nlsrParameters = conf.nlsrParameters

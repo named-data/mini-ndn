@@ -100,8 +100,7 @@ class NdnHost(Host, NdnHostCommon):
         self.cmd("mkdir -p %s" % self.homeFolder)
         self.cmd("cd %s" % self.homeFolder)
 
-        self.nfd = Nfd(self)
-        self.nfd.start()
+        self.nfd = None
 
         self.peerList = {}
 
@@ -116,7 +115,8 @@ class NdnHost(Host, NdnHostCommon):
 
     def terminate(self):
         "Stop node."
-        self.nfd.stop()
+        if self.nfd is not None:
+            self.nfd.stop()
         Host.terminate(self)
 
 class CpuLimitedNdnHost(CPULimitedHost, NdnHostCommon):
@@ -134,8 +134,7 @@ class CpuLimitedNdnHost(CPULimitedHost, NdnHostCommon):
         self.cmd("mkdir -p %s" % self.homeFolder)
         self.cmd("cd %s" % self.homeFolder)
 
-        self.nfd = Nfd(self)
-        self.nfd.start()
+        self.nfd = None
 
         self.peerList = {}
 
@@ -150,8 +149,9 @@ class CpuLimitedNdnHost(CPULimitedHost, NdnHostCommon):
 
     def terminate(self):
         "Stop node."
-        self.nfd.stop()
-        Host.terminate(self)
+        if self.nfd is not None:
+            self.nfd.stop()
+        CPULimitedHost.terminate(self)
 
 class RemoteNdnHost(RemoteMixin, NdnHost):
     "A node on a remote server"
