@@ -194,7 +194,7 @@ class NlsrConfigGenerator:
                 self.neighborIPs.append(ip)
 
                 self.node.cmd("{} -a neighbors.neighbor \
-                              <<<\'name {}{}-site/%C1.Router/cs/{} face-uri {}://{}\n cost {}\'"
+                              <<<\'name {}{}-site/%C1.Router/cs/{} face-uri {}://{}\n link-cost {}\'"
                               .format(self.infocmd, NETWORK, other.name, other.name, self.faceType, ip, linkCost))
 
     def __editHyperbolicSection(self):
