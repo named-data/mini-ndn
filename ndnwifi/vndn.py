@@ -23,8 +23,6 @@ import matplotlib.pyplot as plt
 from ndn.nfd import Nfd
 from ndnwifi import WifiExperimentManager
 
-
-# build_adhocnet function() is usd to replace BuildFromTopo() function in mininet/net.py
 def build_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
                cluster, placement, servers, tunnelType, ctime, nPings, pctTraffic, experimentName, nlsrSecurity):
     """Create an ad hoc network from a topology object

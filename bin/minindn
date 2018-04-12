@@ -64,6 +64,8 @@ from mininet.topo import Topo
 from mininet.wifi.net import Mininet_wifi
 from mininet.log import setLogLevel, output, info
 from mininet.link import TCLink
+from mininet.wifi.link import wmediumd
+from mininet.wifi.wmediumdConnector import interference
 from mininet.util import ipStr, ipParse
 
 from mininet.examples.cluster import MininetCluster, RoundRobinPlacer, ClusterCleanup
@@ -72,7 +74,8 @@ from mininet.examples.clustercli import ClusterCLI
 from ndnwifi import WifiExperimentManager
 from ndn.ndn_host import NdnHost, CpuLimitedNdnHost, RemoteNdnHost
 from ndn.conf_parser import parse_hosts, parse_switches, parse_links
-from ndnwifi.wificonf_parser import parse_stations, parse_cars, parse_accessPoints from ndn.placer import GuidedPlacer, PopulatePlacement
+from ndnwifi.wificonf_parser import parse_stations, parse_cars, parse_accessPoints
+from ndn.placer import GuidedPlacer, PopulatePlacement
 from ndn.util import ssh, scp, MiniNDNCLI
 from ndnwifi.wifiutil import MiniNdnWifiCLI
 from ndnwifi.ndnadhoc import build_adhocnet
@@ -448,8 +451,8 @@ def execute(options):
     t = datetime.datetime.now()
     if options.isWiFi: #for wireless network.
         """Build manet ,a stationary ad hoc network or vanet according to topology configure"""
-        options.wmediumd=True
-        options.interference=True
+        options.wmediumd=wmediumd
+        options.interference=interference
         if options.isManet and options.isAdhoc:
             options.isAdhoc = False
         if options.isManet or options.isAdhoc: # for ad hoc network
@@ -473,8 +476,8 @@ def execute(options):
                     #for a simple wireless network with APs
                     if not (options.ssid =='my-ssid'):
                         options.ssid='my-ssid'
-                        net = Mininet_wifi(wifiTopo, host=NdnHost, station=NdnStation, link=TCLink, isWiFi=options.isWiFi, 
-                                      channel=options.channel, ssid=options.ssid, controller=Controller, accessPoint=OVSKernelAP)
+                        net = Mininet_wifi(wifiTopo, host=NdnHost, station=NdnStation,
+                                           channel=options.channel, ssid=options.ssid, controller=Controller, accessPoint=OVSKernelAP)
                     t2 = datetime.datetime.now()
                     delta = t2 - t
                     info('Setup time: ' + str(delta.seconds) + '\n')

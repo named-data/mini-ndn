@@ -21,8 +21,6 @@ import matplotlib.pyplot as plt
 from ndn.nfd import Nfd
 from ndnwifi import WifiExperimentManager
 
-
-# build_adhocnet function() is usd to replace BuildFromTopo() function in mininet/net.py
 def build_adhocnet(adhocTopo, isManet, isAdhoc, ssid, channel, mode, wmediumd, interference,
                    cluster, placement, servers, tunnelType, ctime, nPings, pctTraffic, experimentName, nlsrSecurity):
     """Create an ad hoc network from a topology object
@@ -34,7 +32,7 @@ def build_adhocnet(adhocTopo, isManet, isAdhoc, ssid, channel, mode, wmediumd, i
        channel: channel parames;
        ssid: service set identifier;
        wmedimd:param for 802.11 simulation tool;
-       interferce:param for 802.11 simulation tool;
+       interference: param for 802.11 simulation tool;
        placement:
        servers:
        tunnelType:
@@ -48,27 +46,26 @@ def build_adhocnet(adhocTopo, isManet, isAdhoc, ssid, channel, mode, wmediumd, i
     #build a wire network or a wirelesswork network.
     #topology object adhocTopo can't make as  params in Mininet object definination.
     if adhocTopo.isTCLink == True and adhocTopo.isLimited == True:
-        adhocnet = Mininet_wifi(host=CpuLimitedNdnHost, station=NdnStation, link=TCLink,controller=Controller,
-                           ssid=ssid, channel=channel, mode=mode, enable_wmediumd=wmediumd,
-                           enable_interference=interference)
+        adhocnet = Mininet_wifi(host=CpuLimitedNdnHost, station=NdnStation, link=wmediumd ,controller=Controller,
+                           ssid=ssid, channel=channel, mode=mode,
+                           wmediumd_mode=interference)
     elif adhocTopo.isTCLink == True and adhocTopo.isLimited == False:
         if cluster is not None:
             mn = partial(MininetCluster, servers=servers, placement=placement)
-            adhocnet = mn(host=NdnHost, station=NdnStation, link=TCLink,controller=Controller,
-                          ssid=ssid, channel=channel, mode=mode, enable_wmediumd=wmediumd,
-                          enable_interference=interference)
+            adhocnet = mn(host=NdnHost, station=NdnStation, link=wmediumd ,controller=Controller,
+                          ssid=ssid, channel=channel, mode=mode,
+                          wmediumd_mode=interference)
         else:
-            adhocnet = Mininet_wifi(host=NdnHost, station=NdnStation, link=TCLink, controller=Controller,
-                               ssid=ssid, channel=channel, mode=mode, enable_wmediumd=wmediumd,
-                               enable_interference=interference)
+            adhocnet = Mininet_wifi(host=NdnHost, station=NdnStation, link=wmediumd, controller=Controller,
+                                    ssid=ssid, channel=channel, mode=mode, wmediumd_mode=interference)
 
     elif adhocTopo.isTCLink == False and adhocTopo.isLimited == True:
         adhocnet = Mininet_wifi(host=CpuLimitedNdnHost, station=NdnStation, controller=Controller, ssid=ssid, channel=channel,
-                       mode=mode, enable_wmediumd=wmediumd, enable_interference=interference)
+                                mode=mode, link=wmediumd, wmediumd_mode=interference)
 
     else:
         adhocnet = Mininet_wifi(host=NdnHost, station=NdnStation, controller=Controller, ssid=ssid, channel=channel,
-                           mode=mode, enable_wmediumd=wmediumd, enable_interference=interference)
+                                mode=mode, link=wmediumd, wmediumd_mode=interference)
 
 
     # Possibly we should clean up here and/or validate
