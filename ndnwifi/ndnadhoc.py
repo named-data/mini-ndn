@@ -7,9 +7,10 @@ So, need to this program. """
 import sys
 import datetime
 import random # This line for graph
+from functools import partial
 from subprocess import call
 from mininet.wifi.net import Mininet_wifi
-from ndn.ndn_host import NdnHost
+from ndn.ndn_host import NdnHost, CpuLimitedNdnHost
 from ndnwifi.ndn_host import NdnStation
 from mininet.link import TCLink
 from mininet.node import Controller
@@ -66,12 +67,6 @@ def build_adhocnet(adhocTopo, isManet, isAdhoc, ssid, channel, mode, wmediumd, i
     else:
         adhocnet = Mininet_wifi(host=NdnHost, station=NdnStation, controller=Controller, ssid=ssid, channel=channel,
                                 mode=mode, link=wmediumd, wmediumd_mode=interference)
-
-
-    # Possibly we should clean up here and/or validate
-    # the topo
-    if adhocnet.cleanup:
-        pass
 
     info('*** Creating adhoc network\n')
     if not adhocnet.controllers and adhocnet.controller:
