@@ -60,7 +60,7 @@
 
 from mininet.node import CPULimitedHost, Host, Node
 from mininet.examples.cluster import RemoteMixin
-from mnwifi.wifi.node_wifi import Station
+from mininet.wifi.node import Station
 
 from ndn.nfd import Nfd
 

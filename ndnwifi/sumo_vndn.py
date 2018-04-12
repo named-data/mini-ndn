@@ -9,13 +9,13 @@ import sys
 import datetime
 import random # This line for graph
 from subprocess import call
-from mnwifi.wifi.mininet_wifi import Mininet_Wifi
+from mininet.wifi.net import Mininet_wifi
 from ndn.ndn_host import NdnHost
 from mininet.link import TCLink
 from mininet.node import Controller, OVSKernelSwitch
 from mininet.log import setLogLevel, output, info
 from mininet.examples.cluster import MininetCluster, RoundRobinPlacer, ClusterCleanup
-from mnwifi.wifiLink import Association
+from mininet.wifi.link import Association
 from ndnwifi.wifiutil import MiniNdnWifiCLI
 import matplotlib.pyplot as plt
 from ndn.nfd import Nfd
@@ -46,30 +46,9 @@ def build_sumo_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
     cls = Association
     cls.printCon = False
     #build a wire network or a wirelesswork network.
-    #topology object adhocTopo can't make as  params in Mininet object definination.
-#    if vndnTopo.isTCLink == True and vndnTopo.isLimited == True:
-        #sumo_vndn = Mininet(host=CpuLimitedNdnHost, station=CpuLimitedNdnHost, link=TCLink,controller=Controller,
-        #                   ssid=ssid, channel=channel, mode=mode, enable_wmediumd=wmediumd,
-        #                   enable_interference=interference)
-#    elif vndnTopo.isTCLink == True and vndnTopo.isLimited == False:
-#        if cluster is not None:
-        #    mn = partial(MininetCluster, servers=servers, placement=placement)
-        #    sumo_vndn = mn(host=NdnHost, station=NdnHost, link=TCLink,controller=Controller,
-        #                  ssid=ssid, channel=channel, mode=mode, enable_wmediumd=wmediumd,
-        #                  enable_interference=interference)
-#        else:
-        #    sumo_vndn = Mininet(host=NdnHost, station=NdnHost, link=TCLink, controller=Controller,
-        #                       ssid=ssid, channel=channel, mode=mode, enable_wmediumd=wmediumd,
-        #                       enable_interference=interference)
-
-#    elif vndnTopo.isTCLink == False and vndnTopo.isLimited == True:
-        #sumo_vndn = Mininet(host=CpuLimitedNdnHost, station=CpuLimitedNdnHost, controller=Controller, ssid=ssid, channel=channel,
-        #               mode=mode, enable_wmediumd=wmediumd, enable_interference=interference)
-
-#    else:
-    sumo_vndn = Mininet_Wifi(host=NdnHost, station=NdnStation, car=NdnHost, controller=Controller, switch=OVSKernelSwitch ,ssid=ssid, channel=channel,
+    #topology object adhocTopo can't make as  params in Mininet object definination
+    sumo_vndn = Mininet_wifi(host=NdnHost, station=NdnStation, car=NdnHost, controller=Controller, switch=OVSKernelSwitch ,ssid=ssid, channel=channel,
                    mode=mode, enable_wmediumd=wmediumd, enable_interference=interference)
-
 
     # Possibly we should clean up here and/or validate
     # the topo
@@ -102,17 +81,6 @@ def build_sumo_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
         info(carName + ' ')
 
     info('\n*** Adding accessPoints and Road Sides Units:\n')
-#    for switchName in vndnTopo.accessPoints():
-#        # A bit ugly: add batch parameter if appropriate
-#        params = vndnTopo.nodeInfo(switchName)
-#        cls = params.get('cls', sumo_vndn.switch)
-#        if hasattr(cls, 'batchStartup'):
-#            params.setdefault('batch', True)
-#        if 'rsu' in str(switchName):
-#            sumo_vndn.addAccessPoint(switchName, ssid="vanet-ssid", passwd='123456789a', encrypt='wpa2', **params)
-#        else:
-#            sumo_vndn.addSwitch(switchName, **params)
-#            info(switchName + ' ')
 
     rsu1 = sumo_vndn.addAccessPoint('rsu1', ssid='vanet-ssid', mac='00:00:00:11:00:01', mode='g', channel='1', passwd='123456789a',
                                encrypt='wpa2', position='3279.02,3736.27,0',range=100)
@@ -171,7 +139,6 @@ def build_sumo_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
     j = 2
     for v in sumo_vndn.carsSTA:
         v.setIP('192.168.1.%s/24' % j, intf='%s-eth0' % v)
-        #v.setIP('10.0.0.%s/24' % i, intf='%s-mp0' % v) # This is for v2v communication in mesh mode
         v.setIP('10.0.0.%s/24' % i, intf='%s-wlan0' % v) #This is for v2v communication in ad hoc mode
         v.cmd('echo 1 > /proc/sys/net/ipv4/ip_forward')
         i += 1
@@ -224,4 +191,3 @@ def build_sumo_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
     call(["nfd-stop"])
     call(["sudo", "mn", "--clean"])
     sys.exit(1)
-

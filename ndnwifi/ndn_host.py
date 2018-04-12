@@ -58,7 +58,7 @@
 #   advertising or publicity pertaining to the Software or any derivatives
 #   without specific, written prior permission.
 
-from mnwifi.wifi.node_wifi import Station, Car
+from mininet.wifi.node import Station, Car
 from ndn.ndn_host import NdnHostCommon
 from ndn.nfd import Nfd
 
@@ -72,7 +72,6 @@ class NdnStation(Station, NdnHostCommon):
             NdnHostCommon.init()
 
         # Create home directory for a node
-        #self.homeFolder = "%s/%s" % (self.params['workdir'], self.name) # Xian: using workDir will occur erro
         self.homeFolder = "%s/%s" % ("/tmp/minindn", self.name) # Xian: using workDir will occur erro
         self.cmd("mkdir -p %s" % self.homeFolder)
         self.cmd("cd %s" % self.homeFolder)

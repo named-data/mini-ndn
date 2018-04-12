@@ -5,16 +5,16 @@
 import os
 import random
 
-from mnwifi.wifi.mininet_wifi import Mininet_Wifi
+from mininet.wifi.net import Mininet_wifi
 from mininet.node import Controller, OVSKernelSwitch
 from mininet.link import TCLink
-from mnwifi.wifi.cli_wifi import CLI_WiFi
+from mininet.wifi.cli import CLI_wifi
 from mininet.log import setLogLevel
 
 def topology():
 
     "Create a network."
-    net = Mininet_Wifi(controller=Controller, link=TCLink, switch=OVSKernelSwitch,
+    net = Mininet_wifi(controller=Controller, link=TCLink, switch=OVSKernelSwitch,
                   enable_wmediumd=True, enable_interference=True)
 
     print "*** Creating nodes"
@@ -43,7 +43,6 @@ def topology():
 
     print "*** Configuring Propagation Model"
     net.propagationModel("logDistancePropagationLossModel", exp=4)
-#    net.propagationModel('friisPropagationLossModel', sL=2)
     print "*** Configuring wifi nodes"
     net.configureWifiNodes()
 
@@ -53,14 +52,8 @@ def topology():
     net.addLink(rsu11, rsu14)
     net.addLink(rsu11, rsu15)
     print "asdfasdfasdfasdfalsdjfalsdfjasldfkajsldkfjalsdfjalsdfjasldkfjalsdkfjalsdkfasldkfasldfkjasl"
-#    for carsta in net.carsSTA:
-#        net.addHoc(carsta, ssid="adhoc-Net", channel=5)
-#    for carsta in net.carsSTA:
-#        net.addMesh(carsta, intf='%s-mp0'%carsta, ssid='my-mesh', channel=5)
 
     net.plotGraph(max_x=500, max_y=500)
-
-#    net.roads(10)
 
     net.startMobility(time=0, model='RandomWayPoint', max_x=500, max_y=400,
                       min_v=0.1, max_v=0.2)
@@ -109,7 +102,7 @@ def topology():
             j += 2
 
     print "*** Running CLI"
-    CLI(net)
+    CLI_wifi(net)
 
     print "*** Stopping network"
     net.stop()

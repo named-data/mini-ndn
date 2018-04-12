@@ -23,7 +23,7 @@
 
 from subprocess import call
 from mininet.cli import CLI
-from mnwifi.wifi.cli_wifi import CLI_Wifi
+from mininet.wifi.cli import CLI_wifi
 import sys
 
 sshbase = [ 'ssh', '-q', '-t', '-i/home/mininet/.ssh/id_rsa' ]
@@ -46,7 +46,7 @@ class MiniNDNCLI(CLI):
     def __init__(self, mininet, stdin=sys.stdin, script=None):
         CLI.__init__(self, mininet, stdin=sys.stdin, script=None)
 
-class MiniNdnWifiCLI(CLI_Wifi): #add this line for Wifi network 
+class MiniNdnWifiCLI(CLI_wifi): #add this line for Wifi network
     prompt='minindn-wifi>'
     def __init__(self, mininet, stdin=sys.stdin, script=None):
-        CLI_Wifi.__init__(self, mininet, stdin=sys.stdin, script=None)
+        CLI_wifi.__init__(self, mininet, stdin=sys.stdin, script=None)

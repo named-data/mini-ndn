@@ -9,15 +9,15 @@ import sys
 import datetime
 import random
 from subprocess import call
-from mnwifi.wifi.mininet_wifi import Mininet_Wifi
+from mininet.wifi.net import Mininet_wifi
 from ndn.ndn_host import NdnHost
 from ndnwifi.ndn_host import NdnStation, NdnCar
 from mininet.link import TCLink
 from mininet.node import Controller, OVSKernelSwitch
-from mnwifi.wifi.node_wifi import OVSKernelAP
+from mininet.wifi.node import OVSKernelAP
 from mininet.log import setLogLevel, output, info
 from mininet.examples.cluster import MininetCluster, RoundRobinPlacer, ClusterCleanup
-from mnwifi.wifiLink import Association
+from mininet.wifi.link import Association
 from ndnwifi.wifiutil import MiniNdnWifiCLI
 import matplotlib.pyplot as plt
 from ndn.nfd import Nfd
@@ -42,34 +42,13 @@ def build_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
        tunnelType:
        the following paramters are for experiments.
        ctime: specific time that the nentwork covergence;
-       nPings: number that perform 
+       nPings: number that perform
     """
     t = datetime.datetime.now()
     cls = Association
     cls.printCon = False
-    #build a wire network or a wirelesswork network.
-    #topology object adhocTopo can't make as  params in Mininet object definination.
-#    if vndnTopo.isTCLink == True and vndnTopo.isLimited == True:
-        #vndn = Mininet(host=CpuLimitedNdnHost, station=CpuLimitedNdnHost, link=TCLink,controller=Controller,
-        #                   ssid=ssid, channel=channel, mode=mode, enable_wmediumd=wmediumd,
-        #                   enable_interference=interference)
-#    elif vndnTopo.isTCLink == True and vndnTopo.isLimited == False:
-#        if cluster is not None:
-        #    mn = partial(MininetCluster, servers=servers, placement=placement)
-        #    vndn = mn(host=NdnHost, station=NdnHost, link=TCLink,controller=Controller,
-        #                  ssid=ssid, channel=channel, mode=mode, enable_wmediumd=wmediumd,
-        #                  enable_interference=interference)
-#        else:
-        #    vndn = Mininet(host=NdnHost, station=NdnHost, link=TCLink, controller=Controller,
-        #                       ssid=ssid, channel=channel, mode=mode, enable_wmediumd=wmediumd,
-        #                       enable_interference=interference)
 
-#    elif vndnTopo.isTCLink == False and vndnTopo.isLimited == True:
-        #vndn = Mininet(host=CpuLimitedNdnHost, station=CpuLimitedNdnHost, controller=Controller, ssid=ssid, channel=channel,
-        #               mode=mode, enable_wmediumd=wmediumd, enable_interference=interference)
-
-#    else:
-    vndn = Mininet_Wifi(host=NdnHost, station=NdnStation, car=NdnCar, controller=Controller, switch=OVSKernelSwitch, ssid=ssid, channel=channel,
+    vndn = Mininet_wifi(host=NdnHost, station=NdnStation, car=NdnCar, controller=Controller, switch=OVSKernelSwitch, ssid=ssid, channel=channel,
                     mode=mode, enable_wmediumd=wmediumd, enable_interference=interference)
 
 
@@ -176,7 +155,6 @@ def build_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
     j = 2
     for v in vndn.carsSTA:
         v.setIP('192.168.1.%s/24' % j, intf='%s-eth0' % v)
-        #v.setIP('10.0.0.%s/24' % i, intf='%s-mp0' % v) # This is for v2v communication in mesh mode
         v.setIP('10.0.0.%s/24' % i, intf='%s-wlan0' % v) #This is for v2v communication in ad hoc mode
         v.cmd('echo 1 > /proc/sys/net/ipv4/ip_forward')
         i += 1
@@ -229,4 +207,3 @@ def build_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
     call(["nfd-stop"])
     call(["sudo", "mn", "--clean"])
     sys.exit(1)
-
