@@ -16,7 +16,7 @@ from mininet.link import TCLink
 from mininet.node import Controller
 from mininet.log import setLogLevel, output, info
 from mininet.examples.cluster import MininetCluster, RoundRobinPlacer, ClusterCleanup
-from mininet.wifi.link import Association
+from mininet.wifi.link import Association, adhoc
 from ndnwifi.wifiutil import MiniNdnWifiCLI
 import matplotlib.pyplot as plt
 from ndn.nfd import Nfd
@@ -113,7 +113,7 @@ def build_adhocnet(adhocTopo, isManet, isAdhoc, ssid, channel, mode, wmediumd, i
 
     info('\n*** Adding link(s):\n')
     for station in adhocnet.stations:
-        adhocnet.addHoc(station, ssid = ssid, mode = mode)
+        adhocnet.addLink(station, cls=adhoc, ssid=ssid, mode=mode)
     t2 = datetime.datetime.now()
     delta = t2 - t
     info('Setup time: ' + str(delta.seconds) + '\n')
