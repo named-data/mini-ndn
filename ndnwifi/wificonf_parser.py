@@ -324,7 +324,11 @@ def parse_accessPoints(conf_arq):
 
     for item in items:
         name = item[0]
-        accessPoints.append(confNdnAccessPoint(name))
+        params = {}
+        for arg in item[1:]:
+            fields = arg.split('=')
+            params[fields[0]] = fields[1]
+        accessPoints.append(confNdnAccessPoint(name, params))
 
     return accessPoints
 
@@ -343,7 +347,11 @@ def parse_switches(conf_arq):
 
     for item in items:
         name = item[0]
-        switches.append(confNdnSwitch(name))
+        params = {}
+        for arg in item[1:]:
+            fields = arg.split('=')
+            params[fields[0]] = fields[1]
+        switches.append(confNdnSwitch(name, params))
 
     return switches
 
