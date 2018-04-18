@@ -382,7 +382,7 @@ class NdnWifiTopo(Topo_WiFi):
         # Add switches and access points to the wifi topology
         switches = accessPoints_conf + switches_conf
         for node in switches:
-            self.addSwitch(node.name)
+            self.addSwitch(node.name, node.params)
 
         # Add link object in wifi network topology
         for link in links_conf:
