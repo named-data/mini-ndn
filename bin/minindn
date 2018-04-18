@@ -334,7 +334,7 @@ class NdnTopo(Topo):
             self.addHost(host.name, app=host.app, params=host.uri_tuples, cpu=host.cpu,cores=host.cores,cache=host.cache, workdir=workDir)
 
         for switch in switches_conf:
-            self.addSwitch(switch.name)
+            self.addSwitch(switch.name, **switch.params)
 
         for link in links_conf:
             if len(link.linkDict) == 0:
@@ -382,7 +382,7 @@ class NdnWifiTopo(Topo_WiFi):
         # Add switches and access points to the wifi topology
         switches = accessPoints_conf + switches_conf
         for node in switches:
-            self.addSwitch(node.name, node.params)
+            self.addSwitch(node.name, **node.params)
 
         # Add link object in wifi network topology
         for link in links_conf:
