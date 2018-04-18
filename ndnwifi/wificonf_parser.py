@@ -146,7 +146,7 @@ class confNdnStation():
 
 # add class confNdnAccessPoint
 class confNdnAccessPoint:
-    def __init__(self, name, params=None)
+    def __init__(self, name, params=None):
         self.name=name
         self.params=params
 
