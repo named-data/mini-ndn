@@ -57,6 +57,7 @@ class Nfd(NdnApplication):
 
         # Change home folder
         node.cmd("export HOME=%s" % node.homeFolder)
+        node.cmd("ndnsec-keygen /localhost/operator | ndnsec-install-cert -")
 
     def start(self):
         NdnApplication.start(self, "nfd --config %s >> %s 2>&1 &" % (self.confFile, self.logFile))
