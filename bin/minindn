@@ -471,18 +471,8 @@ def execute(options):
                     #for a simple wireless network with APs
                     if not (options.ssid =='my-ssid'):
                         options.ssid='my-ssid'
-                        # Absolutely critical to pass 'build=False',
-                        # or else IFB won't be correctly enabled. We
-                        # need to prevent the Mininet object from
-                        # being built until we can enable IFB. There's
-                        # no IFB option in the constructor, so this is
-                        # our only choice.
-                        net = Mininet_wifi(wifiTopo, host=NdnHost, station=NdnStation, build=False,
+                        net = Mininet_wifi(wifiTopo, host=NdnHost, station=NdnStation, ifb=options.ifb,
                                            channel=options.channel, ssid=options.ssid, controller=Controller, accessPoint=OVSKernelAP)
-
-                        # Enable IFB, then build the topology.
-                        net.useIFB() if options.ifb else None
-                        net.build()
                     t2 = datetime.datetime.now()
                     delta = t2 - t
                     info('Setup time: ' + str(delta.seconds) + '\n')
