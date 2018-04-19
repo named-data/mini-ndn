@@ -231,6 +231,7 @@ def parse_args():
     parser.add_argument('--manet', action='store_true', default=False, help='build mobile ad hoc network')
     parser.add_argument('--vndn', action='store_true', default=False, help='build ndn-based vehicle ad hoc network')
     parser.add_argument('--sumovndn', action='store_true', default=False, help='build ndn-based sumo vehicle ad hoc network')
+    parser.add_argument('--ifb', action='store_true', default=False, help='use IFB in the topology for receiver-side delays with TC.')
     args = parser.parse_args()
     options = ProgramOptions()
     options.templateFile = args.tempfile
@@ -258,13 +259,7 @@ def parse_args():
     options.isSumoVndn=args.sumovndn
     options.isManet=args.manet
     options.isAdhoc=args.adhoc
-    # (error: 'Namespace' object has no this following attribute)
-    #options.ipBase = args.ipbase
-    #options.xterms = args.xterms
-    #options.mac = args.mac
-    #options.arp = args.arp
-    #options.pin = args.pin
-    ###
+    options.ifb=args.ifb
     options.channel = args.channel
     options.mode = args.mode
     options.ssid= args.ssid
@@ -476,8 +471,18 @@ def execute(options):
                     #for a simple wireless network with APs
                     if not (options.ssid =='my-ssid'):
                         options.ssid='my-ssid'
-                        net = Mininet_wifi(wifiTopo, host=NdnHost, station=NdnStation,
+                        # Absolutely critical to pass 'build=False',
+                        # or else IFB won't be correctly enabled. We
+                        # need to prevent the Mininet object from
+                        # being built until we can enable IFB. There's
+                        # no IFB option in the constructor, so this is
+                        # our only choice.
+                        net = Mininet_wifi(wifiTopo, host=NdnHost, station=NdnStation, build=False,
                                            channel=options.channel, ssid=options.ssid, controller=Controller, accessPoint=OVSKernelAP)
+
+                        # Enable IFB, then build the topology.
+                        net.useIFB() if options.ifb else None
+                        net.build()
                     t2 = datetime.datetime.now()
                     delta = t2 - t
                     info('Setup time: ' + str(delta.seconds) + '\n')
