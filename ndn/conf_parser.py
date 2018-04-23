@@ -272,7 +272,8 @@ def parse_switches(conf_arq):
         params = {}
         for arg in item[1:]:
             fields = arg.split('=')
-            params[fields[0]] = fields[1]
+            if fields[0] != '_':
+                params[fields[0]] = fields[1]
         switches.append(confNdnSwitch(name, params))
 
     return switches
