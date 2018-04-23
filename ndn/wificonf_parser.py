@@ -245,7 +245,7 @@ def parse_accessPoints(conf_arq):
     for item in items:
         name = item[0]
         params = {}
-        args = items[1:]
+        args = item[1:]
         if len(args) > 0:
             for arg in args[0].split(' '):
                 fields = arg.split('=')
