@@ -224,13 +224,6 @@ def parse_args():
 
     parser.add_argument("--face-type", dest='faceType', default='udp', choices=['udp', 'tcp'])
 
-    args, unknownArgs = parser.parse_known_args()
-
-    unknownArgsList = []
-    for arg in unknownArgs:
-        if arg.startswith(("--")):
-            parser.add_argument(arg)
-            unknownArgsList.append(arg.split("--")[1])
 
     #the following 6 code lines for wifi
     parser.add_argument('--wifi', '-w', action='store_true', default=False, help='activate wifi')
@@ -245,7 +238,14 @@ def parse_args():
     parser.add_argument('--vndn', action='store_true', default=False, help='build ndn-based vehicle ad hoc network')
     parser.add_argument('--sumovndn', action='store_true', default=False, help='build ndn-based sumo vehicle ad hoc network')
     parser.add_argument('--ifb', action='store_true', default=False, help='use IFB in the topology for receiver-side delays with TC.')
-    args = parser.parse_args()
+    args, unknownArgs = parser.parse_known_args()
+
+    unknownArgsList = []
+    for arg in unknownArgs:
+        if arg.startswith(("--")):
+            parser.add_argument(arg)
+            unknownArgsList.append(arg.split("--")[1])
+
     options = ProgramOptions()
     options.templateFile = args.tempfile
     options.ctime = args.ctime
