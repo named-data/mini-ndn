@@ -34,6 +34,7 @@ class _WifiExperimentManager:
 
     def __init__(self):
         self.experiments = {}
+        self.expArgs = {}
 
     def loadModules(self):
         currentDir = os.path.dirname(__file__)
@@ -49,6 +50,12 @@ class _WifiExperimentManager:
     def register(self, name, experimentClass):
         if name not in self.experiments:
             self.experiments[name] = experimentClass
+            try:
+                helpStr = experimentClass.arguments()
+                if type(helpStr) is str:
+                    self.expArgs[name] = experimentClass.arguments()
+            except:
+                pass
         else:
             raise _WifiExperimentManager.Error("Experiment '%s' has already been registered" % name)
 
@@ -81,3 +88,8 @@ def getExperimentNames():
         experimentNames.append(key)
 
     return experimentNames
+
+def getExperimentArgs():
+    manager = __getInstance()
+
+    return manager.expArgs

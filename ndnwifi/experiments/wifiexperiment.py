@@ -43,6 +43,7 @@ class wifiExperiment:
         self.carSTASet = [] # for car station
         # Used to restart pings on the recovered node if any
         self.pingedDict = {}
+        self.arbArgs = args["arbArgs"]
 
         if self.isWiFi:
             if self.isVndn or self.isSumoVndn:
