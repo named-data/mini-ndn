@@ -1,11 +1,55 @@
 Release Notes
 =============
 
+Mini-NDN version 0.4.0 (changes since version 0.3.0)
+----------------------------------------------------
+
+Release date: January 10, 2018
+
+**New features**:
+
+- Use SIGQUIT to quit Mini-NDN, SIGINT to kill programs
+
+- Use Infoedit to edit NFD and NLSR configuration files
+
+- Use nlsr.conf installed in the system
+
+- Provide a Vagrantfile to setup Mini-NDN and NDN
+
+- Provide option to disable NLSR
+
+- Provide an option to run NLSR in dry-run mode
+
+- Add option to specify whether to use TCP or UDP face in nlsr.conf
+
+- Add option to specify arbitrary arguments to use in experiments
+
+- Include a single option to install Mini-NDN and all the dependencies
+
+**Bug fixes**:
+
+- Fix "key does not exist error" after NLSR starts
+
+- Update install.sh to call ldconfig after installing ChronoSync
+
+- Add hyperbolic coordinates to default topology
+
+**Misc changes**:
+
+- Add an experiment to test nlsrc
+
+- Create faces in NFD for each neighbor in NLSR
+
+- Update to latest ndn-cxx
+
+- Use /tmp/minindn folder as default work dir instead of /tmp
+
 Mini-NDN version 0.3.0 (changes since version 0.2.0)
+----------------------------------------------------
 
 Release date: March 3, 2017
 
-**New featues**:
+**New features**:
 
 - Mini-NDN cluster edition
 
@@ -46,7 +90,7 @@ Mini-NDN version 0.2.0 (changes since version 0.1.1)
 
 Release date: August 18, 2016
 
-**New featues**:
+**New features**:
 
 - Automatic security configuration for NLSR
 

@@ -105,9 +105,9 @@ Experiment ID: `--failure-mcn`
 
 ### Experiment data
 
-The ping data is stored at `/tmp/node-name/ping-data`.
+The ping data is stored at `/tmp/minindn/node-name/ping-data`.
 
-The ping server log is stored at `/tmp/node-name/ping-server`
+The ping server log is stored at `/tmp/minindn/node-name/ping-server`
 
 ## Creating custom experiments
 
@@ -175,7 +175,27 @@ The experiment can then be run from the command-line using the name registered.
         def run(self):
             for host in self.net.hosts:
                 # By default status.txt would be stored
-                # at /tmp/host/status.txt
+                # at /tmp/minindn/host/status.txt
                 host.cmd("nfdc status report > status.txt")
 
     Experiment.register("example-name", ExampleExperiment)
+
+## Passing arbitrary arguments to experiments
+
+One can pass any arbitrary argument to the Mini-NDN command line
+as long as the arguments don't clash with Mini-NDN's arguments.
+This feature allows users to pass any argument to Mini-NDN and process
+them in an experiment without modifying Mini-NDN's core.
+
+Please look at `ndn/experiments/arbitrary_arguments_experiment.py`
+to see how these arguments can be accessed. To have the experiment
+options printed in `sudo minindn --list-experiments` when using
+arbitrary arguments one can add the static `arguments` method as
+shown in the aforementioned experiment.
+
+To run the experiment:
+
+    sudo minindn --experiment arbitrary-arguments --ds 400 --logging false
+
+The experiment will print out the supplied arbitrary values which are --ds
+and --logging. --experiment is a fixed argument of Mini-NDN.

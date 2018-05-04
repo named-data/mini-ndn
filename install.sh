@@ -1,7 +1,7 @@
 #!/bin/bash
 # -*- Mode:bash; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2017, The University of Memphis,
+# Copyright (C) 2015-2018, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -99,13 +99,8 @@ function forwarder {
         $install libpcap-devel
     fi
 
-    git clone https://github.com/named-data/NFD
+    git clone --depth 1 https://github.com/named-data/NFD
     cd NFD
-    current=$(git rev-parse HEAD)
-    if [[ $current != "f4056d0242536f85b7d7b4de1b5ac50dad65c233" ]]; then
-      git checkout f4056d0242536f85b7d7b4de1b5ac50dad65c233
-      git checkout -b fix-commit
-    fi
     ./waf configure --without-websocket
     ./waf
     sudo ./waf install
@@ -119,15 +114,7 @@ function routing {
         cxx="true"
     fi
 
-    if [[ $DIST == Ubuntu ]]; then
-        $install liblog4cxx10-dev
-    fi
-
-    if [[ $DIST == Fedora ]]; then
-        $install log4cxx log4cxx-devel openssl-devel
-    fi
-
-    git clone https://github.com/named-data/ChronoSync
+    git clone --depth 1 https://github.com/named-data/ChronoSync
     cd ChronoSync
     current=$(git rev-parse HEAD)
     if [[ $current != "097bb448f46b8bd9a5c1f431e824f8f6a169b650" ]]; then
@@ -157,20 +144,15 @@ function ndncxx {
     fi
 
     if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
-        $install git libsqlite3-dev libboost-all-dev make g++ libssl-dev libcrypto++-dev
+        $install git libsqlite3-dev libboost-all-dev make g++ libssl-dev
     fi
 
     if [[ $DIST == Fedora ]]; then
-        $install gcc-c++ sqlite-devel boost-devel openssl-devel cryptopp-devel
+        $install gcc-c++ sqlite-devel boost-devel openssl-devel
     fi
 
-    git clone https://github.com/named-data/ndn-cxx
+    git clone --depth 1 https://github.com/named-data/ndn-cxx
     cd ndn-cxx
-    current=$(git rev-parse HEAD)
-    if [[ $current != "b555b00c280b9c9ed46f24a1fbebc73b720601af" ]]; then
-      git checkout b555b00c280b9c9ed46f24a1fbebc73b720601af
-      git checkout -b fix-commit
-    fi
     ./waf configure
     ./waf
     sudo ./waf install
@@ -213,6 +195,12 @@ function mininetwifi {
     sudo rm -rf mininet-wifi
 }
 
+function infoedit {
+    git clone --depth 1 https://github.com/NDN-Routing/infoedit.git
+    cd infoedit
+    sudo make install
+    cd ../
+}
 
 function minindn {
     if [[ updated != true ]]; then
@@ -250,19 +238,124 @@ function minindnwifi {
     sudo cp ndnwifi_utils/topologies/singleap-topology.conf "$install_dir"
     sudo cp ndnwifi_utils/topologies/multiap-topology.conf "$install_dir"
     sudo cp ndnwifi_utils/topologies/vndn-topology.conf "$install_dir"
+    sudo cp topologies/default-topology.conf "$install_dir"
+    sudo cp topologies/minindn.caida.conf "$install_dir"
+    sudo cp topologies/minindn.ucla.conf "$install_dir"
+    sudo cp topologies/minindn.testbed.conf "$install_dir"
     sudo python setup.py clean --all install
 }
 
+function ndn_cpp {
+    if [[ updated != true ]]; then
+        $update
+        updated="true"
+    fi
+
+    if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
+        $install git build-essential libssl-dev libsqlite3-dev libboost-all-dev libprotobuf-dev protobuf-compiler
+    fi
+
+    if [[ $DIST == Fedora ]]; then
+        printf '\nNDN-CPP does not support Fedora yet.\n'
+        return
+    fi
+
+    git clone --depth 1 https://github.com/named-data/ndn-cpp
+    cd ndn-cpp
+    ./configure
+    proc=$(nproc)
+    make -j$proc
+    sudo make install
+    sudo ldconfig
+    cd ..
+}
+
+function pyNDN {
+    if [[ updated != true ]]; then
+        $update
+        updated="true"
+    fi
+
+    if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
+        $install git build-essential libssl-dev libffi-dev python-dev python-pip
+    fi
+
+    if [[ $DIST == Fedora ]]; then
+        printf '\nPyNDN does not support Fedora yet.\n'
+        return
+    fi
+
+    sudo pip install cryptography trollius protobuf pytest mock
+    git clone --depth 1 https://github.com/named-data/PyNDN2
+    cd PyNDN2
+    # Update the user's PYTHONPATH.
+    echo "export PYTHONPATH=\$PYTHONPATH:`pwd`/python" >> ~/.bashrc
+    # Also update root's PYTHONPATH in case of running under sudo.
+    echo "export PYTHONPATH=\$PYTHONPATH:`pwd`/python" | sudo tee -a /root/.bashrc > /dev/null
+    cd ..
+}
+
+function ndn_js {
+    if [[ updated != true ]]; then
+        $update
+        updated="true"
+    fi
+
+    if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
+        $install git nodejs npm
+    fi
+
+    if [[ $DIST == Fedora ]]; then
+        printf '\nNDN-JS does not support Fedora yet.\n'
+        return
+    fi
+
+    sudo ln -fs /usr/bin/nodejs /usr/bin/node
+    sudo npm install -g mocha
+    sudo npm install rsa-keygen sqlite3
+    git clone --depth 1 https://github.com/named-data/ndn-js
+}
+
+function jNDN {
+    if [[ updated != true ]]; then
+        $update
+        updated="true"
+    fi
+
+    if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
+        $install git openjdk-8-jdk maven
+    fi
+
+    if [[ $DIST == Fedora ]]; then
+        printf '\nNDN-JS does not support Fedora yet.\n'
+        return
+    fi
+
+    git clone --depth 1 https://github.com/named-data/jndn
+    cd jndn
+    mvn install
+    cd ..
+}
+
+function commonClientLibraries {
+    ndn_cpp
+    pyNDN
+    ndn_js
+    jNDN
+}
 
 function usage {
-    printf '\nUsage: %s [-mfrti]\n\n' $(basename $0) >&2
+    printf '\nUsage: %s [-a]\n\n' $(basename $0) >&2
 
     printf 'options:\n' >&2
-    printf -- ' -d: install NFD\n' >&2
+    printf -- ' -a: install all the required dependencies\n' >&2
+    printf -- ' -e: install infoedit\n' >&2
+    printf -- ' -f: install NFD\n' >&2
+    printf -- ' -i: install mini-ndn\n' >&2
+    printf -- ' -m: install mininet and dependencies\n' >&2
     printf -- ' -r: install NLSR\n' >&2
     printf -- ' -t: install tools\n' >&2
-    printf -- ' -m: install mininet-wifi and dependencies\n' >&2
-    printf -- ' -i: install mini-ndn\n' >&2
+    printf -- ' -c: install Common Client Libraries\n' >&2
     printf -- ' -w: install minindn-wifi' >&2
     exit 2
 }
@@ -270,14 +363,26 @@ function usage {
 if [[ $# -eq 0 ]]; then
     usage
 else
-    while getopts 'drtmiw' OPTION
+    while getopts 'aemfrticw' OPTION
     do
         case $OPTION in
-        d)    forwarder;;
+        a)
+        forwarder
+        mininet-wifi
+        routing
+        tools
+        infoedit
+        commonClientLibraries
+        minindnwifi
+        break
+        ;;
+        e)    infoedit;;
+        f)    forwarder;;
+        i)    minindn;;
+        m)    mininet-wifi;;
         r)    routing;;
         t)    tools;;
-        m)    mininetwifi;;
-        i)    minindn;;
+        c)    commonClientLibraries;;
         w)    minindnwifi;;
         ?)    usage;;
         esac

@@ -116,7 +116,6 @@ class PrintExperimentNames(argparse.Action):
             if experiment in experimentArgs:
                 print("      ({})".format(experimentArgs[experiment]))
 
-
         sys.exit(0)
 
 class ProgramOptions:
@@ -125,12 +124,13 @@ class ProgramOptions:
         self.experimentName = None
         self.nFaces = 3
         self.templateFile = "minindn.conf"
-        self.hr = False
+        self.routingType = "link-state"
+        self.isNlsrEnabled = False # NLSR doesn't work for wifi by default
         self.isCliEnabled = True
         self.nlsrSecurity = False
         self.nPings = 300
         self.testbed = False
-        self.workDir = "/tmp"
+        self.workDir = "/tmp/minindn"
         self.resultDir = None
         self.pctTraffic = 1.0
         self.cluster = None
@@ -140,17 +140,15 @@ class ProgramOptions:
         self.tunnelType = None
         self.faceType = "udp"
         self.arbArgs = {}
+        self.csSize = 65536
 
-def createResultsDir(resultDir, faces, hr):
+def createResultsDir(resultDir, faces, rType):
     if faces == 0:
         faces = "all"
 
-    if hr:
-        routingType = "/hr/"
-    else:
-        routingType = "/ls/"
+    routingChoice = "/{}/".format(rType)
 
-    resultDir = "%s/%s/faces-%s" % (str(resultDir), routingType, str(faces))
+    resultDir = "{}/{}/faces-{}".format(resultDir, routingChoice, faces)
     resultDir = os.path.abspath(resultDir)
 
     if not os.path.isdir(resultDir):
@@ -167,7 +165,7 @@ def parse_args():
 
     # nargs='?' required here since optional argument
     parser.add_argument('tempfile', nargs='?', default=INSTALL_DIR + 'default-topology.conf',
-                        help="If no template_file is given, ndn_utils/default-topology.conf (given sample file) will be used.")
+                        help="If no template_file is given, topologies/default-topology.conf (given sample file) will be used.")
 
     parser.add_argument("--ctime", type=int, default=60,
                         help="Specify convergence time for the topology (Default: 60 seconds)")
@@ -178,9 +176,12 @@ def parse_args():
     parser.add_argument("--faces", type=int, default=3,
                         help="Specify number of faces 0-60")
 
-    # store_true stores default value of False
-    parser.add_argument("--hr", action="store_true",
-                        help="--hr is used to turn on hyperbolic routing")
+    parser.add_argument("--routing", dest="routingType", default='link-state', choices=['link-state', 'hr', 'dry'],
+                        help="""choices for routing are 'link-state' for link state, 'hr' for hyperbolic, and 'dry'
+                        to test hyperbolic routing and compare with link state. Default is link-state.""")
+
+    parser.add_argument("--nlsr", action="store_true", dest="isNlsrEnabled",
+                        help="Run with NLSR routing")
 
     parser.add_argument("--list-experiments", action=PrintExperimentNames,
                         help="Lists the names of all available experiments")
@@ -191,14 +192,15 @@ def parse_args():
     parser.add_argument("--nPings", type=int, default=10,
                         help="Number of pings to perform between each node in the experiment")
 
+    # store_true stores default value of False
     parser.add_argument("--nlsr-security", action="store_true", dest="nlsrSecurity",
                         help="Enables NLSR security")
 
     parser.add_argument("-t", "--testbed", action="store_true", dest="testbed",
                          help="Instantiates a snapshot of the NDN Testbed irrespective of the tempfile provided")
 
-    parser.add_argument("--work-dir", action="store", dest="workDir", default="/tmp",
-                        help="Specify the working directory; default is /tmp")
+    parser.add_argument("--work-dir", action="store", dest="workDir", default="/tmp/minindn",
+                        help="Specify the working directory; default is /tmp/minindn")
 
     parser.add_argument("--result-dir", action="store", dest="resultDir", default=None,
                         help="Specify the full path destination folder where experiment results will be moved")
@@ -238,6 +240,9 @@ def parse_args():
     parser.add_argument('--vndn', action='store_true', default=False, help='build ndn-based vehicle ad hoc network')
     parser.add_argument('--sumovndn', action='store_true', default=False, help='build ndn-based sumo vehicle ad hoc network')
     parser.add_argument('--ifb', action='store_true', default=False, help='use IFB in the topology for receiver-side delays with TC.')
+    parser.add_argument("--cs-size", dest='csSize', type=int, default=65536,
+                        help="Set CS size in NFD's conf file")
+
     args, unknownArgs = parser.parse_known_args()
 
     unknownArgsList = []
@@ -253,7 +258,8 @@ def parse_args():
     options.ctime = args.ctime
     options.experimentName = args.experiment
     options.nFaces = args.faces
-    options.hr = args.hr
+    options.routingType = args.routingType
+    options.isNlsrEnabled = args.isNlsrEnabled
     options.isCliEnabled = args.isCliEnabled
     options.nlsrSecurity = args.nlsrSecurity
     options.nPings = args.nPings
@@ -267,10 +273,8 @@ def parse_args():
     options.tunnelType = args.tunnelType
     options.placeList = args.placeList
     options.faceType = args.faceType
-    options.faceType = args.faceType
-    for k in args.__dict__:
-        if k in unknownArgsList:
-            options.arbArgs[k] = args.__dict__[k]
+    options.csSize = args.csSize
+
     #the following code lines for WiFi
     options.isWiFi=args.wifi
     options.isVndn=args.vndn
@@ -283,7 +287,6 @@ def parse_args():
     options.ssid= args.ssid
     options.wmediumd=args.wmediumd
     options.interference=args.interference
-    # the following code lines for WiFi
     # Use wifi default topopology configure file if no default file is specified.
     if options.isAdhoc or options.isManet:
         options.isWiFi = True
@@ -292,6 +295,11 @@ def parse_args():
             options.templateFile = INSTALL_DIR + 'wifi/adhoc-topology.conf'
         else:
             options.templateFile = INSTALL_DIR + 'wifi/singleap-topology.conf'
+
+    for k in args.__dict__:
+        if k in unknownArgsList:
+            options.arbArgs[k] = args.__dict__[k]
+
     if options.experimentName is not None and options.experimentName not in WifiExperimentManager.getExperimentNames():
         print("No experiment named %s" % options.experimentName)
         sys.exit(1)
@@ -344,7 +352,13 @@ class NdnTopo(Topo):
         for host in hosts_conf:
             if host.cpu != None and self.isLimited != True:
                 self.isLimited = True
-            self.addHost(host.name, app=host.app, params=host.uri_tuples, cpu=host.cpu,cores=host.cores,cache=host.cache, workdir=workDir)
+            self.addHost(host.name, app=host.app, params=host.uri_tuples, cpu=host.cpu,
+                         cores=host.cores,cache=host.cache, workdir=workDir)
+            if (options.routingType != 'link-state' and (host.params.get('radius') is None
+                or host.params.get('angle') is None)):
+                info('Hyperbolic coordinates in topology file are either missing or misconfigured.\n' \
+                     'Check that each node has one radius value and one or two angle value(s).\n')
+                sys.exit(1)
 
         for switch in switches_conf:
             self.addSwitch(switch.name, **switch.params)
@@ -428,18 +442,6 @@ def execute(options):
             print("Placement list sum is not equal to number of nodes!")
             sys.exit(1)
 
-    # Use nfd.conf as default configuration for NFD, else use the sample
-
-    nfdConfFile = "%s/nfd.conf" % INSTALL_DIR
-    if os.path.isfile("/usr/local/etc/ndn/nfd.conf") == True:
-        shutil.copy2("/usr/local/etc/ndn/nfd.conf", nfdConfFile)
-    elif os.path.isfile("/usr/local/etc/ndn/nfd.conf.sample") == True:
-        shutil.copy2("/usr/local/etc/ndn/nfd.conf.sample", nfdConfFile)
-    else:
-        sys.exit("nfd.conf or nfd.conf.sample cannot be found in the expected directory. Exit.")
-
-    call(["sudo", "sed", "-i", 's|default_level [A-Z]*$|default_level $LOG_LEVEL|g', nfdConfFile])
-
     # Copy nfd.conf to remote hosts - this assumes that NDN versions across
     # the cluster are at least compatible if not the same
     if options.cluster is not None:
@@ -452,7 +454,7 @@ def execute(options):
                 ssh(login, "sudo cp /tmp/nfd.conf %s" % src)
 
     if options.resultDir is not None:
-        options.resultDir = createResultsDir(options.resultDir, options.nFaces, options.hr)
+        options.resultDir = createResultsDir(options.resultDir, options.nFaces, options.routingType)
 
     #Generates a network topology according to templateFile.
     if options.isWiFi: # for wireless network
@@ -537,31 +539,47 @@ def execute(options):
                     node1.setIP(ipStr(ipParse(ndnNetBase) + 1) + '/30', intf=link.intf1)
                     node2.setIP(ipStr(ipParse(ndnNetBase) + 2) + '/30', intf=link.intf2)
                     ndnNetBase = ipStr(ipParse(ndnNetBase) + 4)
+    time.sleep(2)
+    info('Starting NFD on nodes\n')
+    for host in net.hosts:
+        host.nfd = Nfd(host, options.csSize)
+        host.nfd.start()
+
+    if options.isNlsrEnabled is True:
 
         # NLSR Security
         if options.nlsrSecurity is True:
             Nlsr.createKeysAndCertificates(net, options.workDir)
 
         # NLSR initialization
+        info('Starting NLSR on nodes\n')
         for host in net.hosts:
             conf = next(x for x in hosts_conf if x.name == host.name)
             host.nlsrParameters = conf.nlsrParameters
+
             if options.nFaces is not None:
                 host.nlsrParameters["max-faces-per-prefix"] = options.nFaces
-            if options.hr is True:
+
+            if options.routingType == 'dry':
+                host.nlsrParameters["hyperbolic-state"] = "dry-run"
+
+            elif options.routingType == 'hr':
                 host.nlsrParameters["hyperbolic-state"] = "on"
+
             # Generate NLSR configuration file
             configGenerator = NlsrConfigGenerator(host, options.nlsrSecurity, options.faceType)
             configGenerator.createConfigFile()
+
             # Start NLSR
             host.nlsr = Nlsr(host, configGenerator.neighborIPs, options.faceType)
             host.nlsr.start()
-        for host in net.hosts:
-            if 'app' in host.params:
-                if host.params['app'] != '':
-                    app = host.params['app']
-                    print("Starting " + app + " on node " + host.name)
-                    print(host.cmd(app))
+
+    for host in net.hosts:
+        if 'app' in host.params:
+            if host.params['app'] != '':
+                app = host.params['app']
+                print("Starting " + app + " on node " + host.name)
+                print(host.cmd(app))
 
     # Load experiment
     experimentName = options.experimentName
@@ -579,6 +597,7 @@ def execute(options):
             "strategy": Nfd.STRATEGY_BEST_ROUTE,
             "pctTraffic": options.pctTraffic,
             "nlsrSecurity": options.nlsrSecurity,
+            "workDir": options.workDir,
             "arbArgs" : options.arbArgs
         }
 
@@ -622,7 +641,7 @@ if __name__ == '__main__':
     hosts_conf = []
     links_conf = []
 
-    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGQUIT, signal_handler)
 
     options = parse_args()
 
