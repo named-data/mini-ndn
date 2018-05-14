@@ -508,4 +508,14 @@ if __name__ == '__main__':
     options = parse_args()
 
     setLogLevel('info')
-    execute(options)
+
+    # No exceptions are raised in ndn presently, and Mininet relies
+    # on generic Exception. If this situation changes this may well
+    # need to be altered.
+    try:
+        execute(options)
+    except Exception as e:
+        print("Mininet Error: {}".format(e))
+        call(["nfd-stop"])
+        call(["sudo", "mn", "--clean"])
+        sys.exit(1)
