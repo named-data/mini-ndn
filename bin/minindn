@@ -445,6 +445,21 @@ def execute(options):
                 print("Starting " + app + " on node " + host.name)
                 print(host.cmd(app))
 
+    # Determine if each host is running NFD and NLSR
+    for host in net.hosts:
+        nfdStatus = host.cmd("ps -g -U root | grep 'nfd --config {}/[n]fd.conf'".format(host.homeFolder))
+        nlsrStatus = host.cmd("ps -g | grep 'nlsr -f {}/[n]lsr.conf'".format(host.homeFolder))
+        if not host.nfd.isRunning or not nfdStatus:
+            print("NFD on host {} is not running. Printing log file and exiting...".format(host.name))
+            print(host.cmd("cat {}/nfd.log".format(host.homeFolder)))
+            net.stop()
+            sys.exit(1)
+        if (not host.nlsr.isRunning or not nlsrStatus) and options.isNlsrEnabled:
+            print("NLSR on host {} is not running. Printing log file and exiting...".format(host.name))
+            print(host.cmd("cat {}/log/nlsr.log".format(host.homeFolder)))
+            net.stop()
+            sys.exit(1)
+
     # Load experiment
     experimentName = options.experimentName
 
@@ -494,6 +509,17 @@ def signal_handler(signal, frame):
     call(["sudo", "mn", "--clean"])
     sys.exit(1)
 
+def verify_dependencies():
+    "Prevent MiniNDN from running without necessary dependencies"
+    dependencies = ["nfd", "nlsr", "infoedit", "ndnping", "ndnpingserver"]
+    devnull = open("/dev/null", "w")
+    # Checks that each program is in the system path
+    for program in dependencies:
+        if call(["which", program], stdout=devnull):
+            print("{} is missing from the system path! Exiting...".format(program))
+            sys.exit(1)
+    devnull.close()
+
 if __name__ == '__main__':
 
     hosts_conf = []
@@ -504,6 +530,7 @@ if __name__ == '__main__':
     options = parse_args()
 
     setLogLevel('info')
+    verify_dependencies()
 
     try:
         execute(options)
