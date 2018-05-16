@@ -180,22 +180,25 @@ The experiment can then be run from the command-line using the name registered.
 
     Experiment.register("example-name", ExampleExperiment)
 
-## Passing arbitrary arguments to experiments
+## Passing arguments to experiments
 
-One can pass any arbitrary argument to the Mini-NDN command line
-as long as the arguments don't clash with Mini-NDN's arguments.
-This feature allows users to pass any argument to Mini-NDN and process
-them in an experiment without modifying Mini-NDN's core.
+Mini-NDN has the capacity to pass arguments to experiments, insofar
+as they do not clash with those of Mini-NDN. This feature
+allows users to pass arguments to Mini-NDN and process them in an
+experiment without having to rewrite Mini-NDN's core.
 
-Please look at `ndn/experiments/arbitrary_arguments_experiment.py`
-to see how these arguments can be accessed. To have the experiment
-options printed in `sudo minindn --list-experiments` when using
-arbitrary arguments one can add the static `arguments` method as
-shown in the aforementioned experiment.
+An example of an experiment implementing this functionality is given in
+`ndn/experiments/arguments_experiment.py`, which demonstrates how to
+write code which handles arguments. Documentation for these arguments
+appears when called with `sudo minindn -h`, as does documentation for
+fixed arguments defined in core code, so it is strongly recommended to
+differentiate those you write yourself. Note that Bash and Zsh users
+can make use of autocomplete functionality when calling these arguments.
 
 To run the experiment:
 
-    sudo minindn --experiment arbitrary-arguments --ds 400 --logging false
+    sudo minindn --experiment arg-exp --ds 226 --logging
 
-The experiment will print out the supplied arbitrary values which are --ds
-and --logging. --experiment is a fixed argument of Mini-NDN.
+The experiment will print out the supplied value for --ds and a boolean
+value for the presence of --logging. --experiment is a fixed argument of
+Mini-NDN.

@@ -36,7 +36,7 @@ class Experiment:
         self.strategy = args["strategy"]
         self.pctTraffic = args["pctTraffic"]
         self.nlsrSecurity = args["nlsrSecurity"]
-        self.arbArgs = args["arbArgs"]
+        self.arguments = args["arguments"]
 
         # Used to restart pings on the recovered node if any
         self.pingedDict = {}

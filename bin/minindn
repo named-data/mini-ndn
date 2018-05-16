@@ -103,13 +103,10 @@ class PrintExperimentNames(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
         experimentNames = ExperimentManager.getExperimentNames()
-        experimentArgs = ExperimentManager.getExperimentArgs()
 
         print("Mini-NDN experiments:")
         for experiment in experimentNames:
             print("  {}".format(experiment))
-            if experiment in experimentArgs:
-                print("      ({})".format(experimentArgs[experiment]))
 
         sys.exit(0)
 
@@ -134,7 +131,7 @@ class ProgramOptions:
         self.placer = None
         self.tunnelType = None
         self.faceType = "udp"
-        self.arbArgs = {}
+        self.arguments = None
         self.csSize = 65536
 
 def createResultsDir(resultDir, faces, rType):
@@ -224,16 +221,10 @@ def parse_args():
     parser.add_argument("--cs-size", dest='csSize', type=int, default=65536,
                         help="Set CS size in NFD's conf file")
 
+    ExperimentManager.addExperimentArgs(parser)
+
     if "argcomplete" in sys.modules:
         argcomplete.autocomplete(parser)
-
-    args, unknownArgs = parser.parse_known_args()
-
-    unknownArgsList = []
-    for arg in unknownArgs:
-        if arg.startswith(("--")):
-            parser.add_argument(arg)
-            unknownArgsList.append(arg.split("--")[1])
 
     args = parser.parse_args()
 
@@ -258,10 +249,7 @@ def parse_args():
     options.placeList = args.placeList
     options.faceType = args.faceType
     options.csSize = args.csSize
-
-    for k in args.__dict__:
-        if k in unknownArgsList:
-            options.arbArgs[k] = args.__dict__[k]
+    options.arguments = args
 
     if options.experimentName is not None and options.experimentName not in ExperimentManager.getExperimentNames():
         print("No experiment named %s" % options.experimentName)
@@ -471,7 +459,7 @@ def execute(options):
             "pctTraffic": options.pctTraffic,
             "nlsrSecurity": options.nlsrSecurity,
             "workDir": options.workDir,
-            "arbArgs" : options.arbArgs
+            "arguments" : options.arguments
         }
 
         experiment = ExperimentManager.create(experimentName, experimentArgs)

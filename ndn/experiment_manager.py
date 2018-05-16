@@ -35,7 +35,6 @@ class _ExperimentManager:
 
     def __init__(self):
         self.experiments = {}
-        self.expArgs = {}
 
     def loadModules(self):
         currentDir = os.path.dirname(__file__)
@@ -52,12 +51,6 @@ class _ExperimentManager:
     def register(self, name, experimentClass):
         if name not in self.experiments:
             self.experiments[name] = experimentClass
-            try:
-                helpStr = experimentClass.arguments()
-                if type(helpStr) is str:
-                    self.expArgs[name] = experimentClass.arguments()
-            except:
-                pass
         else:
             raise _ExperimentManager.Error("Experiment '%s' has already been registered" % name)
 
@@ -92,7 +85,9 @@ def getExperimentNames():
 
     return experimentNames
 
-def getExperimentArgs():
+def addExperimentArgs(parser):
+    # Find all experiment command line arguments and parse them.
     manager = __getInstance()
-
-    return manager.expArgs
+    for name in manager.experiments:
+        if hasattr(manager.experiments[name], "parseArguments"):
+            manager.experiments[name].parseArguments(parser)
