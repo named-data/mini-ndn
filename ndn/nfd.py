@@ -26,8 +26,6 @@ from ndn.ndn_application import NdnApplication
 from ndn.util import copyExistentFile
 
 class Nfd(NdnApplication):
-    STRATEGY_BEST_ROUTE = "best-route"
-    STRATEGY_NCC = "ncc"
 
     def __init__(self, node, csSize):
         NdnApplication.__init__(self, node)
@@ -71,7 +69,3 @@ class Nfd(NdnApplication):
     def start(self):
         NdnApplication.start(self, "setsid nfd --config {} > {} 2>&1 &".format(self.confFile, self.logFile))
         time.sleep(2)
-
-    def setStrategy(self, name, strategy):
-        self.node.cmd("nfdc strategy set {} ndn:/localhost/nfd/strategy/{}".format(name, strategy))
-        time.sleep(0.5)

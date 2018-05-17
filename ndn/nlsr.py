@@ -26,6 +26,7 @@ from mininet.examples.cluster import RemoteMixin
 
 from ndn.ndn_application import NdnApplication
 from ndn.util import ssh, scp, copyExistentFile
+from apps.nfdc import Nfdc
 
 import shutil
 import os
@@ -41,8 +42,8 @@ class Nlsr(NdnApplication):
         self.node = node
         self.neighbors = neighbors
         self.faceType = faceType
-        self.routerName = "/%sC1.Router/cs/%s" % ('%', node.name)
-        self.confFile = "%s/nlsr.conf" % node.homeFolder
+        self.routerName = "/{}C1.Router/cs/{}".format('%', node.name)
+        self.confFile = "{}/nlsr.conf".format(node.homeFolder)
 
         # Make directory for log file
         self.logDir = "{}/log".format(node.homeFolder)
@@ -58,7 +59,7 @@ class Nlsr(NdnApplication):
 
     def createFaces(self):
         for ip in self.neighbors:
-            self.node.cmd("nfdc face create {}://{} permanent".format(self.faceType, ip))
+            Nfdc.createFace(self.node, ip, self.faceType, isPermanent=True)
 
     @staticmethod
     def createKey(host, name, outputFile):

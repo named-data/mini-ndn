@@ -73,6 +73,9 @@ from ndn.conf_parser import parse_hosts, parse_switches, parse_links
 from ndn.remote_ndn_link import RemoteNdnLink, RemoteGRENdnLink
 from ndn.placer import GuidedPlacer, PopulatePlacement
 from ndn.util import ssh, scp, MiniNDNCLI
+from ndn.nlsr import Nlsr, NlsrConfigGenerator
+from ndn.nfd import Nfd
+from ndn.apps.nfdc import Nfdc
 
 import os.path, time
 import shutil
@@ -85,9 +88,6 @@ from subprocess import call
 import glob
 from functools import partial
 import re
-
-from ndn.nlsr import Nlsr, NlsrConfigGenerator
-from ndn.nfd import Nfd
 
 try:
     import argcomplete
@@ -470,7 +470,7 @@ def execute(options):
             "net": net,
             "ctime": options.ctime,
             "nPings": options.nPings,
-            "strategy": Nfd.STRATEGY_BEST_ROUTE,
+            "strategy": Nfdc.STRATEGY_BEST_ROUTE,
             "pctTraffic": options.pctTraffic,
             "nlsrSecurity": options.nlsrSecurity,
             "workDir": options.workDir,

@@ -27,6 +27,7 @@ from ndn.apps.ndn_ping_client import NDNPingClient
 from itertools import cycle
 
 from ndn import ExperimentManager
+from ndn.apps.nfdc import Nfdc
 
 class Experiment:
 
@@ -49,10 +50,10 @@ class Experiment:
     def setup(self):
         for host in self.net.hosts:
             # Set strategy
-            host.nfd.setStrategy("/ndn/", self.strategy)
+            Nfdc.setStrategy(host, "/ndn/", self.strategy)
 
             # Start ping server
-            host.cmd("ndnpingserver /ndn/" + str(host) + "-site/" + str(host) + " > ping-server &")
+            host.cmd("ndnpingserver /ndn/{}-site/{} > ping-server &".format(host, host))
 
             # Create folder to store ping data
             host.cmd("mkdir ping-data")
@@ -108,8 +109,8 @@ class Experiment:
         host.nfd.start()
         host.nlsr.createFaces()
         host.nlsr.start()
-        host.nfd.setStrategy("/ndn/", self.strategy)
-        host.cmd("ndnpingserver /ndn/" + str(host) + "-site/" + str(host) + " > ping-server &")
+        Nfdc.setStrategy(host, "/ndn/", self.strategy)
+        host.cmd("ndnpingserver /ndn/{}-site/{} > ping-server &".format(host, host))
 
     def startPctPings(self):
         nNodesToPing = int(round(len(self.net.hosts)*self.pctTraffic))
