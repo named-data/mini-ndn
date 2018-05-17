@@ -21,29 +21,23 @@
 # along with Mini-NDN, e.g., in COPYING.md file.
 # If not, see <http://www.gnu.org/licenses/>.
 
-import os
+import time
 
-class NdnApplication:
-    def __init__(self, node):
-        self.node = node
-        self.isRunning = False
-        self.processId = ""
-
-    def start(self, command):
-        if self.isRunning is True:
-            try:
-                os.kill(int(self.processId), 0)
-            except OSError:
-                self.isRunning = False
-
-        if self.isRunning is False:
-            self.node.cmd(command)
-            self.processId = self.node.cmd("echo $!")[:-1]
-
-            self.isRunning = True
-
-    def stop(self):
-        if self.isRunning and self.processId != "":
-            self.node.cmd("sudo kill {}".format(self.processId))
-
-            self.isRunning = False
+class NDNPingClient:
+    @staticmethod
+    def ping(source, dest, nPings=1, interval=None, timeout=None, starting_seq_num=None,
+             identifier=None, allow_stale_data=False, print_timestamp=True, sleepTime=0.2):
+        print("Scheduling ping(s) from {} to {}".format(source.name, dest.name))
+        # Use "&" to run in background and perform parallel pings
+        source.cmd("ndnping{1}{2}{3}{4}{5}{6}{7} /ndn/{0}-site/{0} >> ping-data/{0}.txt &"
+        .format(
+            dest,
+            " -c {}".format(nPings),
+            " -i {}".format(interval) if interval else "",
+            " -o {}".format(timeout) if timeout  else "",
+            " -n {}".format(starting_seq_num) if starting_seq_num else "",
+            " -p {}".format(identifier) if identifier else "",
+            " -a" if allow_stale_data else "",
+            " -t" if print_timestamp else ""
+        ))
+        time.sleep(sleepTime)

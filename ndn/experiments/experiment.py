@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2017, The University of Memphis,
+# Copyright (C) 2015-2018, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -23,6 +23,7 @@
 
 import time
 import sys
+from ndn.apps.ndn_ping_client import NDNPingClient
 from itertools import cycle
 
 from ndn import ExperimentManager
@@ -91,18 +92,12 @@ class Experiment:
             self.net.stop()
             sys.exit(1)
 
-    def ping(self, source, dest, nPings):
-        # Use "&" to run in background and perform parallel pings
-        print "Scheduling ping(s) from %s to %s" % (source.name, dest.name)
-        source.cmd("ndnping -t -c "+ str(nPings) + " /ndn/" + dest.name + "-site/" + dest.name + " >> ping-data/" + dest.name + ".txt &")
-        time.sleep(0.2)
-
     def startPings(self):
         for host in self.net.hosts:
             for other in self.net.hosts:
                 # Do not ping self
                 if host.name != other.name:
-                    self.ping(host, other, self.nPings)
+                    NDNPingClient.ping(host, other, self.nPings)
 
     def failNode(self, host):
         print("Bringing %s down" % host.name)
@@ -137,7 +132,7 @@ class Experiment:
 
                 # Do not ping self
                 if host.name != other.name:
-                    self.ping(host, other, self.nPings)
+                    NDNPingClient.ping(host, other, self.nPings)
                     nodesPingedList.append(other)
 
                 # Always increment because in 100% case a node should not ping itself
