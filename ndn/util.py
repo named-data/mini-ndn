@@ -24,6 +24,7 @@
 from subprocess import call
 from mininet.cli import CLI
 import sys
+from os.path import isfile
 
 sshbase = [ 'ssh', '-q', '-t', '-i/home/mininet/.ssh/id_rsa' ]
 scpbase = [ 'scp', '-i', '/home/mininet/.ssh/id_rsa' ]
@@ -39,6 +40,16 @@ def scp(*args):
         tmp.append(arg)
     rcmd = scpbase + tmp
     call(rcmd, stdout=devnull, stderr=devnull)
+
+def copyExistentFile(node, fileList, destination):
+    for file in fileList:
+        if isfile(file):
+            node.cmd("cp {} {}".format(file, destination))
+            break
+    if not isfile(destination):
+        fileName = destination.split("/")[-1]
+        raise IOError("{} not found in expected directory.".format(fileName))
+
 
 class MiniNDNCLI(CLI):
     prompt = 'mini-ndn> '

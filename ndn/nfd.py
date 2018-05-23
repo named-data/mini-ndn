@@ -23,6 +23,7 @@
 
 import time, sys, os
 from ndn.ndn_application import NdnApplication
+from ndn.util import copyExistentFile
 
 class Nfd(NdnApplication):
     STRATEGY_BEST_ROUTE = "best-route"
@@ -39,15 +40,11 @@ class Nfd(NdnApplication):
         self.ndnFolder = "{}/.ndn".format(node.homeFolder)
         self.clientConf = "{}/client.conf".format(self.ndnFolder)
 
-        # Copy nfd.conf file from /usr/local/etc/ndn to the node's home
-
+        # Copy nfd.conf file from /usr/local/etc/ndn or /etc/ndn to the node's home directory
         # Use nfd.conf as default configuration for NFD, else use the sample
-        if os.path.isfile("/usr/local/etc/ndn/nfd.conf") == True:
-            node.cmd("sudo cp /usr/local/etc/ndn/nfd.conf {}".format(self.confFile))
-        elif os.path.isfile("/usr/local/etc/ndn/nfd.conf.sample") == True:
-            node.cmd("sudo cp /usr/local/etc/ndn/nfd.conf.sample {}".format(self.confFile))
-        else:
-            sys.exit("nfd.conf or nfd.conf.sample cannot be found in the expected directory. Exit.")
+        possibleConfPaths = ["/usr/local/etc/ndn/nfd.conf.sample", "/usr/local/etc/ndn/nfd.conf",
+                             "/etc/ndn/nfd.conf.sample", "/etc/ndn/nfd.conf"]
+        copyExistentFile(node, possibleConfPaths, self.confFile)
 
         # Set log level
         node.cmd("infoedit -f {} -s log.default_level -v {}".format(self.confFile, self.logLevel))
@@ -60,9 +57,11 @@ class Nfd(NdnApplication):
         # Make NDN folder
         node.cmd("sudo mkdir {}".format(self.ndnFolder))
 
-        # Copy the client.conf file and change the unix socket
-        node.cmd("sudo cp /usr/local/etc/ndn/client.conf.sample {}".format(self.clientConf))
+        # Copy client configuration to host
+        possibleClientConfPaths = ["/usr/local/etc/ndn/client.conf.sample", "/etc/ndn/client.conf.sample"]
+        copyExistentFile(node, possibleClientConfPaths, self.clientConf)
 
+        # Change the unix socket
         node.cmd("sudo sed -i 's|nfd.sock|{}.sock|g' {}".format(node.name, self.clientConf))
 
         # Change home folder

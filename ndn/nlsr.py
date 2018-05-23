@@ -25,7 +25,7 @@ from mininet.clean import sh
 from mininet.examples.cluster import RemoteMixin
 
 from ndn.ndn_application import NdnApplication
-from ndn.util import ssh, scp
+from ndn.util import ssh, scp, copyExistentFile
 
 import shutil
 import os
@@ -78,7 +78,7 @@ class Nlsr(NdnApplication):
         # Create root certificate
         rootName = NETWORK
         sh("ndnsec-keygen {}".format(rootName)) # Installs a self-signed cert into the system
-        sh("ndnsec-cert-dump -i {} > {}/root.cert".format(rootName, securityDir, securityDir))
+        sh("ndnsec-cert-dump -i {} > {}/root.cert".format(rootName, securityDir))
 
         # Create necessary certificates for each site
         for host in net.hosts:
@@ -154,7 +154,8 @@ class NlsrConfigGenerator:
         self.hyperRadius = parameters.get("radius", 0.0)
         self.hyperAngle = parameters.get("angle", 0.0)
         self.neighborIPs = []
-        self.node.cmd("sudo cp /usr/local/etc/ndn/nlsr.conf.sample nlsr.conf")
+        possibleConfPaths = ["/usr/local/etc/ndn/nlsr.conf.sample", "/etc/ndn/nlsr.conf.sample"]
+        copyExistentFile(node, possibleConfPaths, "{}/nlsr.conf".format(self.node.homeFolder))
 
     def createConfigFile(self):
 
