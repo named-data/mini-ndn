@@ -171,41 +171,36 @@ def parse_switches(conf_arq):
 
 def parse_links(conf_arq):
     'Parse links section from the conf file.'
-    arq = open(conf_arq,'r')
+    arq = open(conf_arq, 'r')
 
     links = []
+    linkSectionFlag = False
 
-    while True:
-        line = arq.readline()
-        if line == '[links]\n':
-            break
+    for line in arq:
+        if linkSectionFlag:
+            args = line.split()
 
-    while True:
-        line = arq.readline()
-        if line == '':
-            break
+            # checks for non-empty line
+            if len(args) == 0:
+                continue
 
-        args = line.split()
+            h1, h2 = args.pop(0).split(':')
 
-        #checks for non-empty line
-        if len(args) == 0:
-            continue
+            link_dict = {}
 
-        h1, h2 = args.pop(0).split(':')
+            for arg in args:
+                arg_name, arg_value = arg.split('=')
+                key = arg_name
+                value = arg_value
+                if key in ['bw','jitter','max_queue_size']:
+                    value = int(value)
+                if key in ['loss']:
+                    value = float(value)
+                link_dict[key] = value
 
-        link_dict = {}
+            links.append(confNDNLink(h1,h2,link_dict))
 
-        for arg in args:
-            arg_name, arg_value = arg.split('=')
-            key = arg_name
-            value = arg_value
-            if key in ['bw','jitter','max_queue_size']:
-                value = int(value)
-            if key in ['loss']:
-                value = float(value)
-            link_dict[key] = value
-
-        links.append(confNDNLink(h1,h2,link_dict))
-
+        elif line == "[links]\n":
+            linkSectionFlag = True
 
     return links
