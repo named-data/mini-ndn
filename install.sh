@@ -305,12 +305,14 @@ function jNDN {
 
 function argcomplete {
     if [[ $SHELL == "/bin/bash" ]]; then
+        $install bash-completion
         $install python-argcomplete
         if ! grep -q 'eval "$(register-python-argcomplete minindn)"' ~/.bashrc; then
             echo 'eval "$(register-python-argcomplete minindn)"' >> ~/.bashrc
         fi
         source ~/.bashrc
     elif [[ $SHELL == "/bin/zsh" ]] || [[ $SHELL == "/usr/bin/zsh" ]]; then
+        $install bash-completion
         $install python-argcomplete
         if ! grep -z -q 'autoload bashcompinit\sbashcompinit\seval "$(register-python-argcomplete minindn)"' ~/.zshrc; then
             echo -e 'autoload bashcompinit\nbashcompinit\neval "$(register-python-argcomplete minindn)"' >> ~/.zshrc
