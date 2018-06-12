@@ -324,12 +324,12 @@ def parse_accessPoints(conf_arq):
     except ConfigParser.NoSectionError:
         return accessPoints
 
-    print items
+    #print items
     for item in items:
         name = item[0] # ap1
         params = {}
         args = item[1:] # _
-        print args
+        #print args
         if len(args) > 1:
             for arg in args[0].split(' '):
                 fields = arg.split('=')

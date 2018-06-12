@@ -11,6 +11,7 @@ import random # This line for graph
 from subprocess import call
 from mininet.wifi.net import Mininet_wifi
 from ndn.ndn_host import NdnHost
+from ndn_host import NdnStation, NdnCar
 from mininet.link import TCLink
 from mininet.node import Controller, OVSKernelSwitch
 from mininet.log import setLogLevel, output, info
@@ -45,13 +46,13 @@ def build_sumo_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
     cls.printCon = False
     #build a wire network or a wirelesswork network.
     #topology object adhocTopo can't make as  params in Mininet object definination
-    sumo_vndn = Mininet_wifi(host=NdnHost, station=NdnStation, car=NdnHost, controller=Controller, switch=OVSKernelSwitch ,ssid=ssid, channel=channel,
-                   mode=mode, enable_wmediumd=wmediumd, enable_interference=interference)
+    sumo_vndn = Mininet_wifi(host=NdnHost, station=NdnStation, car=NdnCar, controller=Controller, switch=OVSKernelSwitch ,ssid=ssid, channel=channel,
+                   mode=mode, link=wmediumd, wmediumd_mode=interference)
 
     # Possibly we should clean up here and/or validate
     # the topo
-    if sumo_vndn.cleanup:
-        pass
+    #if sumo_vndn.cleanup:
+    #    pass
 
     info('*** Creating adhoc network\n')
     if not sumo_vndn.controllers and sumo_vndn.controller:
@@ -109,7 +110,7 @@ def build_sumo_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
         i=i+1
 
     "Available Options: sumo, sumo-gui"
-    sumo_vndn.useExternalProgram('sumo-gui', config_file='map.sumocfg')
+    sumo_vndn.useExternalProgram('sumo', config_file='map.sumocfg')
     print "starting network....."
     sumo_vndn.build()
     sumo_vndn.controllers[0].start()
@@ -127,7 +128,7 @@ def build_sumo_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
     k = 1
     for car in sumo_vndn.cars:
         car.setIP('192.168.0.%s/24' % k, intf='%s-wlan0' % car)
-        car.setIP('192.168.1.%s/24' % i, intf='%s-eth0' % car)
+        car.setIP('192.168.1.%s/24' % i, intf='%s-eth1' % car)
         car.cmd('ip route add 10.0.0.0/8 via 192.168.1.%s' % j)
         i += 2
         j += 2
@@ -136,7 +137,7 @@ def build_sumo_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
     i = 1
     j = 2
     for v in sumo_vndn.carsSTA:
-        v.setIP('192.168.1.%s/24' % j, intf='%s-eth0' % v)
+        v.setIP('192.168.1.%s/24' % j, intf='%s-eth1' % v)
         v.setIP('10.0.0.%s/24' % i, intf='%s-wlan0' % v) #This is for v2v communication in ad hoc mode
         v.cmd('echo 1 > /proc/sys/net/ipv4/ip_forward')
         i += 1

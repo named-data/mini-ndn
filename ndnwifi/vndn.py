@@ -9,7 +9,7 @@ import sys
 import datetime
 import random
 from subprocess import call
-from mininet.wifi.net import Mininet_wifi
+from mininet.net import Mininet
 from ndn.ndn_host import NdnHost
 from ndnwifi.ndn_host import NdnStation, NdnCar
 from mininet.link import TCLink
@@ -46,14 +46,14 @@ def build_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
     cls = Association
     cls.printCon = False
 
-    vndn = Mininet_wifi(host=NdnHost, station=NdnStation, car=NdnCar, controller=Controller, switch=OVSKernelSwitch, ssid=ssid, channel=channel,
+    vndn = Mininet(host=NdnHost, station=NdnStation, car=NdnCar, controller=Controller, switch=OVSKernelSwitch, ssid=ssid, channel=channel,
                     mode=mode, enable_wmediumd=wmediumd, enable_interference=interference)
 
 
     # Possibly we should clean up here and/or validate
     # the topo
-    if vndn.cleanup:
-        pass
+    #if vndn.cleanup:
+    #     pass
 
     info('*** Creating ndn based vehicle network\n')
     if not vndn.controllers and vndn.controller:
