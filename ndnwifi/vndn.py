@@ -9,7 +9,11 @@ import sys
 import datetime
 import random
 from subprocess import call
+#<<<<<<< HEAD
 from mininet.net import Mininet
+#=======
+from mininet.wifi.net import Mininet_wifi
+#>>>>>>> 43eaca4746df52b3eec2b5d2a3bd70a1afb8ae2b
 from ndn.ndn_host import NdnHost
 from ndnwifi.ndn_host import NdnStation, NdnCar
 from mininet.link import TCLink
@@ -46,7 +50,11 @@ def build_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
     cls = Association
     cls.printCon = False
 
-    vndn = Mininet(host=NdnHost, station=NdnStation, car=NdnCar, controller=Controller, switch=OVSKernelSwitch, ssid=ssid, channel=channel,
+#<<<<<<< HEAD
+#    vndn = Mininet(host=NdnHost, station=NdnStation, car=NdnCar, controller=Controller, switch=OVSKernelSwitch, ssid=ssid, channel=channel,
+#=======
+    vndn = Mininet_wifi(host=NdnHost, station=NdnStation, car=NdnCar, controller=Controller, switch=OVSKernelSwitch, ssid=ssid, channel=channel,
+#>>>>>>> 43eaca4746df52b3eec2b5d2a3bd70a1afb8ae2b
                     mode=mode, enable_wmediumd=wmediumd, enable_interference=interference)
 
 

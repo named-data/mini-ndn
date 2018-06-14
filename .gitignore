@@ -9,11 +9,9 @@ doc/latex
 examples
 infoedit
 jndn
-Mini_NDN.egg-info
-MiniNDN_WiFi.egg-info
 mininet
-mini-ndn
 mini_ndn
+mini-ndn
 NFD
 NLSR
 ndn-cpp
@@ -26,3 +24,4 @@ util
 .vagrant
 modify\ illustration.pdf
 Introduction\ of\ MiniNDN-WiFi.odp
+MiniNDN_WiFi.egg-info/

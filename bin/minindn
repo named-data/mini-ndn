@@ -300,7 +300,6 @@ def parse_args():
             	options.templateFile = INSTALL_DIR + 'wifi/singleap-topology.conf'
     print options.templateFile
 
-
     for k in args.__dict__:
         if k in unknownArgsList:
             options.arbArgs[k] = args.__dict__[k]
