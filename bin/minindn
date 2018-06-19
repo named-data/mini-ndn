@@ -454,7 +454,7 @@ def execute(options):
             print(host.cmd("cat {}/nfd.log".format(host.homeFolder)))
             net.stop()
             sys.exit(1)
-        if (not host.nlsr.isRunning or not nlsrStatus) and options.isNlsrEnabled:
+        if options.isNlsrEnabled and (not host.nlsr.isRunning or not nlsrStatus):
             print("NLSR on host {} is not running. Printing log file and exiting...".format(host.name))
             print(host.cmd("cat {}/log/nlsr.log".format(host.homeFolder)))
             net.stop()

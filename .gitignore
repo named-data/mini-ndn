@@ -20,3 +20,4 @@ openflow
 PyNDN2
 util
 .vagrant
+*.pyc
