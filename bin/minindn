@@ -407,7 +407,7 @@ class NdnWifiTopo(Topo_WiFi):
                 self.isLimited = True
             # No addCar() function in topo.py file.
             self.addStation(car.name, app=car.app, params=car.uri_tuples,\
-                            cpu=car.cpu,cores=car.cores,cache=car.cache, workdir=workDir, func='adhoc') 
+                            cpu=car.cpu,cores=car.cores,cache=car.cache, workdir=workDir, func='adhoc')
                             # params 'func' is for v2v communication in adhoc mode
 
         # Add switches and access points to the wifi topology
@@ -545,7 +545,13 @@ def execute(options):
                     ndnNetBase = ipStr(ipParse(ndnNetBase) + 4)
     time.sleep(2)
     info('Starting NFD on nodes\n')
-    for host in net.hosts:
+    hostlist = None
+    if options.isWiFi:
+        hostlist = net.hosts + net.stations
+    else:
+        hostlist = net.hosts
+
+    for host in hostlist:
         host.nfd = Nfd(host, options.csSize)
         host.nfd.start()
 
@@ -557,7 +563,7 @@ def execute(options):
 
         # NLSR initialization
         info('Starting NLSR on nodes\n')
-        for host in net.hosts:
+        for host in hostlist:
             conf = next(x for x in hosts_conf if x.name == host.name)
             host.nlsrParameters = conf.nlsrParameters
 
@@ -578,7 +584,7 @@ def execute(options):
             host.nlsr = Nlsr(host, configGenerator.neighborIPs, options.faceType)
             host.nlsr.start()
 
-    for host in net.hosts:
+    for host in hostlist:
         if 'app' in host.params:
             if host.params['app'] != '':
                 app = host.params['app']
