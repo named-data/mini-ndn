@@ -502,8 +502,6 @@ def execute(options):
                     info('Setup time: ' + str(delta.seconds) + '\n')
                     net.plotGraph(max_x=100, max_y=100)
                     net.start()
-
-
     else: # for a wire network
         if topo.isTCLink == True and topo.isLimited == True:
             net = Mininet_wifi(topo,host=CpuLimitedNdnHost,link=TCLink)
@@ -521,7 +519,7 @@ def execute(options):
         delta = t2 - t
         info('Setup time: ' + str(delta.seconds) + '\n')
         net.start()
-
+    info('After building vndn\n')
     ###
     # Giving proper IPs to intf so neighbor nodes can communicate
     # This is one way of giving connectivity, another way could be

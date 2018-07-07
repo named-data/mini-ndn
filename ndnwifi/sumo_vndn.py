@@ -7,6 +7,7 @@ So, need to this program. """
 import os
 import sys
 import datetime
+import os.path, time
 import random # This line for graph
 from subprocess import call
 from mininet.wifi.net import Mininet_wifi
@@ -95,7 +96,8 @@ def build_sumo_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
 
     print "*** Setting bgscan"
     sumo_vndn.setBgscan(signal=-45, s_inverval=5, l_interval=10)
-
+    
+    # todo
     print "*** Configuring Propagation Model"
     sumo_vndn.propagationModel(model="logDistance", exp=4)
 
@@ -152,9 +154,13 @@ def build_sumo_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
                 v1.cmd('route add -host 192.168.1.%s gw 10.0.0.%s' % (j, i))
             i += 1
             j += 2
-
-
-    # Load experiment
+    
+    
+    time.sleep(2)
+    info('Starting NFD on nodes\n')
+    for host in sumo_vndn.cars:
+        host.nfd = Nfd(host, 65536) # Load experiment
+        host.nfd.start()        
 
     if experimentName is not None:
         print("Loading experiment: %s" % experimentName)
@@ -178,7 +184,6 @@ def build_sumo_vndn(vndnTopo, ssid, channel, mode, wmediumd, interference,
         else:
             print("ERROR: Experiment '%s' does not exist" % experimentName)
             return
-
 
     """Running CLI....."""
     MiniNdnWifiCLI(sumo_vndn)

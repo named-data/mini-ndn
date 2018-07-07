@@ -25,3 +25,4 @@ util
 modify\ illustration.pdf
 Introduction\ of\ MiniNDN-WiFi.odp
 MiniNDN_WiFi.egg-info/
+.nfs*
