@@ -31,7 +31,7 @@ class Nfd(NdnApplication):
     def __init__(self, node, csSize):
         NdnApplication.__init__(self, node)
 
-        self.logLevel = node.params["params"].get("nfd-log-level", "INFO")
+        self.logLevel = node.params["params"].get("nfd-log-level", "DEBUG")
 
         self.confFile = "{}/nfd.conf".format(node.homeFolder)
         self.logFile = "{}/nfd.log".format(node.homeFolder)
@@ -48,7 +48,7 @@ class Nfd(NdnApplication):
             node.cmd("sudo cp /usr/local/etc/ndn/nfd.conf.sample {}".format(self.confFile))
         else:
             sys.exit("nfd.conf or nfd.conf.sample cannot be found in the expected directory. Exit.")
-
+        node.cmd("infoedit -f {} -s tables.cs_unsolicited_policy -v admit-all".format(self.confFile))
         # Set log level
         node.cmd("infoedit -f {} -s log.default_level -v {}".format(self.confFile, self.logLevel))
         # Open the conf file and change socket file name
