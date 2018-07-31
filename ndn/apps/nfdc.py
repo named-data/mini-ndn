@@ -22,7 +22,9 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 import time
-from mininet.log import setLogLevel, output, info, debug
+from mininet.log import debug
+
+SLEEP_TIME = 0.2
 
 class Nfdc:
     STRATEGY_ASF = "asf"
@@ -48,13 +50,13 @@ class Nfdc:
         )
 
         debug(node.cmd(cmd))
-        time.sleep(0.5)
+        time.sleep(SLEEP_TIME)
 
     @staticmethod
     def unregisterRoute(node, namePrefix, remoteNodeAddress, origin=255):
         cmd = "nfdc route remove {} {} {}".format(namePrefix, remoteNodeAddress, origin)
         debug(node.cmd(cmd))
-        time.sleep(0.5)
+        time.sleep(SLEEP_TIME)
 
     @staticmethod
     def createFace(node, remoteNodeAddress, protocol="udp", isPermanent=False):
@@ -64,20 +66,20 @@ class Nfdc:
             "permanent" if isPermanent else "persistent"
         ))
         debug(node.cmd(cmd))
-        time.sleep(0.5)
+        time.sleep(SLEEP_TIME)
 
     @staticmethod
     def destroyFace(node, remoteNodeAddress, protocol="udp"):
         debug(node.cmd("nfdc face destroy {}://{}".format(protocol, remoteNodeAddress)))
-        time.sleep(0.5)
+        time.sleep(SLEEP_TIME)
 
     @staticmethod
     def setStrategy(node, namePrefix, strategy):
         cmd = "nfdc strategy set {} ndn:/localhost/nfd/strategy/{}".format(namePrefix, strategy)
         debug(node.cmd(cmd))
-        time.sleep(0.5)
+        time.sleep(SLEEP_TIME)
 
     @staticmethod
     def unsetStrategy(node, namePrefix):
         debug(node.cmd("nfdc strategy unset {}".format(namePrefix)))
-        time.sleep(0.5)
+        time.sleep(SLEEP_TIME)

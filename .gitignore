@@ -18,6 +18,7 @@ ndn-js
 ndn-tools
 openflow
 PyNDN2
+PSync
 util
 .vagrant
 *.pyc
