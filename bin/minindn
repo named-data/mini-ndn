@@ -295,9 +295,9 @@ def parse_args():
             options.templateFile = INSTALL_DIR + 'wifi/adhoc-topology.conf'
         else:
             if options.isVndn or options.isSumoVndn:
-		options.templateFile = INSTALL_DIR + 'wifi/vndn-topology.conf'
-	    else:
-            	options.templateFile = INSTALL_DIR + 'wifi/singleap-topology.conf'
+                options.templateFile = INSTALL_DIR + 'wifi/vndn-topology.conf'
+            else:
+                options.templateFile = INSTALL_DIR + 'wifi/singleap-topology.conf'
     print options.templateFile
 
     for k in args.__dict__:

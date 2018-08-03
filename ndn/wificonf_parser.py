@@ -1,4 +1,4 @@
-hpf# -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
+# -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
 # Copyright (C) 2015-2017, The University of Memphis,
 #                          Arizona Board of Regents,
@@ -180,7 +180,7 @@ def parse_hosts(conf_arq):
         hosts.append(confNDNHost(name, app, params, cpu, cores, cache))
 
     return hosts
-# Xian: add the parse_stations() and parse_accessPoint() for wifi 
+# Xian: add the parse_stations() and parse_accessPoint() for wifi
 def parse_stations(conf_arq):
     'Parse hosts section from the conf file.'
     config = ConfigParser.RawConfigParser()
