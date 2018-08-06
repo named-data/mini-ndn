@@ -55,3 +55,28 @@ class MiniNDNCLI(CLI):
     prompt = 'mini-ndn> '
     def __init__(self, mininet, stdin=sys.stdin, script=None):
         CLI.__init__(self, mininet, stdin=sys.stdin, script=None)
+
+class ProgramOptions:
+    def __init__(self):
+        self.ctime = 60
+        self.experimentName = None
+        self.nFaces = 3
+        self.templateFile = "minindn.conf"
+        self.routingType = "link-state"
+        self.isNlsrEnabled = True
+        self.isCliEnabled = True
+        self.nlsrSecurity = False
+        self.nPings = 300
+        self.testbed = False
+        self.workDir = "/tmp/minindn"
+        self.resultDir = None
+        self.pctTraffic = 1.0
+        self.cluster = None
+        self.servers = None
+        self.guided = None
+        self.placer = None
+        self.tunnelType = None
+        self.faceType = "udp"
+        self.arguments = None
+        self.csSize = 65536
+        self.strategy = "best-route"

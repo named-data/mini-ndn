@@ -66,25 +66,14 @@ class confNDNHost():
     def __init__(self, name, app='', params='', cpu=None, cores=None, cache=None):
         self.name = name
         self.app = app
-        self.uri_tuples = params
         self.params = params
         self.cpu = cpu
         self.cores = cores
         self.cache = cache
 
-        # For now assume leftovers are NLSR configuration parameters
-        self.nlsrParameters = params
-
     def __repr__(self):
-        return 'Name: '    + self.name + \
-               ' App: '    + self.app + \
-               ' URIS: '   + str(self.uri_tuples) + \
-               ' CPU: '    + str(self.cpu) + \
-               ' Cores: '  + str(self.cores) + \
-               ' Cache: '  + str(self.cache) + \
-               ' Radius: ' + str(self.radius) + \
-               ' Angle: '  + str(self.angle) + \
-               ' NLSR Parameters: ' + self.nlsrParameters
+        return " Name: {} App: {} Params: {} CPU: {} Cores: {} Cores: {} Cache: {}" \
+               .format(self.name, self.app, self.params, self.cpu, self.cores, self.cache)
 
 class confNdnSwitch:
     def __init__(self, name):
@@ -98,7 +87,7 @@ class confNDNLink():
         self.linkDict = linkDict
 
     def __repr__(self):
-        return 'h1: ' + self.h1 + ' h2: ' + self.h2 + ' params: ' + str(self.linkDict)
+        return "h1: {} h2: {} params: {}".format(self.h1, self.h2, self.linkDict)
 
 def parse_hosts(conf_arq):
     'Parse hosts section from the conf file.'
@@ -109,16 +98,16 @@ def parse_hosts(conf_arq):
 
     items = config.items('nodes')
 
-        #makes a first-pass read to hosts section to find empty host sections
+    # makes a first-pass read to hosts section to find empty host sections
     for item in items:
         name = item[0]
         rest = item[1].split()
         if len(rest) == 0:
             config.set('nodes', name, '_')
-        #updates 'items' list
+    # updates 'items' list
     items = config.items('nodes')
 
-        #makes a second-pass read to hosts section to properly add hosts
+    # makes a second-pass read to hosts section to properly add hosts
     for item in items:
 
         name = item[0]

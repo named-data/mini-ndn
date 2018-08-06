@@ -23,10 +23,11 @@
 
 from mininet.clean import sh
 from mininet.examples.cluster import RemoteMixin
+from mininet.log import info
 
 from ndn.ndn_application import NdnApplication
 from ndn.util import ssh, scp, copyExistentFile
-from apps.nfdc import Nfdc
+from ndn.apps.nfdc import Nfdc
 
 import shutil
 import os
@@ -37,11 +38,11 @@ import time
 NETWORK="/ndn/"
 
 class Nlsr(NdnApplication):
-    def __init__(self, node, neighbors, faceType):
+    def __init__(self, node, options):
         NdnApplication.__init__(self, node)
+        self.config = NlsrConfigGenerator(node, options)
+
         self.node = node
-        self.neighbors = neighbors
-        self.faceType = faceType
         self.routerName = "/{}C1.Router/cs/{}".format('%', node.name)
         self.confFile = "{}/nlsr.conf".format(node.homeFolder)
 
@@ -49,17 +50,14 @@ class Nlsr(NdnApplication):
         self.logDir = "{}/log".format(node.homeFolder)
         self.node.cmd("mkdir {}".format(self.logDir))
 
-        # Create faces in NFD
-        self.createFaces()
-
-    def start(self):
-        self.node.cmd("export NDN_LOG=nlsr.*={}".format(self.node.nlsrParameters.get("nlsr-log-level", "DEBUG")))
+    def start(self, sleepTime = 1):
+        self.node.cmd("export NDN_LOG=nlsr.*={}".format(self.node.params["params"].get("nlsr-log-level", "DEBUG")))
         NdnApplication.start(self, "nlsr -f {} > log/nlsr.log 2>&1 &".format(self.confFile))
-        time.sleep(1)
+        time.sleep(sleepTime)
 
     def createFaces(self):
-        for ip in self.neighbors:
-            Nfdc.createFace(self.node, ip, self.faceType, isPermanent=True)
+        for ip in self.config.neighborIPs:
+            Nfdc.createFace(self.node, ip, self.config.faceType, isPermanent=True)
 
     @staticmethod
     def createKey(host, name, outputFile):
@@ -142,21 +140,35 @@ class NlsrConfigGenerator:
     ROUTING_LINK_STATE = "ls"
     ROUTING_HYPERBOLIC = "hr"
 
-    def __init__(self, node, isSecurityEnabled, faceType):
+    def __init__(self, node, options):
         self.node = node
-        self.isSecurityEnabled = isSecurityEnabled
-        self.faceType = faceType
+        self.isSecurityEnabled = options.nlsrSecurity
+        self.faceType = options.faceType
         self.infocmd = "infoedit -f nlsr.conf"
 
-        parameters = node.nlsrParameters
+        parameters = node.params["params"]
 
-        self.nFaces = parameters.get("max-faces-per-prefix", 3)
-        self.hyperbolicState = parameters.get("hyperbolic-state", "off")
+        self.nFaces = options.nFaces
+        if options.routingType == "hr":
+            self.hyperbolicState = "on"
+        elif options.routingType == "dry":
+            self.hyperbolicState = "dry-run"
+        else:
+            self.hyperbolicState = "off"
         self.hyperRadius = parameters.get("radius", 0.0)
         self.hyperAngle = parameters.get("angle", 0.0)
+
+        if ((self.hyperbolicState == "on" or self.hyperbolicState == "dry-run") and
+            (self.hyperRadius == 0.0 or self.hyperAngle == 0.0)):
+                info('Hyperbolic coordinates in topology file are either missing or misconfigured.')
+                info('Check that each node has one radius value and one or two angle value(s).')
+                sys.exit(1)
+
         self.neighborIPs = []
         possibleConfPaths = ["/usr/local/etc/ndn/nlsr.conf.sample", "/etc/ndn/nlsr.conf.sample"]
         copyExistentFile(node, possibleConfPaths, "{}/nlsr.conf".format(self.node.homeFolder))
+
+        self.createConfigFile()
 
     def createConfigFile(self):
 
@@ -192,7 +204,7 @@ class NlsrConfigGenerator:
 
                 linkCost = intf.params.get("delay", "10ms").replace("ms", "")
 
-                # To be used later to create faces
+                Nfdc.createFace(self.node, ip, self.faceType, isPermanent=True)
                 self.neighborIPs.append(ip)
 
                 self.node.cmd("{} -a neighbors.neighbor \

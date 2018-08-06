@@ -208,6 +208,7 @@ function minindn {
     sudo cp topologies/minindn.caida.conf "$install_dir"
     sudo cp topologies/minindn.ucla.conf "$install_dir"
     sudo cp topologies/minindn.testbed.conf "$install_dir"
+    sudo cp topologies/current-testbed.conf "$install_dir"
     sudo python setup.py clean --all install
 }
 

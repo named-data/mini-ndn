@@ -60,7 +60,7 @@
 
 from mininet.topo import Topo
 from mininet.net import Mininet
-from mininet.log import setLogLevel, output, info
+from mininet.log import setLogLevel, output, info, error, warn
 from mininet.link import TCLink
 from mininet.util import ipStr, ipParse
 
@@ -68,14 +68,13 @@ from mininet.examples.cluster import MininetCluster, RoundRobinPlacer, ClusterCl
 from mininet.examples.clustercli import ClusterCLI
 
 from ndn import ExperimentManager
+from ndn.experiments.experiment import Experiment
 from ndn.ndn_host import NdnHost, CpuLimitedNdnHost, RemoteNdnHost
 from ndn.conf_parser import parse_hosts, parse_switches, parse_links
 from ndn.remote_ndn_link import RemoteNdnLink, RemoteGRENdnLink
 from ndn.placer import GuidedPlacer, PopulatePlacement
-from ndn.util import ssh, scp, MiniNDNCLI
-from ndn.nlsr import Nlsr, NlsrConfigGenerator
 from ndn.nfd import Nfd
-from ndn.apps.nfdc import Nfdc
+from ndn.util import ssh, scp, MiniNDNCLI, ProgramOptions
 
 import os.path, time
 import shutil
@@ -110,30 +109,6 @@ class PrintExperimentNames(argparse.Action):
 
         sys.exit(0)
 
-class ProgramOptions:
-    def __init__(self):
-        self.ctime = 60
-        self.experimentName = None
-        self.nFaces = 3
-        self.templateFile = "minindn.conf"
-        self.routingType = "link-state"
-        self.isNlsrEnabled = True
-        self.isCliEnabled = True
-        self.nlsrSecurity = False
-        self.nPings = 300
-        self.testbed = False
-        self.workDir = "/tmp/minindn"
-        self.resultDir = None
-        self.pctTraffic = 1.0
-        self.cluster = None
-        self.servers = None
-        self.guided = None
-        self.placer = None
-        self.tunnelType = None
-        self.faceType = "udp"
-        self.arguments = None
-        self.csSize = 65536
-
 def createResultsDir(resultDir, faces, rType):
     if faces == 0:
         faces = "all"
@@ -146,10 +121,10 @@ def createResultsDir(resultDir, faces, rType):
     if not os.path.isdir(resultDir):
         os.makedirs(resultDir)
     else:
-        print("Results directory (%s) already exists!" % resultDir)
+        warn("Results directory ({}) already exists!".format(resultDir))
         sys.exit(1)
 
-    print("Results will be stored at: %s" % resultDir)
+    info("Results will be stored at: {}".format(resultDir))
     return resultDir
 
 def parse_args():
@@ -252,11 +227,11 @@ def parse_args():
     options.arguments = args
 
     if options.experimentName is not None and options.experimentName not in ExperimentManager.getExperimentNames():
-        print("No experiment named %s" % options.experimentName)
+        error("No experiment named {}".format(options.experimentName))
         sys.exit(1)
 
     if options.experimentName is not None and options.resultDir is None:
-        print("No results folder specified; experiment results will remain in the working directory")
+        warn("No results folder specified; experiment results will remain in the working directory")
 
     if options.cluster is not None:
         servers = options.cluster.split(',')
@@ -268,13 +243,13 @@ def parse_args():
             options.placement = RoundRobinPlacer
         elif options.placement == "guided":
             if options.placeList is None or not re.match("^[0-9,]+$", options.placeList):
-                print("Please specify correctly how many nodes you want to place on each node!")
+                error("Please specify correctly how many nodes you want to place on each node!")
                 sys.exit(1)
             else:
                 try:
                     options.placeList = map(int, options.placeList.split(","))
                 except ValueError:
-                    print("Please specify the nodes correctly, no comma at the beginning/end!")
+                    error("Please specify the nodes correctly, no comma at the beginning/end!")
                     sys.exit(1)
 
                 PopulatePlacement(options.placeList)
@@ -291,30 +266,23 @@ class NdnTopo(Topo):
     def __init__(self, conf_arq, workDir, **opts):
         Topo.__init__(self, **opts)
 
-        global hosts_conf
-        global links_conf
-        hosts_conf = parse_hosts(conf_arq)
-        switches_conf = parse_switches(conf_arq)
-        links_conf = parse_links(conf_arq)
+        self.hosts_conf = parse_hosts(conf_arq)
+        self.switches_conf = parse_switches(conf_arq)
+        self.links_conf = parse_links(conf_arq)
 
         self.isTCLink = False
         self.isLimited = False
 
-        for host in hosts_conf:
+        for host in self.hosts_conf:
             if host.cpu != None and self.isLimited != True:
                 self.isLimited = True
-            self.addHost(host.name, app=host.app, params=host.uri_tuples, cpu=host.cpu,
+            self.addHost(host.name, app=host.app, params=host.params, cpu=host.cpu,
                          cores=host.cores,cache=host.cache, workdir=workDir)
-            if (options.routingType != 'link-state' and (host.params.get('radius') is None
-                or host.params.get('angle') is None)):
-                info('Hyperbolic coordinates in topology file are either missing or misconfigured.\n' \
-                     'Check that each node has one radius value and one or two angle value(s).\n')
-                sys.exit(1)
 
-        for switch in switches_conf:
+        for switch in self.switches_conf:
             self.addSwitch(switch.name)
 
-        for link in links_conf:
+        for link in self.links_conf:
             if len(link.linkDict) == 0:
                 self.addLink(link.h1, link.h2)
             else:
@@ -330,7 +298,7 @@ def execute(options):
         options.templateFile = INSTALL_DIR + 'minindn.testbed.conf'
 
     if os.path.exists(options.templateFile) == False:
-        info('Template file cannot be found. Exiting...\n')
+        error('Template file cannot be found. Exiting...\n')
         sys.exit(1)
 
     if options.cluster is not None and options.placement == GuidedPlacer:
@@ -341,7 +309,7 @@ def execute(options):
                     num_nodes += 1
 
         if sum(options.placeList) != num_nodes:
-            print("Placement list sum is not equal to number of nodes!")
+            error("Placement list sum is not equal to number of nodes!")
             sys.exit(1)
 
     # Copy nfd.conf to remote hosts - this assumes that NDN versions across
@@ -349,18 +317,16 @@ def execute(options):
     if options.cluster is not None:
         for server in options.servers:
             if server != "localhost":
-                login = "mininet@%s" % server
+                login = "mininet@{}".format(server)
                 src = nfdConfFile
-                dst = "%s:/tmp/nfd.conf" % (login)
+                dst = "{}:/tmp/nfd.conf".format(login)
                 scp(src, dst)
-                ssh(login, "sudo cp /tmp/nfd.conf %s" % src)
+                ssh(login, "sudo cp /tmp/nfd.conf {}".format(src))
 
     if options.resultDir is not None:
         options.resultDir = createResultsDir(options.resultDir, options.nFaces, options.routingType)
 
     topo = NdnTopo(options.templateFile, options.workDir)
-
-    t = datetime.datetime.now()
 
     if topo.isTCLink == True and topo.isLimited == True:
         net = Mininet(topo,host=CpuLimitedNdnHost,link=TCLink)
@@ -374,12 +340,6 @@ def execute(options):
         net = Mininet(topo, host=CpuLimitedNdnHost)
     else:
         net = Mininet(topo, host=NdnHost)
-
-    t2 = datetime.datetime.now()
-
-    delta = t2 - t
-
-    info('Setup time: ' + str(delta.seconds) + '\n')
 
     net.start()
 
@@ -404,86 +364,50 @@ def execute(options):
                 ndnNetBase = ipStr(ipParse(ndnNetBase) + 4)
 
     time.sleep(2)
+
     info('Starting NFD on nodes\n')
     for host in net.hosts:
         host.nfd = Nfd(host, options.csSize)
         host.nfd.start()
 
-    if options.isNlsrEnabled is True:
-
-        # NLSR Security
-        if options.nlsrSecurity is True:
-            Nlsr.createKeysAndCertificates(net, options.workDir)
-
-        # NLSR initialization
-        info('Starting NLSR on nodes\n')
-        for host in net.hosts:
-            conf = next(x for x in hosts_conf if x.name == host.name)
-            host.nlsrParameters = conf.nlsrParameters
-
-            if options.nFaces is not None:
-                host.nlsrParameters["max-faces-per-prefix"] = options.nFaces
-
-            if options.routingType == 'dry':
-                host.nlsrParameters["hyperbolic-state"] = "dry-run"
-
-            elif options.routingType == 'hr':
-                host.nlsrParameters["hyperbolic-state"] = "on"
-
-            # Generate NLSR configuration file
-            configGenerator = NlsrConfigGenerator(host, options.nlsrSecurity, options.faceType)
-            configGenerator.createConfigFile()
-
-            # Start NLSR
-            host.nlsr = Nlsr(host, configGenerator.neighborIPs, options.faceType)
-            host.nlsr.start()
-
     for host in net.hosts:
         if 'app' in host.params:
             if host.params['app'] != '':
                 app = host.params['app']
-                print("Starting " + app + " on node " + host.name)
-                print(host.cmd(app))
+                info("Starting {} on node {}".format(app, host.name))
+                info(host.cmd(app))
 
-    # Determine if each host is running NFD and NLSR
+    # Determine if each host is running NFD
     for host in net.hosts:
         nfdStatus = host.cmd("ps -g -U root | grep 'nfd --config {}/[n]fd.conf'".format(host.homeFolder))
-        nlsrStatus = host.cmd("ps -g | grep 'nlsr -f {}/[n]lsr.conf'".format(host.homeFolder))
         if not host.nfd.isRunning or not nfdStatus:
-            print("NFD on host {} is not running. Printing log file and exiting...".format(host.name))
-            print(host.cmd("cat {}/nfd.log".format(host.homeFolder)))
-            net.stop()
-            sys.exit(1)
-        if options.isNlsrEnabled and (not host.nlsr.isRunning or not nlsrStatus):
-            print("NLSR on host {} is not running. Printing log file and exiting...".format(host.name))
-            print(host.cmd("cat {}/log/nlsr.log".format(host.homeFolder)))
+            error("NFD on host {} is not running. Printing log file and exiting...".format(host.name))
+            info(host.cmd("tail {}/nfd.log".format(host.homeFolder)))
             net.stop()
             sys.exit(1)
 
     # Load experiment
     experimentName = options.experimentName
 
-    if experimentName is not None:
-        print("Loading experiment: %s" % experimentName)
+    experimentArgs = {
+        "net": net,
+        "options": options
+    }
 
-        experimentArgs = {
-            "net": net,
-            "ctime": options.ctime,
-            "nPings": options.nPings,
-            "strategy": Nfdc.STRATEGY_BEST_ROUTE,
-            "pctTraffic": options.pctTraffic,
-            "nlsrSecurity": options.nlsrSecurity,
-            "workDir": options.workDir,
-            "arguments" : options.arguments
-        }
+    if experimentName is not None:
+        info("Loading experiment: {}".format(experimentName))
 
         experiment = ExperimentManager.create(experimentName, experimentArgs)
 
         if experiment is not None:
             experiment.start()
         else:
-            print("ERROR: Experiment '%s' does not exist" % experimentName)
+            error("Experiment '{}' does not exist".format(experimentName))
             return
+    else:
+        experiment = Experiment(experimentArgs)
+        if options.isNlsrEnabled:
+            experiment.startNlsr(checkConvergence = False)
 
     if options.isCliEnabled is True:
         MiniNDNCLI(net)
@@ -491,20 +415,20 @@ def execute(options):
     net.stop()
 
     if options.resultDir is not None:
-        print("Moving results to %s" % options.resultDir)
-        for file in glob.glob('%s/*' % options.workDir):
+        info("Moving results to {}".format(options.resultDir))
+        for file in glob.glob('{}/*'.format(options.workDir)):
             shutil.move(file, options.resultDir)
         if options.cluster is not None:
             for server in options.servers:
                 if server != "localhost":
-                    login = "mininet@%s" % server
-                    src = "%s:%s/*" % (login, options.workDir)
+                    login = "mininet@{}".format(server)
+                    src = "{}:{}/*".format(login, options.workDir)
                     dst = options.resultDir
                     scp(src, dst)
-            print("Please clean work directories of other machines before running the cluster again")
+            info("Please clean work directories of other machines before running the cluster again")
 
 def signal_handler(signal, frame):
-    print('Cleaning up...')
+    info('Cleaning up...')
     call(["nfd-stop"])
     call(["sudo", "mn", "--clean"])
     sys.exit(1)
@@ -516,14 +440,11 @@ def verify_dependencies():
     # Checks that each program is in the system path
     for program in dependencies:
         if call(["which", program], stdout=devnull):
-            print("{} is missing from the system path! Exiting...".format(program))
+            error("{} is missing from the system path! Exiting...".format(program))
             sys.exit(1)
     devnull.close()
 
 if __name__ == '__main__':
-
-    hosts_conf = []
-    links_conf = []
 
     signal.signal(signal.SIGQUIT, signal_handler)
 
@@ -535,7 +456,7 @@ if __name__ == '__main__':
     try:
         execute(options)
     except Exception as e:
-        print("Error: {}".format(e))
+        error("{}".format(e))
         call(["nfd-stop"])
         call(["sudo", "mn", "--clean"])
         sys.exit(1)

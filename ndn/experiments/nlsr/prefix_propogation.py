@@ -36,7 +36,7 @@ class PrefixPropogationExperiment(Experiment):
     def run(self):
         firstNode = self.net.hosts[0]
 
-        if self.nlsrSecurity:
+        if self.options.nlsrSecurity:
             firstNode.cmd("ndnsec-set-default /ndn/{}-site/%C1.Operator/op".format(firstNode.name))
 
         print("Testing advertise")

@@ -38,7 +38,7 @@ class _ExperimentManager:
 
     def loadModules(self):
         currentDir = os.path.dirname(__file__)
-        experimentDir = "%s/%s" % (currentDir, "experiments")
+        experimentDir = "{}/{}".format(currentDir, "experiments")
         experimentModule = "ndn.experiments"
 
         # Import and register experiments
@@ -46,13 +46,17 @@ class _ExperimentManager:
             for filename in files:
                 if filename.endswith(".py") and filename != "__init__.py":
                     module = filename.replace(".py", "")
-                    __import__("%s.%s" % (experimentModule, module))
+                    subdir = os.path.basename(root)
+                    if subdir == "experiments":
+                        __import__("{}.{}".format(experimentModule, module))
+                    else:
+                        __import__("{}.{}.{}".format(experimentModule, subdir, module))
 
     def register(self, name, experimentClass):
         if name not in self.experiments:
             self.experiments[name] = experimentClass
         else:
-            raise _ExperimentManager.Error("Experiment '%s' has already been registered" % name)
+            raise _ExperimentManager.Error("Experiment '{}' has already been registered".format(name))
 
     def create(self, name, args):
         if name in self.experiments:

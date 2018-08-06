@@ -23,46 +23,71 @@
 
 import time
 import sys
-from ndn.apps.ndn_ping_client import NDNPingClient
 from itertools import cycle
+
+from mininet.log import info
 
 from ndn import ExperimentManager
 from ndn.apps.nfdc import Nfdc
+
+from ndn.apps.nlsr import Nlsr, NlsrConfigGenerator
+from ndn.apps.ndn_ping_client import NDNPingClient
 
 class Experiment:
 
     def __init__(self, args):
         self.net = args["net"]
-        self.convergenceTime = args["ctime"]
-        self.nPings = args["nPings"]
-        self.strategy = args["strategy"]
-        self.pctTraffic = args["pctTraffic"]
-        self.nlsrSecurity = args["nlsrSecurity"]
-        self.arguments = args["arguments"]
+        self.options = args["options"]
 
         # Used to restart pings on the recovered node if any
         self.pingedDict = {}
 
+    def afterNfdStart(self):
+        pass
+
     def start(self):
+        self.afterNfdStart()
+        if self.options.isNlsrEnabled is True:
+            self.startNlsr()
         self.setup()
         self.run()
 
     def setup(self):
         for host in self.net.hosts:
             # Set strategy
-            Nfdc.setStrategy(host, "/ndn/", self.strategy)
+            Nfdc.setStrategy(host, "/ndn/", self.options.strategy)
 
             # Start ping server
-            host.cmd("ndnpingserver /ndn/{}-site/{} > ping-server &".format(host, host))
+            host.cmd("ndnpingserver /ndn/{}-site/{} > ping-server &".format(host.name, host.name))
 
             # Create folder to store ping data
             host.cmd("mkdir ping-data")
 
-        self.checkConvergence()
+    def startNlsr(self, checkConvergence = True):
+        # NLSR Security
+        if self.options.nlsrSecurity is True:
+            Nlsr.createKeysAndCertificates(self.net, self.options.workDir)
+
+        # NLSR initialization
+        info('Starting NLSR on nodes\n')
+        for host in self.net.hosts:
+            host.nlsr = Nlsr(host, self.options)
+            host.nlsr.start()
+
+        for host in self.net.hosts:
+            nlsrStatus = host.cmd("ps -g | grep 'nlsr -f {}/[n]lsr.conf'".format(host.homeFolder))
+            if not host.nlsr.isRunning or not nlsrStatus:
+                print("NLSR on host {} is not running. Printing log file and exiting...".format(host.name))
+                print(host.cmd("tail {}/log/nlsr.log".format(host.homeFolder)))
+                self.net.stop()
+                sys.exit(1)
+
+        if checkConvergence:
+            self.checkConvergence()
 
     def checkConvergence(self, convergenceTime = None):
         if convergenceTime is None:
-            convergenceTime = self.convergenceTime
+            convergenceTime = self.options.ctime
 
         # Wait for convergence time period
         print "Waiting " + str(convergenceTime) + " seconds for convergence..."
@@ -79,8 +104,8 @@ class Experiment:
             didNodeConverge = True
             for node in self.net.hosts:
                 # Node has its own router name in the fib list, but not name prefix
-                if ( ("/ndn/" + node.name + "-site/%C1.Router/cs/" + node.name) not in statusRouter or
-                      host.name != node.name and ("/ndn/" + node.name + "-site/" + node.name) not in statusPrefix ):
+                if ( ("/ndn/{}-site/%C1.Router/cs/{}".format(node.name, node.name)) not in statusRouter or
+                      host.name != node.name and ("/ndn/{}-site/{}".format(node.name, node.name)) not in statusPrefix ):
                     didNodeConverge = False
                     didNlsrConverge = False
 
@@ -98,23 +123,23 @@ class Experiment:
             for other in self.net.hosts:
                 # Do not ping self
                 if host.name != other.name:
-                    NDNPingClient.ping(host, other, self.nPings)
+                    NDNPingClient.ping(host, other, self.options.nPings)
 
     def failNode(self, host):
-        print("Bringing %s down" % host.name)
+        print("Bringing {} down".format(host.name))
         host.nfd.stop()
 
     def recoverNode(self, host):
-        print("Bringing %s up" % host.name)
+        print("Bringing {} up".format(host.name))
         host.nfd.start()
         host.nlsr.createFaces()
         host.nlsr.start()
-        Nfdc.setStrategy(host, "/ndn/", self.strategy)
-        host.cmd("ndnpingserver /ndn/{}-site/{} > ping-server &".format(host, host))
+        Nfdc.setStrategy(host, "/ndn/", self.options.strategy)
+        host.cmd("ndnpingserver /ndn/{}-site/{} > ping-server &".format(host.name, host.name))
 
     def startPctPings(self):
-        nNodesToPing = int(round(len(self.net.hosts)*self.pctTraffic))
-        print "Each node will ping %d node(s)" % nNodesToPing
+        nNodesToPing = int(round(len(self.net.hosts) * self.options.pctTraffic))
+        print "Each node will ping {} node(s)".format(nNodesToPing)
         # Temporarily store all the nodes being pinged by a particular node
         nodesPingedList = []
 
@@ -133,7 +158,7 @@ class Experiment:
 
                 # Do not ping self
                 if host.name != other.name:
-                    NDNPingClient.ping(host, other, self.nPings)
+                    NDNPingClient.ping(host, other, self.options.nPings)
                     nodesPingedList.append(other)
 
                 # Always increment because in 100% case a node should not ping itself

@@ -25,11 +25,15 @@ The app is the only parameter which needs double quotes (see example below).
 
 * cache : Amount of cache memory available to a node in KB
 
+* nfd-log-level: Set the log level of the NFD running on the node (ex: DEBUG). For finer control,
+nfd.conf or nfd.conf.sample needs to be modified in /usr/local/etc/ndn/
+
+* nlsr-log-level: Set the log level of the NLSR running on the node (ex: DEBUG).
 
     e.g.)
 
     [nodes]
-    a: _ cpu=0.3
+    a: _ cpu=0.3 nfd-log-level=TRACE nlsr-log-level=NONE
     b: app="sample app 1; sampleapp2.sh" cpu=0.3
 
 ### The [links] section:
@@ -61,4 +65,4 @@ The following parameters can be configured for a node:
 Note that `sampleApp1` and `sampleApp2` must be either installed in the system (ex: /usr/bin)
 or an absolute path needs to be given.
 
-See `ndn_utils/topologies` for more sample files
+See `topologies` for more sample files

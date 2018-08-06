@@ -101,7 +101,7 @@ period.
 
 **Scenario**: This is exactly like the failure experiment but instead of failing the node named "csu" it fails the most connected node (MCN) i.e the node with the most links.
 
-Experiment ID: `--failure-mcn`
+Experiment ID: `--mcn-failure`
 
 ### Experiment data
 
@@ -131,7 +131,10 @@ To create an experiment, follow these steps:
             def __init__(self, args):
                 Experiment.__init__(self, args)
 
-3. Override the `setup()` method to define how the experiment should be initialized
+3. Override `start()` if the experiments want to override NLSR setup and skip `setup()` and `run()`
+as described below. `start()` is the entry point for an experiment.
+
+4. Override the `setup()` method to define how the experiment should be initialized
 
    e.g.) Run an ndnping server in the background on each node
 
@@ -140,7 +143,7 @@ To create an experiment, follow these steps:
                host.cmd("ndnpingserver host.name &")
 
 
-4. Override the `run()` method to define how the experiment should behave
+5. Override the `run()` method to define how the experiment should behave
 
     e.g.) Obtain the NFD status of each node and save it to file
 
@@ -148,7 +151,7 @@ To create an experiment, follow these steps:
             for host in self.net.hosts:
                 host.cmd("nfdc status report > status.txt")
 
-5. Register the experiment with the `ExperimentManager` to make the experiment runnable from the
+6. Register the experiment with the `ExperimentManager` to make the experiment runnable from the
 command line.
 
         Experiment.register("example-name", ExampleExperiment)

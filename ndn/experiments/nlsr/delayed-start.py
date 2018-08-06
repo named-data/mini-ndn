@@ -22,21 +22,45 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 from ndn.experiments.experiment import Experiment
+from ndn.apps.nlsr import Nlsr, NlsrConfigGenerator
+
+from mininet.log import info
 
 import time
 
-class PingallExperiment(Experiment):
+class NlsrDelayedStartExperiment(Experiment):
 
     def __init__(self, args):
-
         Experiment.__init__(self, args)
-        self.COLLECTION_PERIOD_BUFFER = 10
-        print "Using %f traffic" % self.pctTraffic
+
+    def setup(self):
+        pass
 
     def run(self):
-        self.startPctPings()
+        pass
 
-        # For pingall experiment sleep for the number of pings + some offset
-        time.sleep(self.nPings + self.COLLECTION_PERIOD_BUFFER)
+    def startNlsr(self, checkConvergence = True):
+        # NLSR Security
+        if self.options.nlsrSecurity is True:
+            Nlsr.createKeysAndCertificates(self.net, self.options.workDir)
 
-Experiment.register("pingall", PingallExperiment)
+        i = 1
+        # NLSR initialization
+        info('Starting NLSR on nodes\n')
+        for host in self.net.hosts:
+            host.nlsr = Nlsr(host, self.options)
+            host.nlsr.start()
+
+            # Wait 1/2 minute between starting NLSRs
+            # Wait 1 hour before starting last NLSR
+            if i == len(self.net.hosts) - 1:
+                info('Sleeping 1 hour before starting last NLSR')
+                time.sleep(3600)
+            else:
+                time.sleep(30)
+            i += 1
+
+        if checkConvergence:
+            self.checkConvergence()
+
+Experiment.register("nlsr-delayed-start", NlsrDelayedStartExperiment)

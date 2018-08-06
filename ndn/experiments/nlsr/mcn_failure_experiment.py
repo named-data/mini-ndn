@@ -22,45 +22,58 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 from ndn.experiments.experiment import Experiment
-from ndn.nlsr import Nlsr
 from ndn.apps.ndn_ping_client import NDNPingClient
 
 import time
 
-class FailureExperiment(Experiment):
+class MCNFailureExperiment(Experiment):
 
     def __init__(self, args):
-        args["nPings"] = 300
         Experiment.__init__(self, args)
 
         self.PING_COLLECTION_TIME_BEFORE_FAILURE = 60
         self.PING_COLLECTION_TIME_AFTER_RECOVERY = 120
 
+    def getMostConnectedNode(self):
+        mcn = max(self.net.hosts, key=lambda host: len(host.intfNames()))
+        print "The most connected node is: {}".format(mcn.name)
+        return mcn
+
+    def setup(self):
+        if self.options.nPings != 0:
+            Experiment.setup(self)
+
     def run(self):
-        self.startPctPings()
+        mostConnectedNode = self.getMostConnectedNode()
+
+        if self.options.nPings != 0:
+            self.startPctPings()
 
         # After the pings are scheduled, collect pings for 1 minute
         time.sleep(self.PING_COLLECTION_TIME_BEFORE_FAILURE)
 
-        # Bring down CSU
-        for host in self.net.hosts:
-            if host.name == "csu":
-                self.failNode(host)
-                break
+        # Bring down MCN
+        self.failNode(mostConnectedNode)
 
-        # CSU is down for 2 minutes
-        time.sleep(120)
+        # MCN is down for 2 minutes
+        time.sleep(int(self.options.arguments.waitTime))
 
-        # Bring CSU back up
-        for host in self.net.hosts:
-            if host.name == "csu":
-                self.recoverNode(host)
+        # Bring MCN back up
+        self.recoverNode(mostConnectedNode)
 
-                for other in self.net.hosts:
-                    if host.name != other.name:
-                        NDNPingClient.ping(host, other, self.PING_COLLECTION_TIME_AFTER_RECOVERY)
+        # Restart pings
+        if self.options.nPings != 0:
+            for nodeToPing in self.pingedDict[mostConnectedNode]:
+                 NDNPingClient.ping(mostConnectedNode, nodeToPing, self.PING_COLLECTION_TIME_AFTER_RECOVERY)
 
-        # Collect pings for more seconds after CSU is up
-        time.sleep(self.PING_COLLECTION_TIME_AFTER_RECOVERY)
+            # Collect pings for more seconds after MCN is up
+            time.sleep(self.PING_COLLECTION_TIME_AFTER_RECOVERY)
+        else:
+            self.checkConvergence()
 
-Experiment.register("failure", FailureExperiment)
+    @staticmethod
+    def parseArguments(parser):
+        parser.add_argument("--wait-time", dest="waitTime", default="120",
+                            help="[Experiment] Generic wait time for experiment use")
+
+Experiment.register("mcn-failure", MCNFailureExperiment)

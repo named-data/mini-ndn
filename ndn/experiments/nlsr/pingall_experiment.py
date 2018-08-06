@@ -22,30 +22,28 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 from ndn.experiments.experiment import Experiment
-from ndn.experiments.mcn_failure_experiment import MCNFailureExperiment
 
 import time
 
-class MCNFailureConvergenceExperiment(MCNFailureExperiment):
+class PingallExperiment(Experiment):
 
     def __init__(self, args):
-        MCNFailureExperiment.__init__(self, args)
+
+        Experiment.__init__(self, args)
+        self.COLLECTION_PERIOD_BUFFER = 10
+        print "Using {} traffic".format(self.options.pctTraffic)
+
+    def setup(self):
+        if self.options.nPings != 0:
+            Experiment.setup(self)
 
     def run(self):
-        mostConnectedNode = self.getMostConnectedNode()
+        if self.options.nPings == 0:
+            return
 
-        # After the pings are scheduled, collect pings for 1 minute
-        time.sleep(self.PING_COLLECTION_TIME_BEFORE_FAILURE)
+        self.startPctPings()
 
-        # Bring down MCN
-        self.failNode(mostConnectedNode)
+        # For pingall experiment sleep for the number of pings + some offset
+        time.sleep(self.options.nPings + self.COLLECTION_PERIOD_BUFFER)
 
-        # MCN is down for 2 minutes
-        time.sleep(120)
-
-        # Bring MCN back up
-        self.recoverNode(mostConnectedNode)
-
-        self.checkConvergence()
-
-Experiment.register("mcn-failure-convergence", MCNFailureConvergenceExperiment)
+Experiment.register("pingall", PingallExperiment)

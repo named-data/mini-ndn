@@ -26,42 +26,40 @@ from ndn.apps.ndn_ping_client import NDNPingClient
 
 import time
 
-class MCNFailureExperiment(Experiment):
+class FailureExperiment(Experiment):
 
     def __init__(self, args):
-        args["nPings"] = 300
+        args["options"].nPings = 300
         Experiment.__init__(self, args)
 
         self.PING_COLLECTION_TIME_BEFORE_FAILURE = 60
         self.PING_COLLECTION_TIME_AFTER_RECOVERY = 120
 
-    def getMostConnectedNode(self):
-        mcn = max(self.net.hosts, key=lambda host: len(host.intfNames()))
-        print "The most connected node is: %s" % mcn.name
-        return mcn
-
     def run(self):
-        mostConnectedNode = self.getMostConnectedNode()
-
         self.startPctPings()
 
         # After the pings are scheduled, collect pings for 1 minute
         time.sleep(self.PING_COLLECTION_TIME_BEFORE_FAILURE)
 
-        # Bring down MCN
-        self.failNode(mostConnectedNode)
+        # Bring down CSU
+        for host in self.net.hosts:
+            if host.name == "csu":
+                self.failNode(host)
+                break
 
-        # MCN is down for 2 minutes
+        # CSU is down for 2 minutes
         time.sleep(120)
 
-        # Bring MCN back up
-        self.recoverNode(mostConnectedNode)
+        # Bring CSU back up
+        for host in self.net.hosts:
+            if host.name == "csu":
+                self.recoverNode(host)
 
-        # Restart pings
-        for nodeToPing in self.pingedDict[mostConnectedNode]:
-            NDNPingClient.ping(mostConnectedNode, nodeToPing, self.PING_COLLECTION_TIME_AFTER_RECOVERY)
+                for other in self.net.hosts:
+                    if host.name != other.name:
+                        NDNPingClient.ping(host, other, self.PING_COLLECTION_TIME_AFTER_RECOVERY)
 
-        # Collect pings for more seconds after MCN is up
+        # Collect pings for more seconds after CSU is up
         time.sleep(self.PING_COLLECTION_TIME_AFTER_RECOVERY)
 
-Experiment.register("failure-mcn", MCNFailureExperiment)
+Experiment.register("failure", FailureExperiment)
