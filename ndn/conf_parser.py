@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2018, The University of Memphis,
+# Copyright (C) 2015-2019, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -60,6 +60,8 @@
 
 import ConfigParser, re
 import shlex
+import sys
+from mininet.log import error
 
 class confNDNHost():
 
@@ -99,9 +101,18 @@ def parse_hosts(conf_arq):
     items = config.items('nodes')
 
     # makes a first-pass read to hosts section to find empty host sections
+    coordinates = []
     for item in items:
         name = item[0]
         rest = item[1].split()
+        # check for the duplicate coordinates
+        if "radius" in item[1]:
+            if item[1] in coordinates:
+                error("FATAL: Duplicate Coordinate, \"{}\" used by multiple nodes\n" \
+                      .format(item[1]))
+                sys.exit(1)
+            else:
+                coordinates.append(item[1])
         if len(rest) == 0:
             config.set('nodes', name, '_')
     # updates 'items' list

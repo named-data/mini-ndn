@@ -53,6 +53,7 @@ class Nfdc:
     @staticmethod
     def unregisterRoute(node, namePrefix, remoteNodeAddress, origin=255):
         cmd = "nfdc route remove {} {} {}".format(namePrefix, remoteNodeAddress, origin)
+        debug(node.cmd(cmd))
         time.sleep(0.5)
 
     @staticmethod
