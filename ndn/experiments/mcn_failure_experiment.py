@@ -22,6 +22,7 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 from ndn.experiments.experiment import Experiment
+from ndn.apps.ndn_ping_client import NDNPingClient
 
 import time
 
@@ -58,7 +59,7 @@ class MCNFailureExperiment(Experiment):
 
         # Restart pings
         for nodeToPing in self.pingedDict[mostConnectedNode]:
-            self.ping(mostConnectedNode, nodeToPing, self.PING_COLLECTION_TIME_AFTER_RECOVERY)
+            NDNPingClient.ping(mostConnectedNode, nodeToPing, self.PING_COLLECTION_TIME_AFTER_RECOVERY)
 
         # Collect pings for more seconds after MCN is up
         time.sleep(self.PING_COLLECTION_TIME_AFTER_RECOVERY)

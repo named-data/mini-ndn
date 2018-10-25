@@ -22,18 +22,23 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 import time
+from mininet.log import setLogLevel, output, info, debug
 
 class Nfdc:
     STRATEGY_ASF = "asf"
     STRATEGY_BEST_ROUTE = "best-route"
     STRATEGY_MULTICAST = "multicast"
     STRATEGY_NCC = "ncc"
+    PROTOCOL_UDP = "udp"
+    PROTOCOL_TCP = "tcp"
+    PROTOCOL_ETHER = "ether"
 
     @staticmethod
-    def registerRoute(node, namePrefix, remoteNode, origin=255, cost=0,
+    def registerRoute(node, namePrefix, remoteNode, protocol=PROTOCOL_UDP, origin=255, cost=0,
                       inheritFlag=True, captureFlag=False, expirationInMillis=0):
-        node.cmd("nfdc route add {} {} {} {} {}{}{}").format(
+        cmd = ("nfdc route add {} {}://{} origin {} cost {} {}{}{}").format(
             namePrefix,
+            protocol,
             remoteNode,
             origin,
             cost,
@@ -41,33 +46,36 @@ class Nfdc:
             "capture " if captureFlag else "",
             "expires {}".format(expirationInMillis)
         )
+        debug(node.cmd(cmd))
         time.sleep(0.5)
 
     @staticmethod
     def unregisterRoute(node, namePrefix, remoteNode, origin=255):
-        node.cmd("nfdc route remove {} {} {}".format(namePrefix, remoteNode, origin))
+        cmd = "nfdc route remove {} {} {}".format(namePrefix, remoteNode, origin)
         time.sleep(0.5)
 
     @staticmethod
     def createFace(node, remoteNode, protocol="udp", isPermanent=False):
-        node.cmd("nfdc face create {}://{} {}".format(
+        cmd = ("nfdc face create {}://{} {}".format(
             protocol,
             remoteNode,
             "permanent" if isPermanent else "persistent"
         ))
+        debug(node.cmd(cmd))
         time.sleep(0.5)
 
     @staticmethod
     def destroyFace(node, remoteNode, protocol="udp"):
-        node.cmd("nfdc face destroy {}://{}".format(protocol, remoteNode))
+        debug(node.cmd("nfdc face destroy {}://{}".format(protocol, remoteNode)))
         time.sleep(0.5)
 
     @staticmethod
     def setStrategy(node, namePrefix, strategy):
-        node.cmd("nfdc strategy set {} ndn:/localhost/nfd/strategy/{}".format(namePrefix, strategy))
+        cmd = "nfdc strategy set {} ndn:/localhost/nfd/strategy/{}".format(namePrefix, strategy)
+        debug(node.cmd(cmd))
         time.sleep(0.5)
 
     @staticmethod
     def unsetStrategy(node, namePrefix):
-        node.cmd("nfdc strategy unset {}".format(namePrefix))
+        debug(node.cmd("nfdc strategy unset {}".format(namePrefix)))
         time.sleep(0.5)

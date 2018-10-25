@@ -23,6 +23,7 @@
 
 from ndn.experiments.experiment import Experiment
 from ndn.nlsr import Nlsr
+from ndn.apps.ndn_ping_client import NDNPingClient
 
 import time
 
@@ -57,7 +58,7 @@ class FailureExperiment(Experiment):
 
                 for other in self.net.hosts:
                     if host.name != other.name:
-                        self.ping(host, other, self.PING_COLLECTION_TIME_AFTER_RECOVERY)
+                        NDNPingClient.ping(host, other, self.PING_COLLECTION_TIME_AFTER_RECOVERY)
 
         # Collect pings for more seconds after CSU is up
         time.sleep(self.PING_COLLECTION_TIME_AFTER_RECOVERY)

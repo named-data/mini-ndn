@@ -23,6 +23,7 @@
 
 from ndn.experiments.experiment import Experiment
 from ndn.nlsr import Nlsr
+from ndn.apps.ndn_ping_client import NDNPingClient
 
 import time
 
@@ -74,7 +75,7 @@ class MultipleFailureExperiment(Experiment):
 
             # Restart pings
             for nodeToPing in self.pingedDict[host]:
-                self.ping(host, nodeToPing, nPings)
+                NDNPingClient.ping(host, nodeToPing, nPings)
 
             time.sleep(self.RECOVERY_INTERVAL - recovery_time)
 
