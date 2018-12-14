@@ -9,14 +9,14 @@ import datetime
 import random # This line for graph
 from functools import partial
 from subprocess import call
-from mininet.wifi.net import Mininet_wifi
+from mn_wifi.net import Mininet_wifi
 from ndn.ndn_host import NdnHost, CpuLimitedNdnHost
 from ndnwifi.ndn_host import NdnStation
 from mininet.link import TCLink
 from mininet.node import Controller
 from mininet.log import setLogLevel, output, info
 from mininet.examples.cluster import MininetCluster, RoundRobinPlacer, ClusterCleanup
-from mininet.wifi.link import Association, adhoc
+from mn_wifi.link import Association, adhoc
 from ndnwifi.wifiutil import MiniNdnWifiCLI
 import matplotlib.pyplot as plt
 from ndn.nfd import Nfd

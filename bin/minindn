@@ -59,13 +59,13 @@
 #   advertising or publicity pertaining to the Software or any derivatives
 #   without specific, written prior permission.
 
-from mininet.wifi.topo import Topo_WiFi
+from mn_wifi.topo import Topo_WiFi
 from mininet.topo import Topo
-from mininet.wifi.net import Mininet_wifi
+from mn_wifi.net import Mininet_wifi
 from mininet.log import setLogLevel, output, info
 from mininet.link import TCLink
-from mininet.wifi.link import wmediumd
-from mininet.wifi.wmediumdConnector import interference
+from mn_wifi.link import wmediumd
+from mn_wifi.wmediumdConnector import interference
 from mininet.util import ipStr, ipParse
 
 from mininet.examples.cluster import MininetCluster, RoundRobinPlacer, ClusterCleanup
@@ -79,10 +79,10 @@ from ndn.placer import GuidedPlacer, PopulatePlacement
 from ndn.util import ssh, scp, MiniNDNCLI
 from ndnwifi.wifiutil import MiniNdnWifiCLI
 from ndnwifi.ndnadhoc import build_adhocnet
-from ndnwifi.vndn import build_vndn
-from ndnwifi.sumo_vndn import build_sumo_vndn
+#from ndnwifi.vndn import build_vndn
+from ndnwifi.sumo_vndn_new import build_sumo_vndn
 from mininet.node import Controller
-from mininet.wifi.node import UserAP, OVSKernelAP
+from mn_wifi.node import UserAP, OVSKernelAP
 from ndnwifi.ndn_host import NdnStation
 
 import os.path, time
@@ -295,7 +295,7 @@ def parse_args():
             options.templateFile = INSTALL_DIR + 'wifi/adhoc-topology.conf'
         else:
             if options.isVndn or options.isSumoVndn:
-                options.templateFile = INSTALL_DIR + 'wifi/vndn-topology.conf'
+                options.templateFile = INSTALL_DIR + 'wifi/vndn-topology-2.conf'
             else:
                 options.templateFile = INSTALL_DIR + 'wifi/singleap-topology.conf'
     print options.templateFile
@@ -482,9 +482,10 @@ def execute(options):
         else:
             if options.isVndn: #emulate vanet
                 options.ssid='vanet-ssid'
-                build_vndn(wifiTopo, options.ssid, options.channel, options.mode, options.wmediumd, options.interference,
-                           options.cluster, options.placement, options.servers, options.tunnelType,
-                           options.ctime, options.nPings, options.pctTraffic, options.experimentName, options.nlsrSecurity)
+                #build_vndn(wifiTopo, options.ssid, options.channel, options.mode, options.wmediumd, options.interference,
+                          # options.cluster, options.placement, options.servers, options.tunnelType,
+                          # options.ctime, options.nPings, options.pctTraffic, options.experimentName, options.nlsrSecurity)
+                pass
             else:
                 if options.isSumoVndn: #emulate vanet based on sumo
                     options.ssid='vanet-ssid'
@@ -552,7 +553,7 @@ def execute(options):
     for host in hostlist:
         host.nfd = Nfd(host, options.csSize)
         host.nfd.start()
-
+    
     if options.isNlsrEnabled is True:
 
         # NLSR Security
