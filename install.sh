@@ -113,6 +113,14 @@ function routing {
         cxx="true"
     fi
 
+    git clone --depth 1 https://github.com/named-data/PSync
+    cd PSync
+    ./waf configure
+    ./waf
+    sudo ./waf install
+    sudo ldconfig
+    cd ../
+
     git clone --depth 1 https://github.com/named-data/ChronoSync
     cd ChronoSync
     ./waf configure
