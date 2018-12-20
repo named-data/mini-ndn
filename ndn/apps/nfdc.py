@@ -35,8 +35,8 @@ class Nfdc:
 
     @staticmethod
     def registerRoute(node, namePrefix, remoteNode, protocol=PROTOCOL_UDP, origin=255, cost=0,
-                      inheritFlag=True, captureFlag=False, expirationInMillis=0):
-        cmd = ("nfdc route add {} {}://{} origin {} cost {} {}{}{}").format(
+                      inheritFlag=True, captureFlag=False, expirationInMillis=None):
+        cmd = ("nfdc route add {} {}://{} origin {} cost {} {}{}").format(
             namePrefix,
             protocol,
             remoteNode,
@@ -44,8 +44,9 @@ class Nfdc:
             cost,
             "no-inherit " if not inheritFlag else "",
             "capture " if captureFlag else "",
-            "expires {}".format(expirationInMillis)
+            "expires {}".format(expirationInMillis) if expirationInMillis else ""
         )
+
         debug(node.cmd(cmd))
         time.sleep(0.5)
 
