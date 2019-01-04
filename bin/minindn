@@ -83,7 +83,7 @@ from ndnwifi.ndnadhoc import build_adhocnet
 from ndnwifi.sumo_vndn_new import build_sumo_vndn
 from mininet.node import Controller
 from mn_wifi.node import UserAP, OVSKernelAP
-from ndnwifi.ndn_host import NdnStation
+from ndnwifi.ndnwifi_host import NdnStation
 
 import os.path, time
 import shutil

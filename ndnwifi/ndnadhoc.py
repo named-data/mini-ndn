@@ -11,7 +11,7 @@ from functools import partial
 from subprocess import call
 from mn_wifi.net import Mininet_wifi
 from ndn.ndn_host import NdnHost, CpuLimitedNdnHost
-from ndnwifi.ndn_host import NdnStation
+from ndnwifi_host import NdnStation
 from mininet.link import TCLink
 from mininet.node import Controller
 from mininet.log import setLogLevel, output, info
