@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2018, The University of Memphis,
+# Copyright (C) 2015-2019, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -227,11 +227,11 @@ def parse_args():
     options.arguments = args
 
     if options.experimentName is not None and options.experimentName not in ExperimentManager.getExperimentNames():
-        error("No experiment named {}".format(options.experimentName))
+        error("No experiment named {}\n".format(options.experimentName))
         sys.exit(1)
 
     if options.experimentName is not None and options.resultDir is None:
-        warn("No results folder specified; experiment results will remain in the working directory")
+        warn("No results folder specified; experiment results will remain in the working directory\n")
 
     if options.cluster is not None:
         servers = options.cluster.split(',')
@@ -395,14 +395,14 @@ def execute(options):
     }
 
     if experimentName is not None:
-        info("Loading experiment: {}".format(experimentName))
+        info("Loading experiment: {}\n".format(experimentName))
 
         experiment = ExperimentManager.create(experimentName, experimentArgs)
 
         if experiment is not None:
             experiment.start()
         else:
-            error("Experiment '{}' does not exist".format(experimentName))
+            error("Experiment '{}' does not exist\n".format(experimentName))
             return
     else:
         experiment = Experiment(experimentArgs)

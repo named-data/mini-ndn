@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2018, The University of Memphis,
+# Copyright (C) 2015-2019, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -34,12 +34,12 @@ class Nfdc:
     PROTOCOL_ETHER = "ether"
 
     @staticmethod
-    def registerRoute(node, namePrefix, remoteNode, protocol=PROTOCOL_UDP, origin=255, cost=0,
-                      inheritFlag=True, captureFlag=False, expirationInMillis=None):
+    def registerRoute(node, namePrefix, remoteNodeAddress, protocol=PROTOCOL_UDP, origin=255,
+                      cost=0, inheritFlag=True, captureFlag=False, expirationInMillis=None):
         cmd = ("nfdc route add {} {}://{} origin {} cost {} {}{}").format(
             namePrefix,
             protocol,
-            remoteNode,
+            remoteNodeAddress,
             origin,
             cost,
             "no-inherit " if not inheritFlag else "",
@@ -51,23 +51,23 @@ class Nfdc:
         time.sleep(0.5)
 
     @staticmethod
-    def unregisterRoute(node, namePrefix, remoteNode, origin=255):
-        cmd = "nfdc route remove {} {} {}".format(namePrefix, remoteNode, origin)
+    def unregisterRoute(node, namePrefix, remoteNodeAddress, origin=255):
+        cmd = "nfdc route remove {} {} {}".format(namePrefix, remoteNodeAddress, origin)
         time.sleep(0.5)
 
     @staticmethod
-    def createFace(node, remoteNode, protocol="udp", isPermanent=False):
+    def createFace(node, remoteNodeAddress, protocol="udp", isPermanent=False):
         cmd = ("nfdc face create {}://{} {}".format(
             protocol,
-            remoteNode,
+            remoteNodeAddress,
             "permanent" if isPermanent else "persistent"
         ))
         debug(node.cmd(cmd))
         time.sleep(0.5)
 
     @staticmethod
-    def destroyFace(node, remoteNode, protocol="udp"):
-        debug(node.cmd("nfdc face destroy {}://{}".format(protocol, remoteNode)))
+    def destroyFace(node, remoteNodeAddress, protocol="udp"):
+        debug(node.cmd("nfdc face destroy {}://{}".format(protocol, remoteNodeAddress)))
         time.sleep(0.5)
 
     @staticmethod
