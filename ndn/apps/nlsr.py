@@ -184,8 +184,7 @@ class NlsrConfigGenerator:
         self.node.cmd("{} -s general.network -v {}".format(self.infocmd, NETWORK))
         self.node.cmd("{} -s general.site -v /{}-site".format(self.infocmd, self.node.name))
         self.node.cmd("{} -s general.router -v /%C1.Router/cs/{}".format(self.infocmd, self.node.name))
-        self.node.cmd("{} -s general.log-dir -v {}/log".format(self.infocmd, self.node.homeFolder))
-        self.node.cmd("{} -s general.seq-dir -v {}/log".format(self.infocmd, self.node.homeFolder))
+        self.node.cmd("{} -s general.state-dir -v {}/log".format(self.infocmd, self.node.homeFolder))
 
     def __editNeighborsSection(self):
 
