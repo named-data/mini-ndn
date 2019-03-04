@@ -328,10 +328,11 @@ def parse_accessPoints(conf_arq):
     for item in items:
         name = item[0] # ap1
         params = {}
-        args = item[1:] # _
+        args = item[1].split() # _
         #print args
-        if len(args) > 1:
-            for arg in args[0].split(' '):
+        for arg in args:
+            if arg != "_":
+                print(arg)
                 fields = arg.split('=')
                 params[fields[0]] = fields[1]
         accessPoints.append(confNdnAccessPoint(name, params))
