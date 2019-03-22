@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2018, The University of Memphis,
+# Copyright (C) 2015-2017, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -66,10 +66,14 @@ class confNDNHost():
     def __init__(self, name, app='', params='', cpu=None, cores=None, cache=None):
         self.name = name
         self.app = app
+        self.uri_tuples = params
         self.params = params
         self.cpu = cpu
         self.cores = cores
         self.cache = cache
+
+        # For now assume leftovers are NLSR configuration parameters
+        self.nlsrParameters = params
 
     def __repr__(self):
         return 'Name: '    + self.name + \
@@ -109,14 +113,12 @@ class confNdnStation():
 
 # Xian add class confNdnAccessPoint
 class confNdnAccessPoint:
-    def __init__(self, name, params=None):
+    def __init__(self, name):
         self.name=name
-        self.params = params
 
 class confNdnSwitch:
-    def __init__(self, name, params=None):
+    def __init__(self, name):
         self.name = name
-        self.params = params
 
 class confNDNLink():
 
@@ -126,7 +128,7 @@ class confNDNLink():
         self.linkDict = linkDict
 
     def __repr__(self):
-        return "h1: {} h2: {} params: {}".format(self.h1, self.h2, self.linkDict)
+        return 'h1: ' + self.h1 + ' h2: ' + self.h2 + ' params: ' + str(self.linkDict)
 
 def parse_hosts(conf_arq):
     'Parse hosts section from the conf file.'
@@ -137,16 +139,16 @@ def parse_hosts(conf_arq):
 
     items = config.items('nodes')
 
-    # makes a first-pass read to hosts section to find empty host sections
+        #makes a first-pass read to hosts section to find empty host sections
     for item in items:
         name = item[0]
         rest = item[1].split()
         if len(rest) == 0:
             config.set('nodes', name, '_')
-    # updates 'items' list
+        #updates 'items' list
     items = config.items('nodes')
 
-    # makes a second-pass read to hosts section to properly add hosts
+        #makes a second-pass read to hosts section to properly add hosts
     for item in items:
 
         name = item[0]
@@ -178,7 +180,7 @@ def parse_hosts(conf_arq):
         hosts.append(confNDNHost(name, app, params, cpu, cores, cache))
 
     return hosts
-# Xian: add the parse_stations() and parse_accessPoint() for wifi 
+# Xian: add the parse_stations() and parse_accessPoint() for wifi
 def parse_stations(conf_arq):
     'Parse hosts section from the conf file.'
     config = ConfigParser.RawConfigParser()
@@ -272,44 +274,48 @@ def parse_switches(conf_arq):
         if len(args) > 0:
             for arg in args[0].split(' '):
                 fields = arg.split('=')
-                if fields[0] != '_':
-                    params[fields[0]] = fields[1]
+                params[fields[0]] = fields[1]
         switches.append(confNdnSwitch(name, params))
 
     return switches
 
 def parse_links(conf_arq):
     'Parse links section from the conf file.'
-    arq = open(conf_arq, 'r')
+    arq = open(conf_arq,'r')
 
     links = []
-    linkSectionFlag = False
 
-    for line in arq:
-        if linkSectionFlag:
-            args = line.split()
+    while True:
+        line = arq.readline()
+        if line == '[links]\n':
+            break
 
-            # checks for non-empty line
-            if len(args) == 0:
-                continue
+    while True:
+        line = arq.readline()
+        if line == '':
+            break
 
-            h1, h2 = args.pop(0).split(':')
+        args = line.split()
 
-            link_dict = {}
+        #checks for non-empty line
+        if len(args) == 0:
+            continue
 
-            for arg in args:
-                arg_name, arg_value = arg.split('=')
-                key = arg_name
-                value = arg_value
-                if key in ['bw','jitter','max_queue_size']:
-                    value = int(value)
-                if key in ['loss']:
-                    value = float(value)
-                link_dict[key] = value
+        h1, h2 = args.pop(0).split(':')
 
-            links.append(confNDNLink(h1,h2,link_dict))
+        link_dict = {}
 
-        elif line == "[links]\n":
-            linkSectionFlag = True
+        for arg in args:
+            arg_name, arg_value = arg.split('=')
+            key = arg_name
+            value = arg_value
+            if key in ['bw','jitter','max_queue_size']:
+                value = int(value)
+            if key in ['loss']:
+                value = float(value)
+            link_dict[key] = value
+
+        links.append(confNDNLink(h1,h2,link_dict))
+
 
     return links

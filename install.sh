@@ -105,6 +105,7 @@ function forwarder {
     ./waf
     sudo ./waf install
     cd ../
+    sudo rm -rf NFD
 }
 
 function routing {
@@ -123,11 +124,17 @@ function routing {
 
     git clone --depth 1 https://github.com/named-data/ChronoSync
     cd ChronoSync
+    current=$(git rev-parse HEAD)
+    if [[ $current != "097bb448f46b8bd9a5c1f431e824f8f6a169b650" ]]; then
+      git checkout 097bb448f46b8bd9a5c1f431e824f8f6a169b650
+      git checkout -b fix-commit
+    fi
     ./waf configure
     ./waf
     sudo ./waf install
     sudo ldconfig
     cd ../
+    sudo rm -rf ChronoSync
 
     git clone --depth 1 https://github.com/named-data/NLSR
     cd NLSR
@@ -135,6 +142,7 @@ function routing {
     ./waf
     sudo ./waf install
     cd ../
+    sudo rm -rf NLSR
 }
 
 function ndncxx {
@@ -158,6 +166,7 @@ function ndncxx {
     sudo ./waf install
     sudo ldconfig
     cd ../
+    sudo rm -rf ndn-cxx
 }
 
 function tools {
@@ -172,9 +181,12 @@ function tools {
     ./waf
     sudo ./waf install
     cd ../
+    sudo rm -rf ndn-tools
 }
 
-function mininet {
+
+# mininetwifi function for install mininetwifi moudul
+function mininetwifi {
     if [[ updated != true ]]; then
         $update
         updated="true"
@@ -184,10 +196,11 @@ function mininet {
         pysetup="true"
     fi
 
-    git clone --depth 1 https://github.com/mininet/mininet
-    cd mininet
-    sudo ./util/install.sh -fnv
+    git clone --depth 1 https://github.com/intrig-unicamp/mininet-wifi
+    cd mininet-wifi
+    sudo ./util/install.sh -Wnfvl
     cd ../
+    sudo rm -rf mininet-wifi
 }
 
 function infoedit {
@@ -209,9 +222,30 @@ function minindn {
         $install python-setuptools
         pysetup="true"
     fi
-    install_dir="/usr/local/etc/mini-ndn/"
+    git clone --depth 1 https://github.com/named-data/mini-ndn
+    sudo mv mini-ndn mini_ndn # name mini-ndn is not allowed in python 
+    cd mini_ndn
+    sudo cp ../ndnwifi/experiments/__init__.py ./ #inorder to import module in the subdirecorty mini_ndn
+    sudo ./install.sh -i
+    cd ../
+    #sudo rm -rf mini_ndn
+}
 
+function minindnwifi {
+    if [[ updated != true ]]; then
+        $update
+        updated="true"
+    fi
+
+    if [[ $pysetup != true ]]; then
+        pysetup="true"
+    fi
+    install_dir="/usr/local/etc/mini-ndn/wifi/"
     sudo mkdir -p "$install_dir"
+    sudo cp ndnwifi_utils/topologies/adhoc-topology.conf "$install_dir"
+    sudo cp ndnwifi_utils/topologies/singleap-topology.conf "$install_dir"
+    sudo cp ndnwifi_utils/topologies/multiap-topology.conf "$install_dir"
+    sudo cp ndnwifi_utils/topologies/vndn-topology.conf "$install_dir"
     sudo cp topologies/default-topology.conf "$install_dir"
     sudo cp topologies/minindn.caida.conf "$install_dir"
     sudo cp topologies/minindn.ucla.conf "$install_dir"
@@ -352,34 +386,36 @@ function usage {
     printf -- ' -r: install NLSR\n' >&2
     printf -- ' -t: install tools\n' >&2
     printf -- ' -c: install Common Client Libraries\n' >&2
+    printf -- ' -w: install minindn-wifi' >&2
     exit 2
 }
 
 if [[ $# -eq 0 ]]; then
     usage
 else
-    while getopts 'abemfrtic' OPTION
+    while getopts 'abemfrticw' OPTION
     do
         case $OPTION in
         a)
         forwarder
-        minindn
-        mininet
+        mininet-wifi
         routing
         tools
         infoedit
         argcomplete
         commonClientLibraries
+        minindnwifi
         break
         ;;
         b)    argcomplete;;
         e)    infoedit;;
         f)    forwarder;;
         i)    minindn;;
-        m)    mininet;;
+        m)    mininet-wifi;;
         r)    routing;;
         t)    tools;;
         c)    commonClientLibraries;;
+        w)    minindnwifi;;
         ?)    usage;;
         esac
     done

@@ -1,16 +1,27 @@
+<<<<<<< HEAD
 Mini-NDN Installation Instructions
+=======
+MiniNDN-WiFi Installing Instructions
+>>>>>>> wifi
 ================================
 
 ### What equipment will I need?
 
+<<<<<<< HEAD
 For this guide, you will need a laptop/desktop with a recent version
 of a Linux distro such as Ubuntu or any of its variants. Fedora is not
 officially supported but has also been reported to work for some
 users. For this guide, the _Ubuntu 18.04 LTS_ release was used.
 Also, note that you'll need administrative privileges in order to
 download and install extra packages and also to execute **Mini-NDN**.
+=======
+Basically, you'll need a laptop/desktop with a recent Linux distro (Ubuntu, Fedora).
+We recommend Ubuntu. For this guide, the _Ubuntu 16.04 64bit LTS_ was used.
+Also, note that you'll need administrative privileges in order to download and install
+extra packages and also to execute **Mini-NDN Wifi**.
+>>>>>>> wifi
 
-### Installing **Mini-NDN**
+### Installing **Mini-NDN Wifi**
 
 NOTE: Mini-NDN, while providing a high level of emulation of hosts,
 requires programs to be installed onto your computer. It will not work
@@ -20,7 +31,11 @@ simply set up with the provided vagrantfile.
 
 If you have all the dependencies (see sections below) installed simply clone this repository and run:
 
+<<<<<<< HEAD
     ./install.sh -i
+=======
+    sudo ./install.sh -iw
+>>>>>>> wifi
 
 else if you don't have the dependencies, the following command will install them from source along with Mini-NDN:
 
@@ -30,42 +45,32 @@ If you want to install the dependencies manually or from the Named Data PPA, fol
 
 ### Installing NDN
 
+<<<<<<< HEAD
 Each node in **Mini-NDN** will run the official implementation of NDN installed on your system. The following dependencies are needed:
+=======
+Each node in **Mini-NDN Wifi** will run the official implementation of NDN. The following dependencies are needed:
+>>>>>>> wifi
 
-Mini-NDN uses NFD, NLSR, and ndn-tools.
+Mini-NDN Wifi uses NFD and ndn-tools.
 
 To install NFD:
 https://named-data.net/doc/NFD/current/INSTALL.html
 
-To install NLSR:
-https://named-data.net/doc/NLSR/current/INSTALL.html
-
 To install ndn-tools:
 https://github.com/named-data/ndn-tools
 
-Note that all three of these can be installed from the Named Data PPA. Instructions for setting it up can
-be found in the NFD insallation instructions. Note that PPA and installs from source **cannot** be mixed.
+### Installing Mininet-Wifi
 
-###Special Instructions for PPA Installs
+**Mini-NDN Wifi** depends on Mininet-Wifi. To install it:
 
-If you are using a custom nfd.conf file in an experiment, you should place it in /usr/local/etc/ndn/
-rather than /etc/ndn/. This is to avoid a bug from the default configuration file for the PPA, which
-is incompatiable with Mini-NDN.
+    git clone --depth 1 https://github.com/intrig-unicamp/mininet-wifi.git
+    
+After you've cloned the repository, you need to `cd` to that directory and issue these commands:
 
-### Installing Mininet
-
-**Mini-NDN** is based on Mininet. To install Mininet:
-
-First, clone Mininet from github:
-
-    git clone --depth 1 https://github.com/mininet/mininet.git
-
-After Mininet source is on your system, run the following command to
-install Mininet core dependencies and Open vSwitch:
-
-    ./util/install.sh -nv
-
-To check if Mininet is working correctly, run this test:
+    git checkout ndn
+    sudo util/install.sh -Wlnfv
+    
+Check if everything is working:
 
     sudo mn --test pingall
 
