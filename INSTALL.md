@@ -1,60 +1,33 @@
-<<<<<<< HEAD
-Mini-NDN Installation Instructions
-=======
 MiniNDN-WiFi Installing Instructions
->>>>>>> wifi
 ================================
 
 ### What equipment will I need?
 
-<<<<<<< HEAD
-For this guide, you will need a laptop/desktop with a recent version
-of a Linux distro such as Ubuntu or any of its variants. Fedora is not
-officially supported but has also been reported to work for some
-users. For this guide, the _Ubuntu 18.04 LTS_ release was used.
-Also, note that you'll need administrative privileges in order to
-download and install extra packages and also to execute **Mini-NDN**.
-=======
 Basically, you'll need a laptop/desktop with a recent Linux distro (Ubuntu, Fedora).
 We recommend Ubuntu. For this guide, the _Ubuntu 16.04 64bit LTS_ was used.
 Also, note that you'll need administrative privileges in order to download and install
 extra packages and also to execute **Mini-NDN Wifi**.
->>>>>>> wifi
 
 ### Installing **Mini-NDN Wifi**
 
-NOTE: Mini-NDN, while providing a high level of emulation of hosts,
-requires programs to be installed onto your computer. It will not work
-if they are not installed. If you do not want NDN software installed
-onto your computer, you can use a virtual machine, which can be quite
-simply set up with the provided vagrantfile.
-
 If you have all the dependencies (see sections below) installed simply clone this repository and run:
 
-<<<<<<< HEAD
-    ./install.sh -i
-=======
     sudo ./install.sh -iw
->>>>>>> wifi
 
-else if you don't have the dependencies, the following command will install them from source along with Mini-NDN:
+else if you don't have the dependencies, the following command will install them along with Mini-NDN:
 
-    ./install.sh -a
+    sudo ./install.sh -a
 
-If you want to install the dependencies manually or from the Named Data PPA, follow the instructions below:
+else if you want to install the dependencies manually, follow the instructions below:
 
 ### Installing NDN
 
-<<<<<<< HEAD
-Each node in **Mini-NDN** will run the official implementation of NDN installed on your system. The following dependencies are needed:
-=======
 Each node in **Mini-NDN Wifi** will run the official implementation of NDN. The following dependencies are needed:
->>>>>>> wifi
 
 Mini-NDN Wifi uses NFD and ndn-tools.
 
 To install NFD:
-https://named-data.net/doc/NFD/current/INSTALL.html
+http://named-data.net/doc/NFD/current/INSTALL.html
 
 To install ndn-tools:
 https://github.com/named-data/ndn-tools
@@ -74,15 +47,13 @@ Check if everything is working:
 
     sudo mn --test pingall
 
-This will print out a series of statements that show the test setup
-and the results of the test. Look for `Results:` two-thirds of the way
-down where it will indicate the percentage of dropped packets.
+This will print out a series of statements that show the test setup and the results of the test. Look
+for `Results:` two-thirds of the way down where it will indicate the percentage of dropped packets.
 Your results should show "0% dropped (2/2 received)".
 
 ### Installing Infoedit
 
-Infoedit is used to edit configuration files such as NFD configuration
-file.
+Infoedit is used to edit configuration files such as NFD configuration file.
 
 To install infoedit:
 https://github.com/NDN-Routing/infoedit

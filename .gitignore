@@ -22,7 +22,6 @@ openflow
 PyNDN2
 util
 .vagrant
-*.pyc
 modify\ illustration.pdf
 Introduction\ of\ MiniNDN-WiFi.odp
 MiniNDN_WiFi.egg-info/

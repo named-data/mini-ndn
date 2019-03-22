@@ -78,9 +78,6 @@ option can be used:
 
     sudo minindn --work-dir /home/mydir/test
 
-<<<<<<< HEAD
-Autocomplete of command-line options is available for users of Bash and Zsh.
-=======
 Assume that we have created an ad hoc network with 4 nodes. We can use
 NDN's tools and mininet-wifi CLI command to test running. Please see
 the detail explanations:
@@ -122,7 +119,6 @@ Each node is given a HOME directory under /tmp/minindn/node-name where
 node-name is the name of the node specified in the [nodes] section of
 the conf file.
 
->>>>>>> wifi
 
 #### Routing options
 

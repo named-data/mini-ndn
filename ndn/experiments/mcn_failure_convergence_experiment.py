@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2018, The University of Memphis,
+# Copyright (C) 2015-2017, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -22,28 +22,30 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 from ndn.experiments.experiment import Experiment
+from ndn.experiments.mcn_failure_experiment import MCNFailureExperiment
 
-class ArgumentsExperiment(Experiment):
+import time
+
+class MCNFailureConvergenceExperiment(MCNFailureExperiment):
+
     def __init__(self, args):
-        Experiment.__init__(self, args)
-        self.ds = self.options.arguments.ds
-        self.logging = self.options.arguments.logging
-
-    def start(self):
-        pass
-
-    def setup(self):
-        pass
+        MCNFailureExperiment.__init__(self, args)
 
     def run(self):
-        print("Argument ds: {}".format(self.ds))
-        print("Argument logging: {}".format(self.logging))
+        mostConnectedNode = self.getMostConnectedNode()
 
-    @staticmethod
-    def parseArguments(parser):
-        parser.add_argument("--ds", dest="ds", default="1000",
-                            help="[Arguments Experiment] Number of data streams")
-        parser.add_argument("--logging", dest="logging", action="store_true",
-                            help="[Arguments Experiment] Enable logging")
+        # After the pings are scheduled, collect pings for 1 minute
+        time.sleep(self.PING_COLLECTION_TIME_BEFORE_FAILURE)
 
-Experiment.register("args-exp", ArgumentsExperiment)
+        # Bring down MCN
+        self.failNode(mostConnectedNode)
+
+        # MCN is down for 2 minutes
+        time.sleep(120)
+
+        # Bring MCN back up
+        self.recoverNode(mostConnectedNode)
+
+        self.checkConvergence()
+
+Experiment.register("mcn-failure-convergence", MCNFailureConvergenceExperiment)

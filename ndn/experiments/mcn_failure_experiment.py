@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2018, The University of Memphis,
+# Copyright (C) 2015-2017, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -22,44 +22,45 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 from ndn.experiments.experiment import Experiment
-from ndn.apps.ndn_ping_client import NDNPingClient
 
 import time
 
-class FailureExperiment(Experiment):
+class MCNFailureExperiment(Experiment):
 
     def __init__(self, args):
-        args["options"].nPings = 300
+        args["nPings"] = 300
         Experiment.__init__(self, args)
 
         self.PING_COLLECTION_TIME_BEFORE_FAILURE = 60
         self.PING_COLLECTION_TIME_AFTER_RECOVERY = 120
 
+    def getMostConnectedNode(self):
+        mcn = max(self.net.hosts, key=lambda host: len(host.intfNames()))
+        print "The most connected node is: %s" % mcn.name
+        return mcn
+
     def run(self):
+        mostConnectedNode = self.getMostConnectedNode()
+
         self.startPctPings()
 
         # After the pings are scheduled, collect pings for 1 minute
         time.sleep(self.PING_COLLECTION_TIME_BEFORE_FAILURE)
 
-        # Bring down CSU
-        for host in self.net.hosts:
-            if host.name == "csu":
-                self.failNode(host)
-                break
+        # Bring down MCN
+        self.failNode(mostConnectedNode)
 
-        # CSU is down for 2 minutes
+        # MCN is down for 2 minutes
         time.sleep(120)
 
-        # Bring CSU back up
-        for host in self.net.hosts:
-            if host.name == "csu":
-                self.recoverNode(host)
+        # Bring MCN back up
+        self.recoverNode(mostConnectedNode)
 
-                for other in self.net.hosts:
-                    if host.name != other.name:
-                        NDNPingClient.ping(host, other, self.PING_COLLECTION_TIME_AFTER_RECOVERY)
+        # Restart pings
+        for nodeToPing in self.pingedDict[mostConnectedNode]:
+            self.ping(mostConnectedNode, nodeToPing, self.PING_COLLECTION_TIME_AFTER_RECOVERY)
 
-        # Collect pings for more seconds after CSU is up
+        # Collect pings for more seconds after MCN is up
         time.sleep(self.PING_COLLECTION_TIME_AFTER_RECOVERY)
 
-Experiment.register("failure", FailureExperiment)
+Experiment.register("failure-mcn", MCNFailureExperiment)

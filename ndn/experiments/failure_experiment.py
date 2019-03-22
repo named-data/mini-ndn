@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2018, The University of Memphis,
+# Copyright (C) 2015-2017, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -22,28 +22,44 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 from ndn.experiments.experiment import Experiment
+from ndn.nlsr import Nlsr
 
 import time
 
-class PingallExperiment(Experiment):
+class FailureExperiment(Experiment):
 
     def __init__(self, args):
-
+        args["nPings"] = 300
         Experiment.__init__(self, args)
-        self.COLLECTION_PERIOD_BUFFER = 10
-        print "Using {} traffic".format(self.options.pctTraffic)
 
-    def setup(self):
-        if self.options.nPings != 0:
-            Experiment.setup(self)
+        self.PING_COLLECTION_TIME_BEFORE_FAILURE = 60
+        self.PING_COLLECTION_TIME_AFTER_RECOVERY = 120
 
     def run(self):
-        if self.options.nPings == 0:
-            return
-
         self.startPctPings()
 
-        # For pingall experiment sleep for the number of pings + some offset
-        time.sleep(self.options.nPings + self.COLLECTION_PERIOD_BUFFER)
+        # After the pings are scheduled, collect pings for 1 minute
+        time.sleep(self.PING_COLLECTION_TIME_BEFORE_FAILURE)
 
-Experiment.register("pingall", PingallExperiment)
+        # Bring down CSU
+        for host in self.net.hosts:
+            if host.name == "csu":
+                self.failNode(host)
+                break
+
+        # CSU is down for 2 minutes
+        time.sleep(120)
+
+        # Bring CSU back up
+        for host in self.net.hosts:
+            if host.name == "csu":
+                self.recoverNode(host)
+
+                for other in self.net.hosts:
+                    if host.name != other.name:
+                        self.ping(host, other, self.PING_COLLECTION_TIME_AFTER_RECOVERY)
+
+        # Collect pings for more seconds after CSU is up
+        time.sleep(self.PING_COLLECTION_TIME_AFTER_RECOVERY)
+
+Experiment.register("failure", FailureExperiment)

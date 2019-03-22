@@ -21,32 +21,22 @@
 # along with Mini-NDN, e.g., in COPYING.md file.
 # If not, see <http://www.gnu.org/licenses/>.
 
-from subprocess import call
-from mininet.cli import CLI
-from mininet.wifi.cli import CLI_wifi
-import sys
+from ndn.experiments.experiment import Experiment
 
-sshbase = [ 'ssh', '-q', '-t', '-i/home/mininet/.ssh/id_rsa' ]
-scpbase = [ 'scp', '-i', '/home/mininet/.ssh/id_rsa' ]
-devnull = open('/dev/null', 'w')
+import time
 
-def ssh(login, cmd):
-    rcmd = sshbase + [login, cmd]
-    call(rcmd, stdout=devnull, stderr=devnull)
+class PingallExperiment(Experiment):
 
-def scp(*args):
-    tmp = []
-    for arg in args:
-        tmp.append(arg)
-    rcmd = scpbase + tmp
-    call(rcmd, stdout=devnull, stderr=devnull)
+    def __init__(self, args):
 
-class MiniNDNCLI(CLI):
-    prompt = 'mini-ndn> '
-    def __init__(self, mininet, stdin=sys.stdin, script=None):
-        CLI.__init__(self, mininet, stdin=sys.stdin, script=None)
+        Experiment.__init__(self, args)
+        self.COLLECTION_PERIOD_BUFFER = 10
+        print "Using %f traffic" % self.pctTraffic
 
-class MiniNdnWifiCLI(CLI_wifi): #add this line for Wifi network
-    prompt='minindn-wifi>'
-    def __init__(self, mininet, stdin=sys.stdin, script=None):
-        CLI_wifi.__init__(self, mininet, stdin=sys.stdin, script=None)
+    def run(self):
+        self.startPctPings()
+
+        # For pingall experiment sleep for the number of pings + some offset
+        time.sleep(self.nPings + self.COLLECTION_PERIOD_BUFFER)
+
+Experiment.register("pingall", PingallExperiment)

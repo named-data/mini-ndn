@@ -58,7 +58,7 @@
 #   advertising or publicity pertaining to the Software or any derivatives
 #   without specific, written prior permission.
 
-from mn_wifi.node import Station, Car
+from mininet.wifi.node import Station, Car
 from ndn.ndn_host import NdnHostCommon
 from ndn.nfd import Nfd
 

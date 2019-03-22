@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2018, The University of Memphis,
+# Copyright (C) 2015-2017, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -23,11 +23,9 @@
 
 from mininet.clean import sh
 from mininet.examples.cluster import RemoteMixin
-from mininet.log import info
 
 from ndn.ndn_application import NdnApplication
-from ndn.util import ssh, scp, copyExistentFile
-from ndn.apps.nfdc import Nfdc
+from ndn.util import ssh, scp
 
 import shutil
 import os
@@ -38,26 +36,29 @@ import time
 NETWORK="/ndn/"
 
 class Nlsr(NdnApplication):
-    def __init__(self, node, options):
+    def __init__(self, node, neighbors, faceType):
         NdnApplication.__init__(self, node)
-        self.config = NlsrConfigGenerator(node, options)
-
         self.node = node
-        self.routerName = "/{}C1.Router/cs/{}".format('%', node.name)
-        self.confFile = "{}/nlsr.conf".format(node.homeFolder)
+        self.neighbors = neighbors
+        self.faceType = faceType
+        self.routerName = "/%sC1.Router/cs/%s" % ('%', node.name)
+        self.confFile = "%s/nlsr.conf" % node.homeFolder
 
         # Make directory for log file
         self.logDir = "{}/log".format(node.homeFolder)
         self.node.cmd("mkdir {}".format(self.logDir))
 
-    def start(self, sleepTime = 1):
-        self.node.cmd("export NDN_LOG=nlsr.*={}".format(self.node.params["params"].get("nlsr-log-level", "DEBUG")))
+        # Create faces in NFD
+        self.createFaces()
+
+    def start(self):
+        self.node.cmd("export NDN_LOG=nlsr.*={}".format(self.node.nlsrParameters.get("nlsr-log-level", "DEBUG")))
         NdnApplication.start(self, "nlsr -f {} > log/nlsr.log 2>&1 &".format(self.confFile))
-        time.sleep(sleepTime)
+        time.sleep(1)
 
     def createFaces(self):
-        for ip in self.config.neighborIPs:
-            Nfdc.createFace(self.node, ip, self.config.faceType, isPermanent=True)
+        for ip in self.neighbors:
+            self.node.cmd("nfdc face create {}://{} permanent".format(self.faceType, ip))
 
     @staticmethod
     def createKey(host, name, outputFile):
@@ -76,7 +77,7 @@ class Nlsr(NdnApplication):
         # Create root certificate
         rootName = NETWORK
         sh("ndnsec-keygen {}".format(rootName)) # Installs a self-signed cert into the system
-        sh("ndnsec-cert-dump -i {} > {}/root.cert".format(rootName, securityDir))
+        sh("ndnsec-cert-dump -i {} > {}/root.cert".format(rootName, securityDir, securityDir))
 
         # Create necessary certificates for each site
         for host in net.hosts:
@@ -140,35 +141,20 @@ class NlsrConfigGenerator:
     ROUTING_LINK_STATE = "ls"
     ROUTING_HYPERBOLIC = "hr"
 
-    def __init__(self, node, options):
+    def __init__(self, node, isSecurityEnabled, faceType):
         self.node = node
-        self.isSecurityEnabled = options.nlsrSecurity
-        self.faceType = options.faceType
+        self.isSecurityEnabled = isSecurityEnabled
+        self.faceType = faceType
         self.infocmd = "infoedit -f nlsr.conf"
 
-        parameters = node.params["params"]
+        parameters = node.nlsrParameters
 
-        self.nFaces = options.nFaces
-        if options.routingType == "hr":
-            self.hyperbolicState = "on"
-        elif options.routingType == "dry":
-            self.hyperbolicState = "dry-run"
-        else:
-            self.hyperbolicState = "off"
+        self.nFaces = parameters.get("max-faces-per-prefix", 3)
+        self.hyperbolicState = parameters.get("hyperbolic-state", "off")
         self.hyperRadius = parameters.get("radius", 0.0)
         self.hyperAngle = parameters.get("angle", 0.0)
-
-        if ((self.hyperbolicState == "on" or self.hyperbolicState == "dry-run") and
-            (self.hyperRadius == 0.0 or self.hyperAngle == 0.0)):
-                info('Hyperbolic coordinates in topology file are either missing or misconfigured.')
-                info('Check that each node has one radius value and one or two angle value(s).')
-                sys.exit(1)
-
         self.neighborIPs = []
-        possibleConfPaths = ["/usr/local/etc/ndn/nlsr.conf.sample", "/etc/ndn/nlsr.conf.sample"]
-        copyExistentFile(node, possibleConfPaths, "{}/nlsr.conf".format(self.node.homeFolder))
-
-        self.createConfigFile()
+        self.node.cmd("sudo cp /usr/local/etc/ndn/nlsr.conf.sample nlsr.conf")
 
     def createConfigFile(self):
 
@@ -184,7 +170,8 @@ class NlsrConfigGenerator:
         self.node.cmd("{} -s general.network -v {}".format(self.infocmd, NETWORK))
         self.node.cmd("{} -s general.site -v /{}-site".format(self.infocmd, self.node.name))
         self.node.cmd("{} -s general.router -v /%C1.Router/cs/{}".format(self.infocmd, self.node.name))
-        self.node.cmd("{} -s general.state-dir -v {}/log".format(self.infocmd, self.node.homeFolder))
+        self.node.cmd("{} -s general.log-dir -v {}/log".format(self.infocmd, self.node.homeFolder))
+        self.node.cmd("{} -s general.seq-dir -v {}/log".format(self.infocmd, self.node.homeFolder))
 
     def __editNeighborsSection(self):
 
@@ -204,7 +191,7 @@ class NlsrConfigGenerator:
 
                 linkCost = intf.params.get("delay", "10ms").replace("ms", "")
 
-                Nfdc.createFace(self.node, ip, self.faceType, isPermanent=True)
+                # To be used later to create faces
                 self.neighborIPs.append(ip)
 
                 self.node.cmd("{} -a neighbors.neighbor \

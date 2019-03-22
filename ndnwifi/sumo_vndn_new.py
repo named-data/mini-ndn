@@ -13,16 +13,16 @@ from subprocess import call
 
 from mininet.node import Controller
 from mininet.log import setLogLevel, info
-from mn_wifi.node import UserAP
-from mn_wifi.cli import CLI_wifi
-from mn_wifi.net import Mininet_wifi
-from mn_wifi.sumo.runner import sumo
-from mn_wifi.link import wmediumd, adhoc, mesh
-from mn_wifi.wmediumdConnector import interference
+from mininet.wifi.node import UserAP
+from mininet.wifi.cli import CLI_wifi
+from mininet.wifi.net import Mininet_wifi
+from mininet.sumo.runner import sumo
+from mininet.wifi.link import wmediumd, adhoc, mesh
+from mininet.wifi.wmediumdConnector import interference
 
 from ndn.ndn_host import NdnHost
 from ndn.nfd import Nfd
-from ndn.apps.nfdc import Nfdc
+#from ndn.apps.nfdc import Nfdc
 from ndnwifi_host import NdnStation, NdnCar
 from ndnwifi.wifiutil import MiniNdnWifiCLI
 

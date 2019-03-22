@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2018, The University of Memphis,
+# Copyright (C) 2015-2017, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -35,10 +35,11 @@ class _ExperimentManager:
 
     def __init__(self):
         self.experiments = {}
+        self.expArgs = {}
 
     def loadModules(self):
         currentDir = os.path.dirname(__file__)
-        experimentDir = "{}/{}".format(currentDir, "experiments")
+        experimentDir = "%s/%s" % (currentDir, "experiments")
         experimentModule = "ndn.experiments"
 
         # Import and register experiments
@@ -46,17 +47,19 @@ class _ExperimentManager:
             for filename in files:
                 if filename.endswith(".py") and filename != "__init__.py":
                     module = filename.replace(".py", "")
-                    subdir = os.path.basename(root)
-                    if subdir == "experiments":
-                        __import__("{}.{}".format(experimentModule, module))
-                    else:
-                        __import__("{}.{}.{}".format(experimentModule, subdir, module))
+                    __import__("%s.%s" % (experimentModule, module))
 
     def register(self, name, experimentClass):
         if name not in self.experiments:
             self.experiments[name] = experimentClass
+            try:
+                helpStr = experimentClass.arguments()
+                if type(helpStr) is str:
+                    self.expArgs[name] = experimentClass.arguments()
+            except:
+                pass
         else:
-            raise _ExperimentManager.Error("Experiment '{}' has already been registered".format(name))
+            raise _ExperimentManager.Error("Experiment '%s' has already been registered" % name)
 
     def create(self, name, args):
         if name in self.experiments:
@@ -89,9 +92,7 @@ def getExperimentNames():
 
     return experimentNames
 
-def addExperimentArgs(parser):
-    # Find all experiment command line arguments and parse them.
+def getExperimentArgs():
     manager = __getInstance()
-    for name in manager.experiments:
-        if hasattr(manager.experiments[name], "parseArguments"):
-            manager.experiments[name].parseArguments(parser)
+
+    return manager.expArgs

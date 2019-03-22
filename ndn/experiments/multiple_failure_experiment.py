@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2018, The University of Memphis,
+# Copyright (C) 2015-2017, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -22,7 +22,7 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 from ndn.experiments.experiment import Experiment
-from ndn.apps.ndn_ping_client import NDNPingClient
+from ndn.nlsr import Nlsr
 
 import time
 
@@ -37,11 +37,12 @@ class MultipleFailureExperiment(Experiment):
 
         # This is the number of pings required to make it through the full experiment
         nInitialPings = (self.PING_COLLECTION_TIME_BEFORE_FAILURE +
-                         len(args["net"].hosts) * (self.FAILURE_INTERVAL + self.RECOVERY_INTERVAL))
-        print("Scheduling with {} initial pings".format(nInitialPings))
+                         len(args["net"].hosts)*(self.FAILURE_INTERVAL + self.RECOVERY_INTERVAL))
+        print("Scheduling with %s initial pings" % nInitialPings)
+
+        args["nPings"] = nInitialPings
 
         Experiment.__init__(self, args)
-        self.options.nPings = nInitialPings
 
     def run(self):
         self.startPctPings()
@@ -69,11 +70,11 @@ class MultipleFailureExperiment(Experiment):
             nPings = ((self.RECOVERY_INTERVAL - recovery_time) +
                       nNodesRemainingToFail*(self.FAILURE_INTERVAL + self.RECOVERY_INTERVAL))
 
-            print("Scheduling with {} remaining pings".format(nPings))
+            print("Scheduling with %s remaining pings" % nPings)
 
             # Restart pings
             for nodeToPing in self.pingedDict[host]:
-                NDNPingClient.ping(host, nodeToPing, nPings)
+                self.ping(host, nodeToPing, nPings)
 
             time.sleep(self.RECOVERY_INTERVAL - recovery_time)
 

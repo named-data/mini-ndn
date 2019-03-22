@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2018, The University of Memphis,
+# Copyright (C) 2015-2017, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -36,7 +36,7 @@ class PrefixPropogationExperiment(Experiment):
     def run(self):
         firstNode = self.net.hosts[0]
 
-        if self.options.nlsrSecurity:
+        if self.nlsrSecurity:
             firstNode.cmd("ndnsec-set-default /ndn/{}-site/%C1.Operator/op".format(firstNode.name))
 
         print("Testing advertise")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2019, The University of Memphis,
+# Copyright (C) 2015-2017, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -59,34 +59,30 @@
 #   advertising or publicity pertaining to the Software or any derivatives
 #   without specific, written prior permission.
 
-from mn_wifi.topo import Topo_WiFi
+from mininet.wifi.topo import Topo_WiFi
 from mininet.topo import Topo
-from mininet.net import Mininet
-from mininet.log import setLogLevel, output, info, error, warn
-from mn_wifi.net import Mininet_wifi
+from mininet.wifi.net import Mininet_wifi
+from mininet.log import setLogLevel, output, info
 from mininet.link import TCLink
-from mn_wifi.link import wmediumd
-from mn_wifi.wmediumdConnector import interference
+from mininet.wifi.link import wmediumd
+from mininet.wifi.wmediumdConnector import interference
 from mininet.util import ipStr, ipParse
 
 from mininet.examples.cluster import MininetCluster, RoundRobinPlacer, ClusterCleanup
 from mininet.examples.clustercli import ClusterCLI
 
-from ndn import ExperimentManager
-from ndn.experiments.experiment import Experiment
 from ndnwifi import WifiExperimentManager
 from ndn.ndn_host import NdnHost, CpuLimitedNdnHost, RemoteNdnHost
 from ndn.conf_parser import parse_hosts, parse_switches, parse_links
 from ndnwifi.wificonf_parser import parse_stations, parse_cars, parse_accessPoints
 from ndn.placer import GuidedPlacer, PopulatePlacement
-from ndn.nfd import Nfd
-from ndn.util import ssh, scp, MiniNDNCLI, ProgramOptions
+from ndn.util import ssh, scp, MiniNDNCLI
 from ndnwifi.wifiutil import MiniNdnWifiCLI
 from ndnwifi.ndnadhoc import build_adhocnet
 #from ndnwifi.vndn import build_vndn
 from ndnwifi.sumo_vndn_new import build_sumo_vndn
 from mininet.node import Controller
-from mn_wifi.node import UserAP, OVSKernelAP
+from mininet.wifi.node import UserAP, OVSKernelAP
 from ndnwifi.ndnwifi_host import NdnStation
 
 import os.path, time
@@ -101,12 +97,10 @@ import glob
 from functools import partial
 import re
 
-try:
-    import argcomplete
-except ImportError:
-    pass
+from ndn.apps.nlsr import Nlsr, NlsrConfigGenerator
+from ndn.nfd import Nfd
 
-VERSION_NUMBER = "0.4.1"
+VERSION_NUMBER = "0.1.0"
 INSTALL_DIR='/usr/local/etc/mini-ndn/'
 
 class PrintExperimentNames(argparse.Action):
@@ -119,6 +113,8 @@ class PrintExperimentNames(argparse.Action):
         print("MiniNDN-wifi experiments:")
         for experiment in experimentNames:
             print("  {}".format(experiment))
+            if experiment in experimentArgs:
+                print("      ({})".format(experimentArgs[experiment]))
 
         sys.exit(0)
 
@@ -158,10 +154,10 @@ def createResultsDir(resultDir, faces, rType):
     if not os.path.isdir(resultDir):
         os.makedirs(resultDir)
     else:
-        warn("Results directory ({}) already exists!".format(resultDir))
-        sys.exit(1)
+        print("Results directory (%s) already exists!" % resultDir)
+        sys.exit(1);
 
-    info("Results will be stored at: {}".format(resultDir))
+    print("Results will be stored at: %s" % resultDir)
     return resultDir
 
 def parse_args():
@@ -174,11 +170,11 @@ def parse_args():
     parser.add_argument("--ctime", type=int, default=60,
                         help="Specify convergence time for the topology (Default: 60 seconds)")
 
-    parser.add_argument("--experiment", choices=[experiment for experiment in ExperimentManager.getExperimentNames()],
+    parser.add_argument("--experiment",
                         help="Runs the specified experiment")
 
     parser.add_argument("--faces", type=int, default=3,
-                        help="Specify number of max faces per prefix for NLSR 0-60")
+                        help="Specify number of faces 0-60")
 
     parser.add_argument("--routing", dest="routingType", default='link-state', choices=['link-state', 'hr', 'dry'],
                         help="""choices for routing are 'link-state' for link state, 'hr' for hyperbolic, and 'dry'
@@ -247,10 +243,13 @@ def parse_args():
     parser.add_argument("--cs-size", dest='csSize', type=int, default=65536,
                         help="Set CS size in NFD's conf file")
 
-    ExperimentManager.addExperimentArgs(parser)
+    args, unknownArgs = parser.parse_known_args()
 
-    if "argcomplete" in sys.modules:
-        argcomplete.autocomplete(parser)
+    unknownArgsList = []
+    for arg in unknownArgs:
+        if arg.startswith(("--")):
+            parser.add_argument(arg)
+            unknownArgsList.append(arg.split("--")[1])
 
     args = parser.parse_args()
 
@@ -301,8 +300,6 @@ def parse_args():
                 options.templateFile = INSTALL_DIR + 'wifi/singleap-topology.conf'
     print options.templateFile
 
-    options.arguments = args
-
     for k in args.__dict__:
         if k in unknownArgsList:
             options.arbArgs[k] = args.__dict__[k]
@@ -312,7 +309,7 @@ def parse_args():
         sys.exit(1)
 
     if options.experimentName is not None and options.resultDir is None:
-        warn("No results folder specified; experiment results will remain in the working directory\n")
+        print("No results folder specified; experiment results will remain in the working directory")
 
     if options.cluster is not None:
         servers = options.cluster.split(',')
@@ -324,13 +321,13 @@ def parse_args():
             options.placement = RoundRobinPlacer
         elif options.placement == "guided":
             if options.placeList is None or not re.match("^[0-9,]+$", options.placeList):
-                error("Please specify correctly how many nodes you want to place on each node!")
+                print("Please specify correctly how many nodes you want to place on each node!")
                 sys.exit(1)
             else:
                 try:
                     options.placeList = map(int, options.placeList.split(","))
                 except ValueError:
-                    error("Please specify the nodes correctly, no comma at the beginning/end!")
+                    print("Please specify the nodes correctly, no comma at the beginning/end!")
                     sys.exit(1)
 
                 PopulatePlacement(options.placeList)
@@ -347,23 +344,30 @@ class NdnTopo(Topo):
     def __init__(self, conf_arq, workDir, **opts):
         Topo.__init__(self, **opts)
 
-        self.hosts_conf = parse_hosts(conf_arq)
-        self.switches_conf = parse_switches(conf_arq)
-        self.links_conf = parse_links(conf_arq)
+        global hosts_conf
+        global links_conf
+        hosts_conf = parse_hosts(conf_arq)
+        switches_conf = parse_switches(conf_arq)
+        links_conf = parse_links(conf_arq)
 
         self.isTCLink = False
         self.isLimited = False
 
-        for host in self.hosts_conf:
+        for host in hosts_conf:
             if host.cpu != None and self.isLimited != True:
                 self.isLimited = True
-            self.addHost(host.name, app=host.app, params=host.params, cpu=host.cpu,
+            self.addHost(host.name, app=host.app, params=host.uri_tuples, cpu=host.cpu,
                          cores=host.cores,cache=host.cache, workdir=workDir)
+            if (options.routingType != 'link-state' and (host.params.get('radius') is None
+                or host.params.get('angle') is None)):
+                info('Hyperbolic coordinates in topology file are either missing or misconfigured.\n' \
+                     'Check that each node has one radius value and one or two angle value(s).\n')
+                sys.exit(1)
 
         for switch in switches_conf:
             self.addSwitch(switch.name, **switch.params)
 
-        for link in self.links_conf:
+        for link in links_conf:
             if len(link.linkDict) == 0:
                 self.addLink(link.h1, link.h2)
             else:
@@ -428,7 +432,7 @@ def execute(options):
         options.templateFile = INSTALL_DIR + 'minindn.testbed.conf'
 
     if os.path.exists(options.templateFile) == False:
-        error('Template file cannot be found. Exiting...\n')
+        info('Template file cannot be found. Exiting...\n')
         sys.exit(1)
 
     if options.cluster is not None and options.placement == GuidedPlacer:
@@ -439,7 +443,7 @@ def execute(options):
                     num_nodes += 1
 
         if sum(options.placeList) != num_nodes:
-            error("Placement list sum is not equal to number of nodes!")
+            print("Placement list sum is not equal to number of nodes!")
             sys.exit(1)
 
     # Copy nfd.conf to remote hosts - this assumes that NDN versions across
@@ -447,11 +451,11 @@ def execute(options):
     if options.cluster is not None:
         for server in options.servers:
             if server != "localhost":
-                login = "mininet@{}".format(server)
+                login = "mininet@%s" % server
                 src = nfdConfFile
-                dst = "{}:/tmp/nfd.conf".format(login)
+                dst = "%s:/tmp/nfd.conf" % (login)
                 scp(src, dst)
-                ssh(login, "sudo cp /tmp/nfd.conf {}".format(src))
+                ssh(login, "sudo cp /tmp/nfd.conf %s" % src)
 
     if options.resultDir is not None:
         options.resultDir = createResultsDir(options.resultDir, options.nFaces, options.routingType)
@@ -539,7 +543,6 @@ def execute(options):
                     node2.setIP(ipStr(ipParse(ndnNetBase) + 2) + '/30', intf=link.intf2)
                     ndnNetBase = ipStr(ipParse(ndnNetBase) + 4)
     time.sleep(2)
-
     info('Starting NFD on nodes\n')
     hostlist = None
     if options.isWiFi:
@@ -584,17 +587,8 @@ def execute(options):
         if 'app' in host.params:
             if host.params['app'] != '':
                 app = host.params['app']
-                info("Starting {} on node {}".format(app, host.name))
-                info(host.cmd(app))
-
-    # Determine if each host is running NFD
-    for host in net.hosts:
-        nfdStatus = host.cmd("ps -g -U root | grep 'nfd --config {}/[n]fd.conf'".format(host.homeFolder))
-        if not host.nfd.isRunning or not nfdStatus:
-            error("NFD on host {} is not running. Printing log file and exiting...".format(host.name))
-            info(host.cmd("tail {}/nfd.log".format(host.homeFolder)))
-            net.stop()
-            sys.exit(1)
+                print("Starting " + app + " on node " + host.name)
+                print(host.cmd(app))
 
     # Load experiment
     experimentName = options.experimentName
@@ -621,12 +615,8 @@ def execute(options):
         if experiment is not None:
             experiment.start()
         else:
-            error("Experiment '{}' does not exist\n".format(experimentName))
+            print("ERROR: Experiment '%s' does not exist" % experimentName)
             return
-    else:
-        experiment = Experiment(experimentArgs)
-        if options.isNlsrEnabled:
-            experiment.startNlsr(checkConvergence = False)
 
     if options.isCliEnabled is True:
         if not options.isWiFi: # for wire network
@@ -637,48 +627,32 @@ def execute(options):
         net.stop()
 
     if options.resultDir is not None:
-        info("Moving results to {}".format(options.resultDir))
-        for file in glob.glob('{}/*'.format(options.workDir)):
+        print("Moving results to %s" % options.resultDir)
+        for file in glob.glob('%s/*' % options.workDir):
             shutil.move(file, options.resultDir)
         if options.cluster is not None:
             for server in options.servers:
                 if server != "localhost":
-                    login = "mininet@{}".format(server)
-                    src = "{}:{}/*".format(login, options.workDir)
+                    login = "mininet@%s" % server
+                    src = "%s:%s/*" % (login, options.workDir)
                     dst = options.resultDir
                     scp(src, dst)
-            info("Please clean work directories of other machines before running the cluster again")
+            print("Please clean work directories of other machines before running the cluster again")
 
 def signal_handler(signal, frame):
-    info('Cleaning up...')
+    print('Cleaning up...')
     call(["nfd-stop"])
     call(["sudo", "mn", "--clean"])
     sys.exit(1)
 
-def verify_dependencies():
-    "Prevent MiniNDN from running without necessary dependencies"
-    dependencies = ["nfd", "nlsr", "infoedit", "ndnping", "ndnpingserver"]
-    devnull = open("/dev/null", "w")
-    # Checks that each program is in the system path
-    for program in dependencies:
-        if call(["which", program], stdout=devnull):
-            error("{} is missing from the system path! Exiting...".format(program))
-            sys.exit(1)
-    devnull.close()
-
 if __name__ == '__main__':
+
+    hosts_conf = []
+    links_conf = []
 
     signal.signal(signal.SIGQUIT, signal_handler)
 
     options = parse_args()
 
     setLogLevel('info')
-    verify_dependencies()
-
-    try:
-        execute(options)
-    except Exception as e:
-        error("{}".format(e))
-        call(["nfd-stop"])
-        call(["sudo", "mn", "--clean"])
-        sys.exit(1)
+    execute(options)

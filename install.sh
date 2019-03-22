@@ -114,14 +114,6 @@ function routing {
         cxx="true"
     fi
 
-    git clone --depth 1 https://github.com/named-data/PSync
-    cd PSync
-    ./waf configure
-    ./waf
-    sudo ./waf install
-    sudo ldconfig
-    cd ../
-
     git clone --depth 1 https://github.com/named-data/ChronoSync
     cd ChronoSync
     current=$(git rev-parse HEAD)
@@ -250,7 +242,6 @@ function minindnwifi {
     sudo cp topologies/minindn.caida.conf "$install_dir"
     sudo cp topologies/minindn.ucla.conf "$install_dir"
     sudo cp topologies/minindn.testbed.conf "$install_dir"
-    sudo cp topologies/current-testbed.conf "$install_dir"
     sudo python setup.py clean --all install
 }
 
@@ -346,26 +337,6 @@ function jNDN {
     cd ..
 }
 
-function argcomplete {
-    if [[ $SHELL == "/bin/bash" ]]; then
-        $install bash-completion
-        $install python-argcomplete
-        if ! grep -q 'eval "$(register-python-argcomplete minindn)"' ~/.bashrc; then
-            echo 'eval "$(register-python-argcomplete minindn)"' >> ~/.bashrc
-        fi
-        source ~/.bashrc
-    elif [[ $SHELL == "/bin/zsh" ]] || [[ $SHELL == "/usr/bin/zsh" ]]; then
-        $install bash-completion
-        $install python-argcomplete
-        if ! grep -z -q 'autoload bashcompinit\sbashcompinit\seval "$(register-python-argcomplete minindn)"' ~/.zshrc; then
-            echo -e 'autoload bashcompinit\nbashcompinit\neval "$(register-python-argcomplete minindn)"' >> ~/.zshrc
-        fi
-        source ~/.zshrc
-    else
-        echo "Skipping argomplete install..."
-    fi
-}
-
 function commonClientLibraries {
     ndn_cpp
     pyNDN
@@ -378,7 +349,6 @@ function usage {
 
     printf 'options:\n' >&2
     printf -- ' -a: install all the required dependencies\n' >&2
-    printf -- ' -b: install autocomplete for Bash and Zsh users\n' >&2
     printf -- ' -e: install infoedit\n' >&2
     printf -- ' -f: install NFD\n' >&2
     printf -- ' -i: install mini-ndn\n' >&2
@@ -393,7 +363,7 @@ function usage {
 if [[ $# -eq 0 ]]; then
     usage
 else
-    while getopts 'abemfrticw' OPTION
+    while getopts 'aemfrticw' OPTION
     do
         case $OPTION in
         a)
@@ -402,12 +372,10 @@ else
         routing
         tools
         infoedit
-        argcomplete
         commonClientLibraries
         minindnwifi
         break
         ;;
-        b)    argcomplete;;
         e)    infoedit;;
         f)    forwarder;;
         i)    minindn;;
