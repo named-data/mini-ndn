@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2018, The University of Memphis,
+# Copyright (C) 2015-2017, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -23,9 +23,7 @@
 
 from subprocess import call
 from mininet.cli import CLI
-from mininet.wifi.cli import CLI_wifi
 import sys
-from os.path import isfile
 
 sshbase = [ 'ssh', '-q', '-t', '-i/home/mininet/.ssh/id_rsa' ]
 scpbase = [ 'scp', '-i', '/home/mininet/.ssh/id_rsa' ]
@@ -42,46 +40,12 @@ def scp(*args):
     rcmd = scpbase + tmp
     call(rcmd, stdout=devnull, stderr=devnull)
 
-def copyExistentFile(node, fileList, destination):
-    for file in fileList:
-        if isfile(file):
-            node.cmd("cp {} {}".format(file, destination))
-            break
-    if not isfile(destination):
-        fileName = destination.split("/")[-1]
-        raise IOError("{} not found in expected directory.".format(fileName))
-
-
 class MiniNDNCLI(CLI):
     prompt = 'mini-ndn> '
     def __init__(self, mininet, stdin=sys.stdin, script=None):
         CLI.__init__(self, mininet, stdin=sys.stdin, script=None)
 
-class ProgramOptions:
-    def __init__(self):
-        self.ctime = 60
-        self.experimentName = None
-        self.nFaces = 3
-        self.templateFile = "minindn.conf"
-        self.routingType = "link-state"
-        self.isNlsrEnabled = True
-        self.isCliEnabled = True
-        self.nlsrSecurity = False
-        self.nPings = 300
-        self.testbed = False
-        self.workDir = "/tmp/minindn"
-        self.resultDir = None
-        self.pctTraffic = 1.0
-        self.cluster = None
-        self.servers = None
-        self.guided = None
-        self.placer = None
-        self.tunnelType = None
-        self.faceType = "udp"
-        self.arguments = None
-        self.csSize = 65536
-        self.strategy = "best-route"
-class MiniNdnWifiCLI(CLI_wifi): #add this line for Wifi network
+class MiniNdnWifiCLI(CLI): #add this line for Wifi network 
     prompt='minindn-wifi>'
     def __init__(self, mininet, stdin=sys.stdin, script=None):
-        CLI_wifi.__init__(self, mininet, stdin=sys.stdin, script=None)
+        CLI.__init__(self, mininet, stdin=sys.stdin, script=None)

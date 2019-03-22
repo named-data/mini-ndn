@@ -1,24 +1,25 @@
+#!/usr/bin/env python
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
 # Copyright (C) 2015-2019, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
-# This file is part of Mini-NDN.
+# This file is part of MiniNDN-WiFi.
 # See AUTHORS.md for a complete list of Mini-NDN authors and contributors.
 #
-# Mini-NDN is free software: you can redistribute it and/or modify
+# MiniNDN-WiFi is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# Mini-NDN is distributed in the hope that it will be useful,
+# MiniNDN-WiFi is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Mini-NDN, e.g., in COPYING.md file.
+# along with MiniNDN-WiFi, e.g., in COPYING.md file.
 # If not, see <http://www.gnu.org/licenses/>.
 #
 # This file incorporates work covered by the following copyright and
@@ -58,10 +59,14 @@
 #   advertising or publicity pertaining to the Software or any derivatives
 #   without specific, written prior permission.
 
+from mn_wifi.topo import Topo_WiFi
 from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.log import setLogLevel, output, info, error, warn
+from mn_wifi.net import Mininet_wifi
 from mininet.link import TCLink
+from mn_wifi.link import wmediumd
+from mn_wifi.wmediumdConnector import interference
 from mininet.util import ipStr, ipParse
 
 from mininet.examples.cluster import MininetCluster, RoundRobinPlacer, ClusterCleanup
@@ -69,12 +74,20 @@ from mininet.examples.clustercli import ClusterCLI
 
 from ndn import ExperimentManager
 from ndn.experiments.experiment import Experiment
+from ndnwifi import WifiExperimentManager
 from ndn.ndn_host import NdnHost, CpuLimitedNdnHost, RemoteNdnHost
 from ndn.conf_parser import parse_hosts, parse_switches, parse_links
-from ndn.remote_ndn_link import RemoteNdnLink, RemoteGRENdnLink
+from ndnwifi.wificonf_parser import parse_stations, parse_cars, parse_accessPoints
 from ndn.placer import GuidedPlacer, PopulatePlacement
 from ndn.nfd import Nfd
 from ndn.util import ssh, scp, MiniNDNCLI, ProgramOptions
+from ndnwifi.wifiutil import MiniNdnWifiCLI
+from ndnwifi.ndnadhoc import build_adhocnet
+#from ndnwifi.vndn import build_vndn
+from ndnwifi.sumo_vndn_new import build_sumo_vndn
+from mininet.node import Controller
+from mn_wifi.node import UserAP, OVSKernelAP
+from ndnwifi.ndnwifi_host import NdnStation
 
 import os.path, time
 import shutil
@@ -93,7 +106,7 @@ try:
 except ImportError:
     pass
 
-VERSION_NUMBER = "0.4.0"
+VERSION_NUMBER = "0.4.1"
 INSTALL_DIR='/usr/local/etc/mini-ndn/'
 
 class PrintExperimentNames(argparse.Action):
@@ -101,13 +114,37 @@ class PrintExperimentNames(argparse.Action):
         super(PrintExperimentNames, self).__init__(option_strings=option_strings, dest=dest, nargs=nargs, help=help)
 
     def __call__(self, parser, namespace, values, option_string=None):
-        experimentNames = ExperimentManager.getExperimentNames()
-
-        print("Mini-NDN experiments:")
+        experimentNames = WifiExperimentManager.getExperimentNames()
+        experimentArgs = WifiExperimentManager.getExperimentArgs()
+        print("MiniNDN-wifi experiments:")
         for experiment in experimentNames:
             print("  {}".format(experiment))
 
         sys.exit(0)
+
+class ProgramOptions:
+    def __init__(self):
+        self.ctime = 60
+        self.experimentName = None
+        self.nFaces = 3
+        self.templateFile = "minindn.conf"
+        self.routingType = "link-state"
+        self.isNlsrEnabled = False # NLSR doesn't work for wifi by default
+        self.isCliEnabled = True
+        self.nlsrSecurity = False
+        self.nPings = 300
+        self.testbed = False
+        self.workDir = "/tmp/minindn"
+        self.resultDir = None
+        self.pctTraffic = 1.0
+        self.cluster = None
+        self.servers = None
+        self.guided = None
+        self.placer = None
+        self.tunnelType = None
+        self.faceType = "udp"
+        self.arbArgs = {}
+        self.csSize = 65536
 
 def createResultsDir(resultDir, faces, rType):
     if faces == 0:
@@ -147,8 +184,8 @@ def parse_args():
                         help="""choices for routing are 'link-state' for link state, 'hr' for hyperbolic, and 'dry'
                         to test hyperbolic routing and compare with link state. Default is link-state.""")
 
-    parser.add_argument("--no-nlsr", action="store_false", dest="isNlsrEnabled",
-                        help="Run mini-ndn without NLSR routing")
+    parser.add_argument("--nlsr", action="store_true", dest="isNlsrEnabled",
+                        help="Run with NLSR routing")
 
     parser.add_argument("--list-experiments", action=PrintExperimentNames,
                         help="Lists the names of all available experiments")
@@ -156,7 +193,7 @@ def parse_args():
     parser.add_argument("--no-cli", action="store_false", dest="isCliEnabled",
                         help="Run experiments and exit without showing the command line interface")
 
-    parser.add_argument("--nPings", type=int, default=300,
+    parser.add_argument("--nPings", type=int, default=10,
                         help="Number of pings to perform between each node in the experiment")
 
     # store_true stores default value of False
@@ -193,6 +230,20 @@ def parse_args():
 
     parser.add_argument("--face-type", dest='faceType', default='udp', choices=['udp', 'tcp'])
 
+
+    #the following 6 code lines for wifi
+    parser.add_argument('--wifi', '-w', action='store_true', default=False, help='activate wifi')
+    parser.add_argument('--radios',  default=0, help='starting k radios')
+    parser.add_argument('--wmediumd', action='store_true', default=False, help='activate wmediumd') #for ad hoc network
+    parser.add_argument('--interference', action='store_true', default=False, help='activate wmediumd') #for ad hoc network
+    parser.add_argument('--channel', default="1", help='wireless channel configuration')
+    parser.add_argument('--mode', default="g", help='wireless mode configuration')
+    parser.add_argument('--ssid', default="adhocNet", help='wireless ssid configuration')
+    parser.add_argument('--adhoc', action='store_true', default=False, help='build ad hoc network')
+    parser.add_argument('--manet', action='store_true', default=False, help='build mobile ad hoc network')
+    parser.add_argument('--vndn', action='store_true', default=False, help='build ndn-based vehicle ad hoc network')
+    parser.add_argument('--sumovndn', action='store_true', default=False, help='build ndn-based sumo vehicle ad hoc network')
+    parser.add_argument('--ifb', action='store_true', default=False, help='use IFB in the topology for receiver-side delays with TC.')
     parser.add_argument("--cs-size", dest='csSize', type=int, default=65536,
                         help="Set CS size in NFD's conf file")
 
@@ -224,10 +275,40 @@ def parse_args():
     options.placeList = args.placeList
     options.faceType = args.faceType
     options.csSize = args.csSize
+
+    #the following code lines for WiFi
+    options.isWiFi=args.wifi
+    options.isVndn=args.vndn
+    options.isSumoVndn=args.sumovndn
+    options.isManet=args.manet
+    options.isAdhoc=args.adhoc
+    options.ifb=args.ifb
+    options.channel = args.channel
+    options.mode = args.mode
+    options.ssid= args.ssid
+    options.wmediumd=args.wmediumd
+    options.interference=args.interference
+    # Use wifi default topopology configure file if no default file is specified.
+    if options.isAdhoc or options.isManet:
+        options.isWiFi = True
+    if options.isWiFi and 'default-topology.conf' in options.templateFile:
+        if options.isAdhoc or options.isManet:
+            options.templateFile = INSTALL_DIR + 'wifi/adhoc-topology.conf'
+        else:
+            if options.isVndn or options.isSumoVndn:
+                options.templateFile = INSTALL_DIR + 'wifi/vndn-topology-2.conf'
+            else:
+                options.templateFile = INSTALL_DIR + 'wifi/singleap-topology.conf'
+    print options.templateFile
+
     options.arguments = args
 
-    if options.experimentName is not None and options.experimentName not in ExperimentManager.getExperimentNames():
-        error("No experiment named {}\n".format(options.experimentName))
+    for k in args.__dict__:
+        if k in unknownArgsList:
+            options.arbArgs[k] = args.__dict__[k]
+
+    if options.experimentName is not None and options.experimentName not in WifiExperimentManager.getExperimentNames():
+        print("No experiment named %s" % options.experimentName)
         sys.exit(1)
 
     if options.experimentName is not None and options.resultDir is None:
@@ -279,8 +360,8 @@ class NdnTopo(Topo):
             self.addHost(host.name, app=host.app, params=host.params, cpu=host.cpu,
                          cores=host.cores,cache=host.cache, workdir=workDir)
 
-        for switch in self.switches_conf:
-            self.addSwitch(switch.name)
+        for switch in switches_conf:
+            self.addSwitch(switch.name, **switch.params)
 
         for link in self.links_conf:
             if len(link.linkDict) == 0:
@@ -290,6 +371,55 @@ class NdnTopo(Topo):
                 self.isTCLink = True
 
         info('Parse of ' + conf_arq + ' done.\n')
+
+# NdnWifiTopo() class for wifi
+class NdnWifiTopo(Topo_WiFi):
+    def __init__(self, conf_arq, workDir, **opts):
+        Topo_WiFi.__init__(self, **opts)
+
+        global stations_conf
+        global cars_conf
+        global accessPoints_conf
+        global switches_conf
+        global links_conf
+
+        # parse configure file of topology
+        stations_conf = parse_stations(conf_arq)
+        cars_conf = parse_cars(conf_arq)
+        accessPoints_conf = parse_accessPoints(conf_arq)
+        switches_conf = parse_switches(conf_arq)
+        links_conf = parse_links(conf_arq)
+        self.isTCLink = False
+        self.isLimited = False
+
+        # Add stations object in wifi network topology
+        for station in stations_conf:
+            if station.cpu != None and self.isLimited != True:
+                self.isLimited = True
+            self.addStation(station.name, app=station.app, params=station.uri_tuples,\
+                            cpu=station.cpu,cores=station.cores,cache=station.cache, workdir=workDir)
+        for car in cars_conf:
+            if car.cpu != None and self.isLimited != True:
+                self.isLimited = True
+            # No addCar() function in topo.py file.
+            self.addStation(car.name, app=car.app, params=car.uri_tuples,\
+                            cpu=car.cpu,cores=car.cores,cache=car.cache, workdir=workDir, func='adhoc')
+                            # params 'func' is for v2v communication in adhoc mode
+
+        # Add switches and access points to the wifi topology
+        switches = accessPoints_conf + switches_conf
+        for node in switches:
+            self.addSwitch(node.name, **node.params)
+
+        # Add link object in wifi network topology
+        for link in links_conf:
+            if len(link.linkDict) == 0:
+                self.addLink(link.h1, link.h2)
+            else:
+                self.addLink(link.h1, link.h2, **link.linkDict)
+                self.isTCLink = True
+        info('Parse of ' + conf_arq + ' done.\n')
+
 
 def execute(options):
     "Create a network based on template_file"
@@ -326,51 +456,131 @@ def execute(options):
     if options.resultDir is not None:
         options.resultDir = createResultsDir(options.resultDir, options.nFaces, options.routingType)
 
-    topo = NdnTopo(options.templateFile, options.workDir)
+    #Generates a network topology according to templateFile.
+    if options.isWiFi: # for wireless network
+        wifiTopo=NdnWifiTopo(options.templateFile, options.workDir)
+    else: # for wire network
+        topo = NdnTopo(options.templateFile, options.workDir)
 
-    if topo.isTCLink == True and topo.isLimited == True:
-        net = Mininet(topo,host=CpuLimitedNdnHost,link=TCLink)
-    elif topo.isTCLink == True and topo.isLimited == False:
-        if options.cluster is not None:
-            mn = partial(MininetCluster, servers=options.servers, placement=options.placement)
-            net = mn(topo=topo, host=RemoteNdnHost, link=options.tunnelType)
+    #build a wire network or a wireless network according to a network topology.
+    t = datetime.datetime.now()
+    if options.isWiFi: #for wireless network.
+        """Build manet ,a stationary ad hoc network or vanet according to topology configure"""
+        options.wmediumd=wmediumd
+        options.interference=interference
+        if options.isManet and options.isAdhoc:
+            options.isAdhoc = False
+        if options.isManet or options.isAdhoc: # for ad hoc network
+            build_adhocnet(wifiTopo, options.isManet, options.isAdhoc, options.ssid, options.channel,
+                           options.mode, options.wmediumd, options.interference,
+                           options.cluster, options.placement, options.servers, options.tunnelType,
+                           options.ctime, options.nPings, options.pctTraffic, options.experimentName, options.nlsrSecurity)
         else:
-            net = Mininet(topo, host=NdnHost, link=TCLink)
-    elif topo.isTCLink == False and topo.isLimited == True:
-        net = Mininet(topo, host=CpuLimitedNdnHost)
-    else:
-        net = Mininet(topo, host=NdnHost)
-
-    net.start()
-
+            if options.isVndn: #emulate vanet
+                options.ssid='vanet-ssid'
+                #build_vndn(wifiTopo, options.ssid, options.channel, options.mode, options.wmediumd, options.interference,
+                          # options.cluster, options.placement, options.servers, options.tunnelType,
+                          # options.ctime, options.nPings, options.pctTraffic, options.experimentName, options.nlsrSecurity)
+                pass
+            else:
+                if options.isSumoVndn: #emulate vanet based on sumo
+                    options.ssid='vanet-ssid'
+                    build_sumo_vndn(wifiTopo, options.ssid, options.channel, options.mode, options.wmediumd, options.interference,
+                                    options.cluster, options.placement, options.servers, options.tunnelType,
+                                    options.ctime, options.nPings, options.pctTraffic, options.experimentName, options.nlsrSecurity)
+                else:
+                    #for a simple wireless network with APs
+                    if not (options.ssid =='my-ssid'):
+                        options.ssid='my-ssid'
+                        net = Mininet_wifi(wifiTopo, host=NdnHost, station=NdnStation, ifb=options.ifb,
+                                           channel=options.channel, ssid=options.ssid, controller=Controller, accessPoint=OVSKernelAP)
+                    t2 = datetime.datetime.now()
+                    delta = t2 - t
+                    info('Setup time: ' + str(delta.seconds) + '\n')
+                    net.plotGraph(max_x=100, max_y=100)
+                    net.start()
+    else: # for a wire network
+        if topo.isTCLink == True and topo.isLimited == True:
+            net = Mininet_wifi(topo,host=CpuLimitedNdnHost,link=TCLink)
+        elif topo.isTCLink == True and topo.isLimited == False:
+            if options.cluster is not None:
+                mn = partial(MininetCluster, servers=options.servers, placement=options.placement)
+                net = mn(topo=topo, host=RemoteNdnHost, link=options.tunnelType)
+            else:
+                net = Mininet_wifi(topo, host=NdnHost, link=TCLink)
+        elif topo.isTCLink == False and topo.isLimited == True:
+                 net = Mininet_wifi(topo, host=CpuLimitedNdnHost)
+        else:
+                 net = Mininet_wifi(topo, host=NdnHost)
+        t2 = datetime.datetime.now()
+        delta = t2 - t
+        info('Setup time: ' + str(delta.seconds) + '\n')
+        net.start()
+    info('After building vndn\n')
+    ###
     # Giving proper IPs to intf so neighbor nodes can communicate
     # This is one way of giving connectivity, another way could be
     # to insert a switch between each pair of neighbors
-    ndnNetBase = "1.0.0.0"
-    interfaces = []
-    for host in net.hosts:
-        for intf in host.intfList():
-            link = intf.link
-            node1, node2 = link.intf1.node, link.intf2.node
+    if not options.isWiFi:
+        ndnNetBase = "1.0.0.0"
+        interfaces = []
+        for host in net.hosts:
+            for intf in host.intfList():
+                link = intf.link
+                node1, node2 = link.intf1.node, link.intf2.node
 
-            if node1 in net.switches or node2 in net.switches:
-                continue
+                if node1 in net.switches or node2 in net.switches:
+                    continue
 
-            if link.intf1 not in interfaces and link.intf2 not in interfaces:
-                interfaces.append(link.intf1)
-                interfaces.append(link.intf2)
-                node1.setIP(ipStr(ipParse(ndnNetBase) + 1) + '/30', intf=link.intf1)
-                node2.setIP(ipStr(ipParse(ndnNetBase) + 2) + '/30', intf=link.intf2)
-                ndnNetBase = ipStr(ipParse(ndnNetBase) + 4)
-
+                if link.intf1 not in interfaces and link.intf2 not in interfaces:
+                    interfaces.append(link.intf1)
+                    interfaces.append(link.intf2)
+                    node1.setIP(ipStr(ipParse(ndnNetBase) + 1) + '/30', intf=link.intf1)
+                    node2.setIP(ipStr(ipParse(ndnNetBase) + 2) + '/30', intf=link.intf2)
+                    ndnNetBase = ipStr(ipParse(ndnNetBase) + 4)
     time.sleep(2)
 
     info('Starting NFD on nodes\n')
-    for host in net.hosts:
+    hostlist = None
+    if options.isWiFi:
+        hostlist = net.hosts + net.stations
+    else:
+        hostlist = net.hosts
+
+    for host in hostlist:
         host.nfd = Nfd(host, options.csSize)
         host.nfd.start()
+    
+    if options.isNlsrEnabled is True:
 
-    for host in net.hosts:
+        # NLSR Security
+        if options.nlsrSecurity is True:
+            Nlsr.createKeysAndCertificates(net, options.workDir)
+
+        # NLSR initialization
+        info('Starting NLSR on nodes\n')
+        for host in hostlist:
+            conf = next(x for x in hosts_conf if x.name == host.name)
+            host.nlsrParameters = conf.nlsrParameters
+
+            if options.nFaces is not None:
+                host.nlsrParameters["max-faces-per-prefix"] = options.nFaces
+
+            if options.routingType == 'dry':
+                host.nlsrParameters["hyperbolic-state"] = "dry-run"
+
+            elif options.routingType == 'hr':
+                host.nlsrParameters["hyperbolic-state"] = "on"
+
+            # Generate NLSR configuration file
+            configGenerator = NlsrConfigGenerator(host, options.nlsrSecurity, options.faceType)
+            configGenerator.createConfigFile()
+
+            # Start NLSR
+            host.nlsr = Nlsr(host, configGenerator.neighborIPs, options.faceType)
+            host.nlsr.start()
+
+    for host in hostlist:
         if 'app' in host.params:
             if host.params['app'] != '':
                 app = host.params['app']
@@ -389,15 +599,24 @@ def execute(options):
     # Load experiment
     experimentName = options.experimentName
 
-    experimentArgs = {
-        "net": net,
-        "options": options
-    }
+    if experimentName is not None and not (options.isManet or options.isAdhoc):
+        print("Loading experiment: %s" % experimentName)
 
-    if experimentName is not None:
-        info("Loading experiment: {}\n".format(experimentName))
+        experimentArgs = {
+            "isWiFi": options.isWiFi,
+            "isVndn": options.isVndn,
+            "isSumoVndn": options.isSumoVndn,
+            "net": net,
+            "ctime": options.ctime,
+            "nPings": options.nPings,
+            "strategy": Nfd.STRATEGY_BEST_ROUTE,
+            "pctTraffic": options.pctTraffic,
+            "nlsrSecurity": options.nlsrSecurity,
+            "workDir": options.workDir,
+            "arbArgs" : options.arbArgs
+        }
 
-        experiment = ExperimentManager.create(experimentName, experimentArgs)
+        experiment = WifiExperimentManager.create(experimentName, experimentArgs)
 
         if experiment is not None:
             experiment.start()
@@ -410,9 +629,12 @@ def execute(options):
             experiment.startNlsr(checkConvergence = False)
 
     if options.isCliEnabled is True:
-        MiniNDNCLI(net)
-
-    net.stop()
+        if not options.isWiFi: # for wire network
+           MiniNDNCLI(net)
+        elif not (options.isAdhoc or options.isManet): #wifi network with aps
+           MiniNdnWifiCLI(net)
+    if not (options.isAdhoc or options.isManet):
+        net.stop()
 
     if options.resultDir is not None:
         info("Moving results to {}".format(options.resultDir))

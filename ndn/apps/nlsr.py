@@ -70,7 +70,6 @@ class Nlsr(NdnApplication):
     @staticmethod
     def createKeysAndCertificates(net, workDir):
         securityDir = "{}/security".format(workDir)
-
         if not os.path.exists(securityDir):
             os.mkdir(securityDir)
 
@@ -91,13 +90,14 @@ class Nlsr(NdnApplication):
                 os.makedirs(nodeSecurityFolder)
 
             shutil.copyfile("{}/root.cert".format(securityDir), "{}/root.cert".format(nodeSecurityFolder))
-
+            print ('nlsr.py--------------------------------------------createKeysAndCertificates() method----------create site ceer before ')
             # Create site certificate
             siteName = "{}{}-site".format(NETWORK, host.name)
             siteKeyFile = "{}/site.keys".format(nodeSecurityFolder)
             siteCertFile = "{}/site.cert".format(nodeSecurityFolder)
             Nlsr.createKey(host, siteName, siteKeyFile)
-
+            print ('nlsr.py----createKeysAndCertificates() method------create site ceer after ', 'siteName=', siteName, '|',siteKeyFile,\
+                   '|', siteCertFile)
             # Copy siteKeyFile from remote for ndnsec-certgen
             if isinstance(host, RemoteMixin) and host.isRemote:
                 login = "mininet@{}".format(host.server)
@@ -192,6 +192,7 @@ class NlsrConfigGenerator:
         for intf in self.node.intfList():
             link = intf.link
             if link:
+                print "nlsr.py=======================================getNeighborsSection() method ================link: ", link
                 node1, node2 = link.intf1.node, link.intf2.node
 
                 if node1 == self.node:

@@ -1,3 +1,4 @@
+*.log
 build
 crypto
 ChronoSync
@@ -8,8 +9,9 @@ doc/latex
 examples
 infoedit
 jndn
-Mini_NDN.egg-info
 mininet
+mini_ndn
+mini-ndn
 NFD
 NLSR
 ndn-cpp
@@ -21,3 +23,7 @@ PyNDN2
 util
 .vagrant
 *.pyc
+modify\ illustration.pdf
+Introduction\ of\ MiniNDN-WiFi.odp
+MiniNDN_WiFi.egg-info/
+.nfs*

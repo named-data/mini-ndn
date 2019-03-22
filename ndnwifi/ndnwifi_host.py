@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2018, The University of Memphis,
+# Copyright (C) 2015-2017, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -58,126 +58,31 @@
 #   advertising or publicity pertaining to the Software or any derivatives
 #   without specific, written prior permission.
 
-from mininet.node import CPULimitedHost, Host, Node
-from mininet.examples.cluster import RemoteMixin
-from mininet.wifi.node import Station
-
+from mn_wifi.node import Station, Car
+from ndn.ndn_host import NdnHostCommon
 from ndn.nfd import Nfd
-
-class NdnHostCommon():
-    "Common methods of NdnHost and CpuLimitedNdnHost"
-
-    def configNdn(self):
-        self.buildPeerIp()
-
-    def buildPeerIp(self):
-        for iface in self.intfList():
-            print "ndn_host.py------------------NdnHostCommon()-C--------------buildPeerIp() method---iface:=", iface,"|iface.link=", iface.link
-            link = iface.link
-            if link:
-                node1, node2 = link.intf1.node, link.intf2.node
-                if node1 == self:
-                    self.peerList[node2.name] = link.intf2.node.IP(link.intf2)
-                else:
-                    self.peerList[node1.name] = link.intf1.node.IP(link.intf1)
-
-    inited = False
-
-    @classmethod
-    def init(cls):
-        "Initialization for NDNHost class"
-        cls.inited = True
-
-class NdnHost(Host, NdnHostCommon):
-    "NDNHost is a Host that always runs NFD"
-
-    def __init__(self, name, **kwargs):
-
-        Host.__init__(self, name, **kwargs)
-        if not NdnHost.inited:
-            NdnHostCommon.init()
-
-        # Create home directory for a node
-        self.homeFolder = "%s/%s" % (self.params['workdir'], self.name) # Xian: using workDir will occur erro
-        self.cmd("mkdir -p %s" % self.homeFolder)
-        self.cmd("cd %s" % self.homeFolder)
-
-        self.nfd = None
-
-        self.peerList = {}
-
-    def config(self, app=None, cache=None, **params):
-
-        r = Node.config(self, **params)
-
-        self.setParam(r, 'app', app=app)
-        self.setParam(r, 'cache', cache=cache)
-        print "ndn_host.py------------NdnHost cla-----config() method-----------"
-        return r
-
-    def terminate(self):
-        "Stop node."
-        if self.nfd is not None:
-            self.nfd.stop()
-        Host.terminate(self)
-
-class CpuLimitedNdnHost(CPULimitedHost, NdnHostCommon):
-    '''CPULimitedNDNHost is a Host that always runs NFD and extends CPULimitedHost.
-       It should be used when one wants to limit the resources of NDN routers and hosts '''
-
-    def __init__(self, name, sched='cfs', **kwargs):
-
-        CPULimitedHost.__init__(self, name, sched, **kwargs)
-        if not NdnHost.inited:
-            NdnHostCommon.init()
-
-        # Create home directory for a node
-        self.homeFolder = "%s/%s" % (self.params['workdir'], self.name)
-        self.cmd("mkdir -p %s" % self.homeFolder)
-        self.cmd("cd %s" % self.homeFolder)
-
-        self.nfd = None
-
-        self.peerList = {}
-
-    def config(self, app=None, cpu=None, cores=None, cache=None, **params):
-
-        r = CPULimitedHost.config(self,cpu,cores, **params)
-
-        self.setParam(r, 'app', app=app)
-        self.setParam(r, 'cache', cache=cache)
-
-        return r
-
-    def terminate(self):
-        "Stop node."
-        if self.nfd is not None:
-            self.nfd.stop()
-        CPULimitedHost.terminate(self)
 
 class NdnStation(Station, NdnHostCommon):
     "NDNStation is a Host that always runs NFD, and is wifi-enabled"
 
     def __init__(self, name, **kwargs):
 
-        Host.__init__(self, name, **kwargs)
-        if not NdnHost.inited:
+        Station.__init__(self, name, **kwargs)
+        if not self.inited:
             NdnHostCommon.init()
 
         # Create home directory for a node
-        self.homeFolder = "%s/%s" % (self.params['workdir'], self.name) # Xian: using workDir will occur erro
+        self.homeFolder = "%s/%s" % ("/tmp/minindn", self.name) # Xian: using workDir will occur erro
         self.cmd("mkdir -p %s" % self.homeFolder)
         self.cmd("cd %s" % self.homeFolder)
-
-        self.nfd = Nfd(self)
-        print "ndn_host.py--------------------------Ndnhost() cla---- init"
-        self.nfd.start()
+        print("NdnStation Constructor.")
+        self.nfd = None
 
         self.peerList = {}
 
     def config(self, app=None, cache=None, **params):
 
-        r = Node.config(self, **params)
+        r = super(NdnStation, self).config(**params)
 
         self.setParam(r, 'app', app=app)
         self.setParam(r, 'cache', cache=cache)
@@ -186,9 +91,38 @@ class NdnStation(Station, NdnHostCommon):
 
     def terminate(self):
         "Stop node."
-        self.nfd.stop()
-        Host.terminate(self)
+        if self.nfd is not None:
+          self.nfd.stop()
+        super(NdnStation, self).terminate()
 
-class RemoteNdnHost(RemoteMixin, NdnHost):
-    "A node on a remote server"
-    pass
+class NdnCar(Car, NdnHostCommon):
+    "NdnCar is a Car that always runs NFD, and is wifi-enabled."
+
+    def __init__(self, name, **kwargs):
+        Car.__init__(self, name, **kwargs)
+        if not self.inited:
+            NdnHostCommon.init()
+        print("NdnCar constructor.")
+        # Create home directory for a node
+        self.homeFolder = "%s/%s" % ("/tmp/minindn", self.name) # Xian: using workDir will occur erro
+        self.cmd("mkdir -p %s" % self.homeFolder)
+        self.cmd("cd %s" % self.homeFolder)
+
+        self.nfd = None
+
+        self.peerList = {}
+
+    def config(self, app=None, cache=None, **params):
+
+        r = super(NdnCar, self).config(**params)
+
+        self.setParam(r, 'app', app=app)
+        self.setParam(r, 'cache', cache=cache)
+        print "ndn_host.py------------NdnCar cla-----config() method-----------"
+        return r
+
+    def terminate(self):
+        "Stop node."
+        if self.nfd is not None:
+          self.nfd.stop()
+        super(NdnCar, self).terminate()
