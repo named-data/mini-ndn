@@ -198,6 +198,9 @@ function infoedit {
 }
 
 function minindn {
+    $install libigraph0-dev
+    sudo pip install -r requirements.txt
+
     if [[ updated != true ]]; then
         if [ ! -d "build" ]; then
             $update
