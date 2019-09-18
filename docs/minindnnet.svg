@@ -1,0 +1,126 @@
+<svg width="692" height="380" xmlns="http://www.w3.org/2000/svg">
+
+ <metadata id="metadata7">image/svg+xml</metadata>
+ <g>
+  <title>background</title>
+  <rect fill="none" id="canvas_background" height="382" width="694" y="-1" x="-1"/>
+ </g>
+ <g>
+  <title>Layer 1</title>
+  <g stroke="null" id="g3790">
+   <rect stroke="#000000" fill="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="4" id="rect2985" width="680.84682" height="350.443392" x="4.962804" y="5.773119" rx="0.324652"/>
+   <path stroke="#000000" fill="none" stroke-miterlimit="4" d="m4,175.828501l681.727736,1.357954" id="path3770"/>
+  </g>
+  <rect stroke="#000000" fill="#e3dedb" stroke-width="0.99538" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="4" stroke-dashoffset="0" rx="2.988095" y="176.111777" x="5.140841" height="180.524655" width="680.312936" id="rect3813"/>
+  <rect stroke="#000000" fill="#ffffff" stroke-width="1.602133" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="4" stroke-dasharray="4.80639973, 4.80639973" stroke-dashoffset="0" ry="8.582684" rx="7.476771" y="44.78072" x="55.492192" height="195.219243" width="148.366914" id="rect3764"/>
+  <rect stroke="#000000" fill="#ffffff" stroke-width="1.638042" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="4" stroke-dasharray="4.9141253, 4.9141253" stroke-dashoffset="0" id="rect3772" width="155.115252" height="195.190135" x="270.220868" y="46.153231" rx="7.816845" ry="8.581405"/>
+  <rect stroke="#000000" fill="#ffffff" stroke-width="1.602133" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="4" stroke-dasharray="4.80639973, 4.80639973" stroke-dashoffset="0" ry="8.582684" rx="7.476771" y="45.459696" x="489.86568" height="195.219243" width="148.366914" id="rect3774"/>
+  <text transform="matrix(1.0192718802397343,0,0,0.9115536073383187,-2.8313337784806336,-12.183034089773187) " font-size="16.005802px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" id="text3776" y="392.709737" x="551.171304" xml:space="preserve">
+   <tspan stroke="null" font-weight="normal" y="398.194877" x="552.152396" id="tspan3778">Kernel Space</tspan>
+  </text>
+  <text transform="matrix(1.0524848569125234,0,0,0.8827879284304422,-52.30106698198968,-77.5201889102731) " font-size="14.180006px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" xml:space="preserve" x="601.466013" y="108.524983" id="text3782">
+   <tspan stroke="null" font-weight="normal" id="tspan3784" x="602.416145" y="114.188857">User Space</tspan>
+  </text>
+  <path stroke="#000000" fill="none" stroke-width="1px" id="path3796" d="m488.56554,176.773764c1.782236,0.480113 1.527628,0.360085 1.527628,0.360085"/>
+  <rect stroke="#000000" fill="#ffffff" stroke-width="0.649807" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="4" stroke-dashoffset="0" rx="0.838801" y="202.851471" x="84.255138" height="26.434283" width="94.537572" id="rect3815"/>
+  <rect stroke="#000000" fill="#ffffff" stroke-width="0.792138" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="4" stroke-dashoffset="0" id="rect3817" width="131.339764" height="28.275376" x="282.077514" y="201.912133" rx="1.165334"/>
+  <path stroke="#000000" fill="none" stroke-width="0.865499px" id="path3823" d="m347.74739,201.086282l0,28.351986"/>
+  <text transform="matrix(0.7776670647796514,0,0,1.19475416519067,-52.30106724263901,-77.52018902784596) " font-size="12.623897px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" xml:space="preserve" x="434.634023" y="248.956571" id="text3835">
+   <tspan stroke="null" font-size="15.579311px" font-weight="bold" font-family="Monospace" x="435.91992" y="253.141532" id="tspan3837">n2-eth0</tspan>
+  </text>
+  <text transform="matrix(0.9031157255303414,0,0,1.0287949657006918,-2.8313337284492768,-13.069358400177762) " font-size="13.163442px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" xml:space="preserve" x="110.835751" y="225.210496" id="text3863">
+   <tspan stroke="null" font-size="16.245171px" font-weight="bold" font-family="Monospace" x="111.943029" y="230.070551" id="tspan3865">n1-eth0</tspan>
+  </text>
+  <path stroke="#000000" fill="none" stroke-width="0.992521px" id="path3887" d="m131.263954,229.882774l0,67.221296l176.555867,-0.960307l1.337531,-65.300682"/>
+  <rect stroke="#000000" fill="#ffffff" stroke-width="0.676601" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="4" stroke-dashoffset="0" id="rect3891" width="95.679394" height="28.317195" x="515.346399" y="202.85306" rx="0.848932"/>
+  <path stroke="#000000" fill="none" stroke-width="0.992521px" d="m383.833251,230.842992l0,67.221296l176.555867,-0.960307l1.337531,-65.300682" id="path3897"/>
+  <text transform="matrix(0.9778213687833123,0,0,0.9501950205038839,-52.301066914088324,-76.5370021990862) " font-size="16.459864px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" xml:space="preserve" x="164.136782" y="409.888383" id="text3907">
+   <tspan stroke="null" id="tspan3915" x="165.159464" y="415.15046">isolated point to point link</tspan>
+  </text>
+  <text transform="matrix(0.9778213687833123,0,0,0.9501950205038839,-52.301066914088324,-76.5370021990862) " font-size="16.459864px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" id="text3919" y="409.573373" x="429.378262" xml:space="preserve">
+   <tspan stroke="null" y="414.83545" x="430.400944" id="tspan3921">isolated point to point link</tspan>
+  </text>
+  <text transform="matrix(0.9778213687833123,0,0,0.9501950205038839,-52.301066914088324,-76.5370021990862) " font-size="16.459864px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" id="text3923" y="428.078233" x="194.615642" xml:space="preserve">
+   <tspan stroke="null" font-weight="bold" y="433.34031" x="195.638324" id="tspan3925">(eg: 1Mbps, 10ms)</tspan>
+  </text>
+  <text transform="matrix(0.9778213687833123,0,0,0.9501950205038839,-52.301066914088324,-76.5370021990862) " font-size="16.459864px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" id="text3927" y="409.888383" x="164.136782" xml:space="preserve">
+   <tspan stroke="null" y="415.15046" x="165.159464" id="tspan3929">Isolated point to point link</tspan>
+  </text>
+  <text transform="matrix(0.9778213687833123,0,0,0.9501950205038839,-52.301066914088324,-76.5370021990862) " font-size="16.459864px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" xml:space="preserve" x="429.378262" y="409.573373" id="text3931">
+   <tspan stroke="null" id="tspan3933" x="430.400944" y="414.83545">Isolated point to point link</tspan>
+  </text>
+  <text transform="matrix(0.877827228897152,0,0,1.0584326041598764,-53.30106731891522,-78.4233265445007) " font-size="13.706223px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" id="text3935" y="282.545218" x="661.482605" xml:space="preserve">
+   <tspan stroke="null" font-size="16.915024px" font-weight="bold" font-family="Monospace" id="tspan3937" y="287.269185" x="662.621781">n3-eth0</tspan>
+  </text>
+  <text transform="matrix(0.7776670647796514,0,0,1.19475416519067,-52.30106724263901,-77.52018902784596) " font-size="12.623897px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" id="text3939" y="248.297391" x="520.751053" xml:space="preserve">
+   <tspan stroke="null" font-size="15.579311px" font-weight="bold" font-family="Monospace" id="tspan3941" y="252.482352" x="522.03695">n2-eth1</tspan>
+  </text>
+  <text transform="matrix(0.8745385143393076,0,0,1.0624128521471832,-2.8313338199928846,-14.069358364146652) " font-size="16.205975px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" id="text3943" y="80.648481" x="141.655977" xml:space="preserve">
+   <tspan stroke="null" font-size="20px" font-weight="bold" font-family="Monospace" id="tspan3945" y="85.354749" x="142.799437">n1</tspan>
+  </text>
+  <text transform="matrix(0.8745385143393076,0,0,1.0624128521471832,-2.8313338199928846,-14.069358364146652) " font-size="16.205975px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" xml:space="preserve" x="385.430517" y="78.840861" id="text3955">
+   <tspan stroke="null" font-size="20px" font-weight="bold" font-family="Monospace" x="386.573977" y="83.547129" id="tspan3957">n2</tspan>
+  </text>
+  <text transform="matrix(0.8745385143393076,0,0,1.0624128521471832,-2.8313338199928846,-14.069358364146652) " font-size="16.205975px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" id="text3959" y="79.181231" x="632.310457" xml:space="preserve">
+   <tspan stroke="null" font-size="20px" font-weight="bold" font-family="Monospace" id="tspan3961" y="83.887499" x="633.453917">n3</tspan>
+  </text>
+  <text transform="matrix(0.9526376792163275,0,0,0.9753141035001042,-53.30106707952308,-77.42332645354041) " font-size="14.959435px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" xml:space="preserve" x="125.371536" y="171.060971" id="text3967">
+   <tspan stroke="null" font-weight="normal" id="tspan3969" x="126.421253" y="176.187525">(NDN Container)</tspan>
+  </text>
+  <text transform="matrix(0.9526376792163275,0,0,0.9753141035001042,-53.30106707952308,-77.42332645354041) " font-size="14.959435px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" id="text3979" y="170.076461" x="352.011746" xml:space="preserve">
+   <tspan stroke="null" font-weight="normal" y="175.203015" x="353.061463" id="tspan3981">(NDN Container)</tspan>
+  </text>
+  <text transform="matrix(0.9526376792163275,0,0,0.9753141035001042,-53.30106707952308,-77.42332645354041) " font-size="14.959435px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" xml:space="preserve" x="580.077396" y="169.091931" id="text3983">
+   <tspan stroke="null" font-weight="normal" id="tspan3985" x="581.127113" y="174.218485">(NDN Container)</tspan>
+  </text>
+  <text transform="matrix(0.9526376792163275,0,0,0.9753141035001042,-53.30106707952308,-77.42332645354041) " font-size="14.959435px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" id="text3987" y="193.704961" x="123.946116" xml:space="preserve">
+   <tspan stroke="null" font-weight="bold" y="198.831515" x="124.995833" id="tspan3989">NFD</tspan>
+  </text>
+  <text transform="matrix(0.9526376792163275,0,0,0.9753141035001042,-53.30106707952308,-77.42332645354041) " font-size="14.959435px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" xml:space="preserve" x="140.791686" y="208.664491" id="text3991">
+   <tspan stroke="null" font-weight="normal" id="tspan3993" x="141.841403" y="213.791045">n1.sock</tspan>
+  </text>
+  <text transform="matrix(0.9526376792163275,0,0,0.9753141035001042,-53.30106707952308,-77.42332645354041) " font-size="14.959435px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" xml:space="preserve" x="123.946116" y="225.286191" id="text3995">
+   <tspan stroke="null" font-weight="bold" id="tspan3997" x="124.995833" y="230.412745">NLSR</tspan>
+  </text>
+  <text transform="matrix(0.9526376792163275,0,0,0.9753141035001042,-53.30106707952308,-77.42332645354041) " font-size="14.959435px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" id="text3999" y="240.245731" x="138.385176" xml:space="preserve">
+   <tspan stroke="null" font-weight="normal" y="245.372285" x="139.434893" id="tspan4001">%C1.Router/n1</tspan>
+  </text>
+  <text transform="matrix(0.9526376792163275,0,0,0.9753141035001042,-53.30106707952308,-77.42332645354041) " font-size="14.959435px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" xml:space="preserve" x="352.011746" y="191.735901" id="text4003">
+   <tspan stroke="null" font-weight="bold" id="tspan4005" x="353.061463" y="196.862455">NFD</tspan>
+  </text>
+  <text transform="matrix(0.9526376792163275,0,0,0.9753141035001042,-53.30106707952308,-77.42332645354041) " font-size="14.959435px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" id="text4007" y="206.695431" x="366.450896" xml:space="preserve">
+   <tspan stroke="null" font-weight="normal" y="211.821985" x="367.500613" id="tspan4009">n2.sock</tspan>
+  </text>
+  <text transform="matrix(0.9526376792163275,0,0,0.9753141035001042,-53.30106707952308,-77.42332645354041) " font-size="14.959435px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" id="text4011" y="223.317141" x="352.011746" xml:space="preserve">
+   <tspan stroke="null" font-weight="bold" y="228.443695" x="353.061463" id="tspan4013">NLSR</tspan>
+  </text>
+  <text transform="matrix(0.9526376792163275,0,0,0.9753141035001042,-53.30106707952308,-77.42332645354041) " font-size="14.959435px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" xml:space="preserve" x="366.450896" y="238.276671" id="text4015">
+   <tspan stroke="null" font-weight="normal" id="tspan4017" x="367.500613" y="243.403225">%C1.Router/n2</tspan>
+  </text>
+  <text transform="matrix(0.9526376792163275,0,0,0.9753141035001042,-53.30106707952308,-77.42332645354041) " font-size="14.959435px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" id="text4019" y="190.751371" x="582.928226" xml:space="preserve">
+   <tspan stroke="null" font-weight="bold" y="195.877925" x="583.977943" id="tspan4021">NFD</tspan>
+  </text>
+  <text transform="matrix(0.9526376792163275,0,0,0.9753141035001042,-53.30106707952308,-77.42332645354041) " font-size="14.959435px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" xml:space="preserve" x="599.773686" y="205.710911" id="text4023">
+   <tspan stroke="null" font-weight="normal" id="tspan4025" x="600.823403" y="210.837465">n3.sock</tspan>
+  </text>
+  <text transform="matrix(0.9526376792163275,0,0,0.9753141035001042,-53.30106707952308,-77.42332645354041) " font-size="14.959435px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" xml:space="preserve" x="582.928226" y="222.332611" id="text4027">
+   <tspan stroke="null" font-weight="bold" id="tspan4029" x="583.977943" y="227.459165">NLSR</tspan>
+  </text>
+  <text transform="matrix(0.9526376792163275,0,0,0.9753141035001042,-53.30106707952308,-77.42332645354041) " font-size="14.959435px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" id="text4031" y="237.292141" x="597.367186" xml:space="preserve">
+   <tspan stroke="null" font-weight="normal" y="242.418695" x="598.416903" id="tspan4033">%C1.Router/n3</tspan>
+  </text>
+  <text transform="matrix(0.9778213687833123,0,0,0.9501950205038839,-52.301066914088324,-76.5370021990862) " font-size="16.459864px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" id="text4035" y="102.475413" x="322.701992" xml:space="preserve">
+   <tspan stroke="null" y="107.73749" x="323.724674" id="tspan4037">Isolated NDN nodes</tspan>
+  </text>
+  <text transform="matrix(0.935021961689298,0,0,0.9936889310882339,-2.9798247609055646,-12.086171479984756) " font-size="11.279781px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" xml:space="preserve" x="75.549398" y="206.131281" id="text4039">
+   <tspan stroke="null" id="tspan4041" x="76.618892" y="211.163037">Private network space</tspan>
+  </text>
+  <text transform="matrix(0.935021961689298,0,0,0.9936889310882339,-2.9798247609055646,-12.086171479984756) " font-size="11.279781px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" id="text4043" y="206.946991" x="308.474828" xml:space="preserve">
+   <tspan stroke="null" y="211.978747" x="309.544322" id="tspan4045">Private network space</tspan>
+  </text>
+  <text transform="matrix(0.935021961689298,0,0,0.9936889310882339,-2.9798247609055646,-12.086171479984756) " font-size="11.279781px" font-style="normal" font-weight="normal" fill="#000000" font-family="Sans" xml:space="preserve" x="540.174348" y="206.131281" id="text4047">
+   <tspan stroke="null" id="tspan4049" x="541.243842" y="211.163037">Private network space</tspan>
+  </text>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica,Arial,sans-serif" font-size="15px" id="svg_1" y="377" x="203.5" stroke-width="null" stroke="null" fill="#333">Figure: Relationship between Minindn and Mininet</text>
+ </g>
+</svg>   

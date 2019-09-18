@@ -1,7 +1,7 @@
 #!/bin/bash
 # -*- Mode:bash; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2018, The University of Memphis,
+# Copyright (C) 2015-2019, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -85,93 +85,85 @@ if [[ $DIST == Fedora ]]; then
     fi
 fi
 
-function forwarder {
-    if [[ $cxx != true ]]; then
-        ndncxx
-        cxx="true"
-    fi
+NDN_SRC="ndn-src"
 
-    if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
-        $install libpcap-dev pkg-config
-    fi
+NDN_GITHUB="https://github.com/named-data"
 
-    if [[ $DIST == Fedora ]]; then
-        $install libpcap-devel
-    fi
+NDN_CXX_VERSION="master"
+NFD_VERSION="master"
+PSYNC_VERSION="master"
+CHRONOSYNC_VERSION="master"
+NLSR_VERSION="master"
+NDN_TOOLS_VERSION="master"
 
-    git clone --depth 1 https://github.com/named-data/NFD
-    cd NFD
-    ./waf configure --without-websocket
-    ./waf
-    sudo ./waf install
-    cd ../
+if [ $SUDO_USER ]; then
+    REAL_USER=$SUDO_USER
+else
+    REAL_USER=$(whoami)
+fi
+
+function patchDummy {
+    git -C $NDN_SRC/ndn-cxx apply $(pwd)/patches/ndn-cxx-dummy-keychain-from-ndnsim.patch
+    if [[ "$?" -ne 0 ]]; then
+        echo "Patch might already be applied"
+    fi
 }
 
-function routing {
-    if [[ $cxx != true ]]; then
-        ndncxx
-        cxx="true"
+function ndn_install {
+    mkdir -p $NDN_SRC
+    name=$1
+    version=$2
+    wafOptions=$3
+
+    if [[ $version == "master" ]]; then
+        if [[ -d "$NDN_SRC/$name" ]]; then
+            pushd $NDN_SRC/$name
+            git checkout master
+        else
+            git clone --depth 1 $NDN_GITHUB/$name $NDN_SRC/$name
+            pushd $NDN_SRC/$name
+        fi
+    else
+        if [[ -d $NDN_SRC/$name ]]; then
+            pushd $NDN_SRC/$name
+            if [[ $(git rev-parse --is-shallow-repository) == "true" ]]; then
+                git fetch --unshallow
+                git fetch --all
+            fi
+        else
+            git clone $NDN_GITHUB/$name $NDN_SRC/$name
+            pushd $NDN_SRC/$name
+        fi
+        git checkout $version -b version-$version || git checkout version-$version
     fi
 
-    git clone --depth 1 https://github.com/named-data/PSync
-    cd PSync
-    ./waf configure
-    ./waf
-    sudo ./waf install
-    sudo ldconfig
-    cd ../
-
-    git clone --depth 1 https://github.com/named-data/ChronoSync
-    cd ChronoSync
-    ./waf configure
-    ./waf
-    sudo ./waf install
-    sudo ldconfig
-    cd ../
-
-    git clone --depth 1 https://github.com/named-data/NLSR
-    cd NLSR
-    ./waf configure
-    ./waf
-    sudo ./waf install
-    cd ../
+    # User must use the same python version as root to use ./waf outside of this script
+    sudo -E -u $REAL_USER ./waf configure $wafOptions
+    sudo -E -u $REAL_USER ./waf && sudo ./waf install && sudo ldconfig
+    popd
 }
 
-function ndncxx {
+function ndn {
     if [[ updated != true ]]; then
         $update
         updated="true"
     fi
 
     if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
-        $install git libsqlite3-dev libboost-all-dev make g++ libssl-dev
+        $install git libsqlite3-dev libboost-all-dev make g++ libssl-dev libpcap-dev pkg-config python-pip
     fi
 
     if [[ $DIST == Fedora ]]; then
-        $install gcc-c++ sqlite-devel boost-devel openssl-devel
+        $install gcc-c++ sqlite-devel boost-devel openssl-devel libpcap-devel python-pip
     fi
 
-    git clone --depth 1 https://github.com/named-data/ndn-cxx
-    cd ndn-cxx
-    ./waf configure
-    ./waf
-    sudo ./waf install
-    sudo ldconfig
-    cd ../
-}
-
-function tools {
-    if [[ $cxx != true ]]; then
-        ndncxx
-        cxx="true"
-    fi
-
-    git clone --depth 1 https://github.com/named-data/ndn-tools
-    cd ndn-tools
-    ./waf configure
-    ./waf
-    sudo ./waf install
-    cd ../
+    ndn_install ndn-cxx $NDN_CXX_VERSION
+    ndn_install NFD $NFD_VERSION --without-websocket
+    ndn_install PSync $PSYNC_VERSION --with-examples
+    ndn_install ChronoSync $CHRONOSYNC_VERSION
+    ndn_install NLSR $NLSR_VERSION
+    ndn_install ndn-tools $NDN_TOOLS_VERSION
+    infoedit
 }
 
 function mininet {
@@ -185,16 +177,17 @@ function mininet {
     fi
 
     git clone --depth 1 https://github.com/mininet/mininet
-    cd mininet
-    sudo ./util/install.sh -fnv
-    cd ../
+    pushd mininet
+    sudo ./util/install.sh -nv
+    popd
 }
 
 function infoedit {
-    git clone --depth 1 https://github.com/NDN-Routing/infoedit.git
-    cd infoedit
+    git clone --depth 1 https://github.com/NDN-Routing/infoedit.git $NDN_SRC/infoedit
+    pushd $NDN_SRC/infoedit
+    rm infoedit
     sudo make install
-    cd ../
+    popd
 }
 
 function minindn {
@@ -220,7 +213,7 @@ function minindn {
     sudo cp topologies/minindn.ucla.conf "$install_dir"
     sudo cp topologies/minindn.testbed.conf "$install_dir"
     sudo cp topologies/current-testbed.conf "$install_dir"
-    sudo python setup.py clean --all install
+    sudo python setup.py develop
 }
 
 function ndn_cpp {
@@ -238,14 +231,14 @@ function ndn_cpp {
         return
     fi
 
-    git clone --depth 1 https://github.com/named-data/ndn-cpp
-    cd ndn-cpp
+    git clone --depth 1 $NDN_GITHUB/ndn-cpp $NDN_SRC/ndn-cpp
+    pushd $NDN_SRC/ndn-cpp
     ./configure
     proc=$(nproc)
     make -j$proc
     sudo make install
     sudo ldconfig
-    cd ..
+    popd
 }
 
 function pyNDN {
@@ -264,13 +257,13 @@ function pyNDN {
     fi
 
     sudo pip install cryptography trollius protobuf pytest mock
-    git clone --depth 1 https://github.com/named-data/PyNDN2
-    cd PyNDN2
+    git clone --depth 1 $NDN_GITHUB/PyNDN2 $NDN_SRC/PyNDN2
+    pushd $NDN_SRC/PyNDN2
     # Update the user's PYTHONPATH.
     echo "export PYTHONPATH=\$PYTHONPATH:`pwd`/python" >> ~/.bashrc
     # Also update root's PYTHONPATH in case of running under sudo.
     echo "export PYTHONPATH=\$PYTHONPATH:`pwd`/python" | sudo tee -a /root/.bashrc > /dev/null
-    cd ..
+    popd
 }
 
 function ndn_js {
@@ -291,7 +284,7 @@ function ndn_js {
     sudo ln -fs /usr/bin/nodejs /usr/bin/node
     sudo npm install -g mocha
     sudo npm install rsa-keygen sqlite3
-    git clone --depth 1 https://github.com/named-data/ndn-js
+    git clone --depth 1 $NDN_GITHUB/ndn-js $NDN_SRC/ndn-js
 }
 
 function jNDN {
@@ -309,30 +302,10 @@ function jNDN {
         return
     fi
 
-    git clone --depth 1 https://github.com/named-data/jndn
-    cd jndn
+    git clone --depth 1 $NDN_GITHUB/jndn $NDN_SRC/jndn
+    pushd $NDN_SRC/jndn
     mvn install
-    cd ..
-}
-
-function argcomplete {
-    if [[ $SHELL == "/bin/bash" ]]; then
-        $install bash-completion
-        $install python-argcomplete
-        if ! grep -q 'eval "$(register-python-argcomplete minindn)"' ~/.bashrc; then
-            echo 'eval "$(register-python-argcomplete minindn)"' >> ~/.bashrc
-        fi
-        source ~/.bashrc
-    elif [[ $SHELL == "/bin/zsh" ]] || [[ $SHELL == "/usr/bin/zsh" ]]; then
-        $install bash-completion
-        $install python-argcomplete
-        if ! grep -z -q 'autoload bashcompinit\sbashcompinit\seval "$(register-python-argcomplete minindn)"' ~/.zshrc; then
-            echo -e 'autoload bashcompinit\nbashcompinit\neval "$(register-python-argcomplete minindn)"' >> ~/.zshrc
-        fi
-        source ~/.zshrc
-    else
-        echo "Skipping argomplete install..."
-    fi
+    popd
 }
 
 function commonClientLibraries {
@@ -342,47 +315,56 @@ function commonClientLibraries {
     jNDN
 }
 
+function buildDocumentation {
+    sphinxInstalled=$(pip show sphinx | wc -l)
+    sphinxRtdInstalled=$(pip show sphinx_rtd_theme | wc -l)
+    if [[ $sphinxInstalled -eq "0" ]]; then
+        pip install sphinx
+    fi
+
+    if [[ $sphinxRtdInstalled -eq "0" ]]; then
+        pip install sphinx_rtd_theme
+    fi
+    cd docs
+    make clean
+    make html
+}
+
 function usage {
     printf '\nUsage: %s [-a]\n\n' $(basename $0) >&2
 
     printf 'options:\n' >&2
     printf -- ' -a: install all the required dependencies\n' >&2
-    printf -- ' -b: install autocomplete for Bash and Zsh users\n' >&2
-    printf -- ' -e: install infoedit\n' >&2
-    printf -- ' -f: install NFD\n' >&2
+    printf -- ' -c: install Common Client Libraries\n' >&2
+    printf -- ' -d: build documentation\n' >&2
+    printf -- ' -h: print this (H)elp message\n' >&2
     printf -- ' -i: install mini-ndn\n' >&2
     printf -- ' -m: install mininet and dependencies\n' >&2
-    printf -- ' -r: install NLSR\n' >&2
-    printf -- ' -t: install tools\n' >&2
-    printf -- ' -c: install Common Client Libraries\n' >&2
+    printf -- ' -n: install NDN dependencies of mini-ndn including infoedit\n' >&2
+    printf -- ' -p: patch ndn-cxx with dummy key chain\n' >&2
     exit 2
 }
 
 if [[ $# -eq 0 ]]; then
     usage
 else
-    while getopts 'abemfrtic' OPTION
+    while getopts 'acdhimnp' OPTION
     do
         case $OPTION in
         a)
-        forwarder
-        minindn
+        ndn
         mininet
-        routing
-        tools
-        infoedit
-        argcomplete
+        minindn
         commonClientLibraries
         break
         ;;
-        b)    argcomplete;;
-        e)    infoedit;;
-        f)    forwarder;;
+        c)    commonClientLibraries;;
+        d)    buildDocumentation;;
+        h)    usage;;
         i)    minindn;;
         m)    mininet;;
-        r)    routing;;
-        t)    tools;;
-        c)    commonClientLibraries;;
+        n)    ndn;;
+        p)    patchDummy;;
         ?)    usage;;
         esac
     done

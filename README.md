@@ -7,10 +7,9 @@ If you are new to the NDN community of software generally, read the
 ### What is Mini-NDN?
 
 Mini-NDN is a lightweight networking emulation tool that enables testing, experimentation, and
-research on the NDN platform. Based on [Mini-CCNx](https://github.com/chesteve/mn-ccnx) which
-is a fork of [Mininet](https://github.com/mininet/mininet), Mini-NDN uses the NDN libraries,
-NFD, NLSR, and tools released by the [NDN project](http://named-data.net/codebase/platform/)
-to emulate an NDN network on a single system.
+research on the NDN platform based on [Mininet](https://github.com/mininet/mininet).
+Mini-NDN uses the NDN libraries, NFD, NLSR, and tools released by the
+[NDN project](http://named-data.net/codebase/platform/) to emulate an NDN network on a single system.
 
 Mini-NDN is open and free software licensed under the GPL 3.0 license. Mini-NDN is free to all
 users and developers. For more information about licensing details and limitations,
@@ -25,9 +24,9 @@ Bug reports and feedback are highly appreciated and can be made through our
 
 ### Documentation
 
-* [Installation](INSTALL.md)
-* [Getting Started](docs/GETTING-STARTED.md)
-* [Mini-NDN Edit](docs/GUI.md)
-* [Running Experiments](docs/EXPERIMENTS.md)
-* [Mini-NDN Redmine](http://redmine.named-data.net/projects/mini-ndn)
-* [Contributor's Guide](https://github.com/named-data/NFD/blob/master/CONTRIBUTING.md)
+Please refer to http://minindn.memphis.edu/ or [docs/index.rst](docs/index.rst) for installation, usage, and other documentation.
+The documentation can be built using:
+
+    ./install.sh -d
+
+and is available under `docs/_build/html`.

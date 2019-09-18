@@ -1,24 +1,19 @@
+# Python
 build
-crypto
-ChronoSync
 dist
-doc/html
-doc/latex
-.DS_Store
-examples
-infoedit
-jndn
 Mini_NDN.egg-info
-mininet
-NFD
-NLSR
-ndn-cpp
-ndn-cxx
-ndn-js
-ndn-tools
-openflow
-PyNDN2
-PSync
-util
-.vagrant
 *.pyc
+
+# Docs
+docs/html
+docs/latex
+docs/_build
+
+# Misc
+.DS_Store
+mininet
+ndn-src
+openflow
+
+# Vagrant
+.vagrant
