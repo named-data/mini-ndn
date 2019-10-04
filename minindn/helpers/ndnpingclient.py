@@ -27,19 +27,21 @@ import time
 
 class NDNPingClient(object):
     @staticmethod
-    def ping(source, dest, nPings=1, interval=None, timeout=None, starting_seq_num=None,
+    def ping(source, prefix, nPings=1, interval=None, timeout=None, starting_seq_num=None,
              identifier=None, allow_stale_data=False, print_timestamp=True, sleepTime=0.2):
-        print('Scheduling ping(s) from {} to {}'.format(source.name, dest.name))
+        print('Scheduling ping(s) from {} for {}'.format(source.name, prefix))
         # Use '&' to run in background and perform parallel pings
-        source.cmd('ndnping{1}{2}{3}{4}{5}{6}{7} /ndn/{0}-site/{0} >> ping-data/{0}.txt &'
+        source.cmd("mkdir ping-data")
+        source.cmd('ndnping{1}{2}{3}{4}{5}{6}{7} {0} >> ping-data/{8}.txt &'
         .format(
-            dest,
+            prefix,
             ' -c {}'.format(nPings),
             ' -i {}'.format(interval) if interval else '',
             ' -o {}'.format(timeout) if timeout  else '',
             ' -n {}'.format(starting_seq_num) if starting_seq_num else '',
             ' -p {}'.format(identifier) if identifier else '',
             ' -a' if allow_stale_data else '',
-            ' -t' if print_timestamp else ''
+            ' -t' if print_timestamp else '',
+            str.replace(prefix[1:], "/", "-")
         ))
         time.sleep(sleepTime)

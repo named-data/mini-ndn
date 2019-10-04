@@ -192,6 +192,22 @@ function mininet {
     popd
 }
 
+function wifi {
+    if [[ updated != true ]]; then
+        $update
+        updated="true"
+    fi
+
+    if [[ $pysetup != true ]]; then
+        pysetup="true"
+    fi
+
+    git clone --depth 1 https://github.com/intrig-unicamp/mininet-wifi.git
+    pushd mininet-wifi
+    sudo ./util/install.sh -Wlfnv
+    popd
+}
+
 function infoedit {
     git clone --depth 1 https://github.com/NDN-Routing/infoedit.git $NDN_SRC/infoedit
     pushd $NDN_SRC/infoedit
@@ -225,6 +241,7 @@ function minindn {
     sudo cp topologies/current-testbed.conf "$install_dir"
     sudo cp topologies/geo_hyperbolic_test.conf "$install_dir"
     sudo cp topologies/geant.conf "$install_dir"
+    sudo cp topologies/wifi/singleap-topology.conf "$install_dir"
     sudo python setup.py develop
 }
 
@@ -347,24 +364,33 @@ function usage {
 
     printf 'options:\n' >&2
     printf -- ' -a: install all the required dependencies\n' >&2
+    printf -- ' -A: install all the required dependencies (wired only)\n' >&2
     printf -- ' -c: install Common Client Libraries\n' >&2
     printf -- ' -d: build documentation\n' >&2
     printf -- ' -h: print this (H)elp message\n' >&2
     printf -- ' -i: install mini-ndn\n' >&2
-    printf -- ' -m: install mininet and dependencies\n' >&2
+    printf -- ' -m: install mininet and dependencies (for wired-only installation)\n' >&2
     printf -- ' -n: install NDN dependencies of mini-ndn including infoedit\n' >&2
     printf -- ' -p: patch ndn-cxx with dummy key chain\n' >&2
     printf -- ' -q: quiet install (must be specified first)\n' >&2
+    printf -- ' -w: install mininet-wifi and dependencies\n' >&2
     exit 2
 }
 
 if [[ $# -eq 0 ]]; then
     usage
 else
-    while getopts 'acdhimnpq' OPTION
+    while getopts 'aAcdhimnpqw' OPTION
     do
         case $OPTION in
         a)
+        ndn
+        wifi
+        minindn
+        commonClientLibraries
+        break
+        ;;
+        A)
         ndn
         mininet
         minindn
@@ -379,6 +405,7 @@ else
         n)    ndn;;
         p)    patchDummy;;
         q)    quiet_install;;
+        w)    wifi ;;
         ?)    usage;;
         esac
     done

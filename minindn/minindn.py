@@ -29,13 +29,14 @@ import configparser
 from subprocess import call, Popen, PIPE
 import shutil
 import glob
+from traceback import format_exc
 
 from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.link import TCLink
 from mininet.node import Switch
 from mininet.util import ipStr, ipParse
-from mininet.log import info, error
+from mininet.log import info, debug, error
 
 
 class Minindn(object):
@@ -232,3 +233,10 @@ class Minindn(object):
         # sleep is not required if ndn-cxx is using in-memory keychain
         if not Minindn.ndnSecurityDisabled:
             time.sleep(seconds)
+
+    @staticmethod
+    def handleException():
+        'Utility method to perform cleanup steps and exit after catching exception'
+        Minindn.cleanUp()
+        info(format_exc())
+        exit(1)

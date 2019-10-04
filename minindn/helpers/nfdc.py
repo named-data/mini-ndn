@@ -38,7 +38,7 @@ class Nfdc(object):
     @staticmethod
     def registerRoute(node, namePrefix, remoteNodeAddress, protocol=PROTOCOL_UDP, origin=255,
                       cost=0, inheritFlag=True, captureFlag=False, expirationInMillis=None):
-        cmd = ('nfdc route add {} {}://{} origin {} cost {} {}{}').format(
+        cmd = ('nfdc route add {} {}://{} origin {} cost {} {}{}{}').format(
             namePrefix,
             protocol,
             remoteNodeAddress,

@@ -12,6 +12,7 @@ docs/_build
 # Misc
 .DS_Store
 mininet
+mn_wifi
 ndn-src
 openflow
 
