@@ -305,7 +305,9 @@ class NdnRoutingHelper(object):
         :param Nodes nodes: List of nodes from net object
         """
         for node in nodes:
-            self.namePrefixes[node.name] = prefix
+            if not node.name in self.namePrefixes:
+                self.namePrefixes[node.name] = []
+            self.namePrefixes[node.name] += prefix
 
     def calculateNPossibleRoutes(self, nFaces=0):
         """
