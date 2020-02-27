@@ -141,8 +141,15 @@ class Minindn(object):
         topo = Topo()
 
         items = config.items('nodes')
+        coordinates = []
+
         for item in items:
             name = item[0].split(':')[0]
+            if item[1] in coordinates:
+                error("FATAL: Duplicate Coordinate, \"{}\" used by multiple nodes\n" \
+                     .format(item[1]))
+                sys.exit(1)
+            coordinates.append(item[1])
 
             params = {}
             for param in item[1].split(' '):
