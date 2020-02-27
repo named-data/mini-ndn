@@ -214,6 +214,7 @@ function minindn {
     sudo cp topologies/minindn.testbed.conf "$install_dir"
     sudo cp topologies/current-testbed.conf "$install_dir"
     sudo cp topologies/geo_hyperbolic_test.conf "$install_dir"
+    sudo cp topologies/geant.conf "$install_dir"
     sudo python setup.py develop
 }
 
