@@ -1,6 +1,6 @@
- # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
+# -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2019, The University of Memphis
+# Copyright (C) 2015-2020, The University of Memphis
 #
 # This file is part of Mini-NDN.
 # See AUTHORS.md for a complete list of Mini-NDN authors and contributors.
@@ -27,6 +27,7 @@ This module will compute link state, hyperbolic and geohyperbolic
 routes and their costs from the given Mini-NDN topology
 '''
 
+import sys
 import heapq
 from math import sin, cos, sinh, cosh, acos, acosh
 import json
@@ -124,7 +125,6 @@ def getHyperbolicDistance(sourceNode, destNode):
     """
     r1 = [key for key in sourceNode][0]
     r2 = [key for key in destNode][0]
-
     zeta = 1.0
     dtheta = calculateAngularDistance(sourceNode[r1], destNode[r2])
     hyperbolicDistance = (1./zeta) * acosh(cosh(zeta * r1) * cosh(zeta * r2) -\
@@ -146,17 +146,19 @@ class _CalculateRoutes(object):
         self.adjacenctMatrix = defaultdict(dict)
         self.nodeDict = defaultdict(dict)
         self.routingType = routingType
+        self.isHrConfigValid = True
         for host in netObj.hosts:
             if 'radius' in host.params['params']:
                 radius = float(host.params['params']['radius'])
             else:
+                self.isHrConfigValid = False
                 radius = 0.0
-            if 'angles' in host.params['params']:
+            if 'angle' in host.params['params']:
                 angles = [float(x) for x in host.params['params']['angle'].split(',')]
             else:
-                angles = 0.0
+                self.isHrConfigValid = False
+                angles = [0.0]
             self.nodeDict[host.name][radius] = angles
-
         for link in netObj.topo.links(withInfo=True):
             linkDelay = int(link[2]['delay'].replace("ms", ""))
             self.adjacenctMatrix[link[0]][link[1]] = linkDelay
@@ -175,12 +177,14 @@ class _CalculateRoutes(object):
             else:
                 resultMatrix = self.computeDijkastraAll() # all possible routes
         elif self.routingType == "hr":
-            # Note: For hyperbolic, only way to find the best routes is by computing all possible
-            # routes and getting the best one.
-            resultMatrix = self.computeHyperbolic()
-        else:
-            info("Routing type not supported\n")
-            return []
+            if self.isHrConfigValid == True:
+                # Note: For hyperbolic, only way to find the best routes is by
+                # computing all possible routes and getting the best one.
+                resultMatrix = self.computeHyperbolic()
+            else:
+                warn('Hyperbolic coordinates in topology file are either missing or misconfigured.\n')
+                warn('Check that each node has one radius value and one or two angle value(s).\n')
+                return None
 
         for node in resultMatrix:
             for destinationNode in resultMatrix[node]:
@@ -213,7 +217,7 @@ class _CalculateRoutes(object):
         for node in self.nodeDict:
             neighbors = [k for k in self.adjacenctMatrix[node]]
             for viaNeighbor in neighbors:
-                others = list(set(nodeNames) - set(viaNeighbor) - set(node))
+                others = [x for x in nodeNames if x not in [viaNeighbor, node]]
                 paths[node][viaNeighbor][viaNeighbor] = 0
                 # Compute distance from neighbors to no-neighbors
                 for destinationNode in others:
@@ -222,7 +226,6 @@ class _CalculateRoutes(object):
                     hyperbolicCost = int(HYPERBOLIC_COST_ADJUSTMENT_FACTOR \
                                          * round(hyperbolicDistance, 6))
                     paths[node][destinationNode][viaNeighbor] = hyperbolicCost
-
         debug("Shortest Distance Matrix: {}".format(json.dumps(paths)))
         return paths
 
@@ -234,7 +237,7 @@ class _CalculateRoutes(object):
         distanceMatrix = self.getNestedDictionary()
         nodeNames = self.getNodeNames()
         for node in nodeNames:
-            others = list(set(nodeNames) - set(node))
+            others = [x for x in nodeNames if x not in [node]]
             for destinationNode in others:
                 cost, path = dijkstra(self.adjacenctMatrix, node, destinationNode)
                 viaNeighbor = path[1]
@@ -259,7 +262,7 @@ class _CalculateRoutes(object):
             for viaNeighbor in neighbors:
                 directCost = self.adjacenctMatrix[node][viaNeighbor]
                 distanceMatrixViaNeighbor[node][viaNeighbor][viaNeighbor] = directCost
-                others = list(set(nodeNames) - set(viaNeighbor) - set(node))
+                others = [x for x in nodeNames if x not in [viaNeighbor, node]]
                 for destinationNode in others:
                     nodeNeighborCost = self.adjacenctMatrix[node][viaNeighbor]
                     # path variable is not used for now
@@ -290,6 +293,7 @@ class NdnRoutingHelper(object):
         self.routeObject = _CalculateRoutes(self.net, self.routingType)
 
     def globalRoutingHelperHandler(self):
+        info('Creating faces and adding routes to FIB\n')
         for host in self.net.hosts:
             neighborIPs = self.getNeighbor(host)
             self.createFaces(host, neighborIPs)
@@ -320,10 +324,13 @@ class NdnRoutingHelper(object):
 
         """
         self.routes = self.routeObject.getRoutes(nFaces)
-        if self.routes:
+        if self.routes is not None:
+            info('Route computation completed\n')
             self.globalRoutingHelperHandler()
         else:
-            warn("Route computation failed\n")
+            warn('Route computation failed\n')
+            self.net.stop()
+            sys.exit(1)
 
     def calculateRoutes(self):
         # Calculate shortest path for every node
