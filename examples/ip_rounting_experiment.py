@@ -50,4 +50,4 @@ if __name__ == '__main__':
 
     ndn.net.pingAll()
 
-    ndn.net.stop()
+    ndn.stop()
