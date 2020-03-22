@@ -109,6 +109,14 @@ function patchDummy {
     fi
 }
 
+function quiet_install {
+    if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
+	update='sudo DEBIAN_FRONTEND=noninteractive apt-get update'
+	install='sudo DEBIAN_FRONTEND=noninteractive apt-get -y install'
+        remove='sudo DEBIAN_FRONTEND=noninteractive apt-get -y remove'
+    fi
+}
+
 function ndn_install {
     mkdir -p $NDN_SRC
     name=$1
@@ -344,13 +352,14 @@ function usage {
     printf -- ' -m: install mininet and dependencies\n' >&2
     printf -- ' -n: install NDN dependencies of mini-ndn including infoedit\n' >&2
     printf -- ' -p: patch ndn-cxx with dummy key chain\n' >&2
+    printf -- ' -q: quiet install\n' >&2
     exit 2
 }
 
 if [[ $# -eq 0 ]]; then
     usage
 else
-    while getopts 'acdhimnp' OPTION
+    while getopts 'acdhimnpq' OPTION
     do
         case $OPTION in
         a)
@@ -367,6 +376,7 @@ else
         m)    mininet;;
         n)    ndn;;
         p)    patchDummy;;
+        q)    quiet_install;;
         ?)    usage;;
         esac
     done
