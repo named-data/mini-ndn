@@ -114,6 +114,8 @@ function quiet_install {
 	update='sudo DEBIAN_FRONTEND=noninteractive apt-get update'
 	install='sudo DEBIAN_FRONTEND=noninteractive apt-get -y install'
         remove='sudo DEBIAN_FRONTEND=noninteractive apt-get -y remove'
+        
+	echo "wireshark-common wireshark-common/install-setuid boolean false" | sudo debconf-set-selections
     fi
 }
 
