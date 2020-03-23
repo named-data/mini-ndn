@@ -67,6 +67,15 @@ To install without CCL, use:
 
     ./install.sh -mni
 
+To install in "quiet" mode (without user interaction), use:
+
+::
+    ./install.sh -qa
+
+.. note::
+    The order of the flag -q is important to ensure that the environment is ready for
+    a quiet install.
+
 See ``install.sh -h`` for detailed options.
 
 Installing Dependencies

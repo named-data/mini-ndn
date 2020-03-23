@@ -13,7 +13,7 @@ else
   git clone --depth 1 https://github.com/named-data/mini-ndn.git
   pushd mini-ndn
 fi
-./install.sh -a
+./install.sh -qa
 
 SCRIPT
 
