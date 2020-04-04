@@ -1,16 +1,16 @@
 diff --git a/ndn-cxx/security/v2/key-chain.cpp b/ndn-cxx/security/v2/key-chain.cpp
-index 8043635..b9af6f0 100644
+index 63f1d985..b8bdeb77 100644
 --- a/ndn-cxx/security/v2/key-chain.cpp
 +++ b/ndn-cxx/security/v2/key-chain.cpp
-@@ -25,6 +25,7 @@
- #include "ndn-cxx/util/config-file.hpp"
- #include "ndn-cxx/util/logger.hpp"
- #include "ndn-cxx/util/sha256.hpp"
+@@ -40,6 +40,7 @@
+ #include "ndn-cxx/security/transform/private-key.hpp"
+ #include "ndn-cxx/security/transform/public-key.hpp"
+ #include "ndn-cxx/security/transform/verifier-filter.hpp"
 +#include "ndn-cxx/util/dummy-keychain.hpp"
  
- #include "ndn-cxx/security/pib/pib-memory.hpp"
- #include "ndn-cxx/security/pib/pib-sqlite3.hpp"
-@@ -163,7 +164,7 @@ KeyChain::getDefaultKeyParams()
+ #include <boost/lexical_cast.hpp>
+
+@@ -162,7 +163,7 @@ KeyChain::getDefaultKeyParams()
  //
  
  KeyChain::KeyChain()
@@ -21,10 +21,10 @@ index 8043635..b9af6f0 100644
  
 diff --git a/ndn-cxx/util/dummy-keychain.cpp b/ndn-cxx/util/dummy-keychain.cpp
 new file mode 100644
-index 0000000..aa24465
+index 00000000..2575f11d
 --- /dev/null
 +++ b/ndn-cxx/util/dummy-keychain.cpp
-@@ -0,0 +1,346 @@
+@@ -0,0 +1,352 @@
 +/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 +/**
 + * Copyright (c) 2011-2015  Regents of the University of California.
@@ -363,6 +363,12 @@ index 0000000..aa24465
 +  throw Error("Not supported");
 +}
 +
++void
++DummyTpm::doImportKey(const Name& keyName, shared_ptr<transform::PrivateKey> key)
++{
++  throw Error("Not supported");
++}
++
 +std::string
 +DummyTpm::getScheme()
 +{
@@ -373,10 +379,10 @@ index 0000000..aa24465
 +} // namespace ndn
 diff --git a/ndn-cxx/util/dummy-keychain.hpp b/ndn-cxx/util/dummy-keychain.hpp
 new file mode 100644
-index 0000000..d1432a6
+index 00000000..374fdef5
 --- /dev/null
 +++ b/ndn-cxx/util/dummy-keychain.hpp
-@@ -0,0 +1,223 @@
+@@ -0,0 +1,226 @@
 +/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 +/**
 + * Copyright (c) 2011-2015  Regents of the University of California.
@@ -591,6 +597,9 @@ index 0000000..d1432a6
 +
 +  void
 +  doImportKey(const Name& keyName, const uint8_t* pkcs8, size_t pkcs8Len, const char* pw, size_t pwLen) final;
++
++  void
++  doImportKey(const Name& keyName, shared_ptr<transform::PrivateKey> key);
 +
 +public:
 +  static const std::string SCHEME;
