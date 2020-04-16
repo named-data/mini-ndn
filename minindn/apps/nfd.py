@@ -35,7 +35,7 @@ class Nfd(Application):
 
         self.confFile = '{}/nfd.conf'.format(self.homeDir)
         self.logFile = 'nfd.log'
-        self.sockFile = '/var/run/{}.sock'.format(node.name)
+        self.sockFile = '/run/{}.sock'.format(node.name)
         self.ndnFolder = '{}/.ndn'.format(self.homeDir)
         self.clientConf = '{}/client.conf'.format(self.ndnFolder)
 
@@ -63,6 +63,7 @@ class Nfd(Application):
         copyExistentFile(node, possibleClientConfPaths, self.clientConf)
 
         # Change the unix socket
+        node.cmd('sudo sed -i "s|;transport|transport|g" {}'.format(self.clientConf))
         node.cmd('sudo sed -i "s|nfd.sock|{}.sock|g" {}'.format(node.name, self.clientConf))
 
         if not Minindn.ndnSecurityDisabled:
