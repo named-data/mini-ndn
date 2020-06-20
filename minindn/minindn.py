@@ -49,6 +49,7 @@ class Minindn(object):
         5) Some other utility functions
     """
     ndnSecurityDisabled = False
+    workDir = None
 
     def __init__(self, parser=argparse.ArgumentParser(), topo=None, topoFile=None, **mininetParams):
         """Create MiniNDN object
@@ -60,7 +61,7 @@ class Minindn(object):
         self.parser = Minindn.parseArgs(parser)
         self.args = self.parser.parse_args()
 
-        self.workDir = self.args.workDir
+        Minindn.workDir = self.args.workDir
         self.resultDir = self.args.resultDir
 
         if not topoFile:
@@ -85,7 +86,7 @@ class Minindn(object):
             if 'params' not in host.params:
                 host.params['params'] = {}
 
-            homeDir = '{}/{}'.format(self.workDir, host.name)
+            homeDir = '{}/{}'.format(Minindn.workDir, host.name)
             host.params['params']['homeDir'] = homeDir
             host.cmd('mkdir -p {}'.format(homeDir))
             host.cmd('export HOME={} && cd ~'.format(homeDir))
@@ -201,7 +202,7 @@ class Minindn(object):
         if self.resultDir is not None:
             info("Moving results to \'{}\'\n".format(self.resultDir))
             os.system("mkdir -p {}".format(self.resultDir))
-            for file in glob.glob('{}/*'.format(self.workDir)):
+            for file in glob.glob('{}/*'.format(Minindn.workDir)):
                 shutil.move(file, self.resultDir)
 
     @staticmethod

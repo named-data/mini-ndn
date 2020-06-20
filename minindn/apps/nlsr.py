@@ -110,7 +110,7 @@ class Nlsr(Application):
         host.cmd('ndnsec-certgen -s {} -r {} > {}'.format(signer, keyFile, outputFile))
 
     def createKeysAndCertificates(self):
-        securityDir = '{}/security'.format(self.parameters['workDir'])
+        securityDir = '{}/security'.format(Minindn.workDir)
 
         if not os.path.exists(securityDir):
             os.mkdir(securityDir)
