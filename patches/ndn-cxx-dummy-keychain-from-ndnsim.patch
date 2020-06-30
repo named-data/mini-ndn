@@ -1,16 +1,8 @@
-diff --git a/ndn-cxx/security/v2/key-chain.cpp b/ndn-cxx/security/v2/key-chain.cpp
-index 63f1d985..b8bdeb77 100644
---- a/ndn-cxx/security/v2/key-chain.cpp
-+++ b/ndn-cxx/security/v2/key-chain.cpp
-@@ -40,6 +40,7 @@
- #include "ndn-cxx/security/transform/private-key.hpp"
- #include "ndn-cxx/security/transform/public-key.hpp"
- #include "ndn-cxx/security/transform/verifier-filter.hpp"
-+#include "ndn-cxx/util/dummy-keychain.hpp"
- 
- #include <boost/lexical_cast.hpp>
-
-@@ -162,7 +163,7 @@ KeyChain::getDefaultKeyParams()
+diff --git a/ndn-cxx/security/key-chain.cpp b/ndn-cxx/security/key-chain.cpp
+index 50eaa226..d4acbe61 100644
+--- a/ndn-cxx/security/key-chain.cpp
++++ b/ndn-cxx/security/key-chain.cpp
+@@ -163,7 +164,7 @@ KeyChain::getDefaultKeyParams()
  //
  
  KeyChain::KeyChain()
@@ -21,7 +13,7 @@ index 63f1d985..b8bdeb77 100644
  
 diff --git a/ndn-cxx/util/dummy-keychain.cpp b/ndn-cxx/util/dummy-keychain.cpp
 new file mode 100644
-index 00000000..2575f11d
+index 00000000..d9228c8e
 --- /dev/null
 +++ b/ndn-cxx/util/dummy-keychain.cpp
 @@ -0,0 +1,352 @@
@@ -93,8 +85,8 @@ index 00000000..2575f11d
 +const std::string DummyPib::SCHEME = "pib-dummy";
 +const std::string DummyTpm::SCHEME = "tpm-dummy";
 +
-+NDN_CXX_V2_KEYCHAIN_REGISTER_PIB_BACKEND(DummyPib);
-+NDN_CXX_V2_KEYCHAIN_REGISTER_TPM_BACKEND(DummyTpm);
++NDN_CXX_KEYCHAIN_REGISTER_PIB_BACKEND(DummyPib);
++NDN_CXX_KEYCHAIN_REGISTER_TPM_BACKEND(DummyTpm);
 +
 +DummyPib::DummyPib(const std::string& locator)
 +{
@@ -273,13 +265,13 @@ index 00000000..2575f11d
 +}
 +
 +ConstBufferPtr
-+DummyKeyHandle::doSign(DigestAlgorithm digestAlgorithm, const uint8_t* buf, size_t size) const
++DummyKeyHandle::doSign(DigestAlgorithm digestAlgorithm, const InputBuffers& bufs) const
 +{
 +  return make_shared<Buffer>(DUMMY_SIGNATURE, sizeof(DUMMY_SIGNATURE));
 +}
 +
 +bool
-+DummyKeyHandle::doVerify(DigestAlgorithm digestAlgorithm, const uint8_t* buf, size_t bufLen,
++DummyKeyHandle::doVerify(DigestAlgorithm digestAlgorithm, const InputBuffers& bufs,
 +                         const uint8_t* sig, size_t sigLen) const
 +{
 +  return true;
@@ -379,7 +371,7 @@ index 00000000..2575f11d
 +} // namespace ndn
 diff --git a/ndn-cxx/util/dummy-keychain.hpp b/ndn-cxx/util/dummy-keychain.hpp
 new file mode 100644
-index 00000000..374fdef5
+index 00000000..b0634db2
 --- /dev/null
 +++ b/ndn-cxx/util/dummy-keychain.hpp
 @@ -0,0 +1,226 @@
@@ -530,10 +522,10 @@ index 00000000..374fdef5
 +
 +private:
 +  ConstBufferPtr
-+  doSign(DigestAlgorithm digestAlgorithm, const uint8_t* buf, size_t size) const final;
++  doSign(DigestAlgorithm digestAlgorithm, const InputBuffers& bufs) const final;
 +
 +  bool
-+  doVerify(DigestAlgorithm digestAlgorithm, const uint8_t* buf, size_t bufLen,
++  doVerify(DigestAlgorithm digestAlgorithm, const InputBuffers& bufs,
 +           const uint8_t* sig, size_t sigLen) const final;
 +
 +  ConstBufferPtr
@@ -599,7 +591,7 @@ index 00000000..374fdef5
 +  doImportKey(const Name& keyName, const uint8_t* pkcs8, size_t pkcs8Len, const char* pw, size_t pwLen) final;
 +
 +  void
-+  doImportKey(const Name& keyName, shared_ptr<transform::PrivateKey> key);
++  doImportKey(const Name& keyName, shared_ptr<transform::PrivateKey> key) final;
 +
 +public:
 +  static const std::string SCHEME;
