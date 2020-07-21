@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2019, The University of Memphis,
+# Copyright (C) 2015-2020, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -22,7 +22,8 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 from igraph import Graph
-from mininet.log import info
+from mininet.log import info, debug
+
 
 class LinkInfo(object):
     """
@@ -34,6 +35,7 @@ class LinkInfo(object):
         self.start_intf_ip = start_ip
         self.end_intf_name = end_intf_name
         self.end_ip = end_ip
+
 
 class IPRoutingHelper(object):
     """The routing helper allows to run IP-based evaluations with Mini-NDN. It configures static IP
@@ -62,6 +64,51 @@ class IPRoutingHelper(object):
         return None
 
     @staticmethod
+    def calculateAllSubPaths(path):
+        """ This method returns all subpaths in forward and reverse order of a given path
+
+        :param path: Given path for which subpaths are calculated
+        :return: List of all subpaths
+        """
+        paths = []
+
+        # Append original path and reversed path
+        paths.append(path)
+        reversed = path[:]
+        reversed.reverse()
+        paths.append(reversed)
+
+        # Iterate over all possible lengths for subpaths
+        for subpath_length in range(2, len(path)):
+            # Get all subpaths of length subpath_lenght of the given path
+            for start_index in range(0, len(path) - subpath_length + 1):
+                subpath = path[start_index: start_index + subpath_length]
+                paths.append(subpath)
+                subpath = subpath[:]
+                subpath.reverse()
+                paths.append(subpath)
+        return paths
+
+    @staticmethod
+    def replaceExistingSubpaths(path, existing_paths):
+
+        subpaths = []
+        for subpath_length in range(3, len(path)):
+            for start_index in range(0, len(path) - subpath_length + 1):
+                subpaths.append(path[start_index: start_index + subpath_length])
+        subpaths.reverse()
+
+        for subpath in subpaths:
+            if len(subpath) == len(path):
+                continue
+            if (subpath[0], subpath[-1]) in existing_paths:
+                existing = existing_paths[(subpath[0], subpath[-1])]
+                path = path[:path.index(existing[0])] + existing[:] + path[
+                                                                      path.index(existing[-1]) + 1:]
+                break
+        return path
+
+    @staticmethod
     def calcAllRoutes(net):
         """ Configures IP routes between all nodes in the emulation topology. This is done in three
          steps:
@@ -81,13 +128,12 @@ class IPRoutingHelper(object):
         for node in mini_nodes:
             node.cmd('sysctl -w net.ipv4.ip_forward=1')
 
-        # Calculate igraph to calculate all shortest paths between nodes
+        # Create the network graph to calculate all shortest paths between nodes
         node_names = [node.name for node in mini_nodes]
         links = []
         for link in mini_links:
             links.append((link.intf1.node.name, link.intf2.node.name))
             links.append((link.intf2.node.name, link.intf1.node.name))
-
         networkGraph = Graph()
         networkGraph = networkGraph.as_directed()
         for node in node_names:
@@ -95,22 +141,44 @@ class IPRoutingHelper(object):
         for (a, b) in links:
             networkGraph.add_edges([(a, b), (b, a)])
 
-        named_paths = []
+        existing_paths = {}  # Variable existing_paths stores all paths that are installed
+        shortest_paths = []  # List of calculated shorted paths betweeen all nodes
+
+        # Calculate shortest paths between all nodes using libigraph
         for from_node in node_names:
             for to_node in node_names:
                 if from_node != to_node:
+                    if (from_node, to_node) in existing_paths \
+                            or (to_node, from_node) in existing_paths:
+                        continue
                     paths = networkGraph.get_all_shortest_paths(from_node, to_node)
                     if len(paths) == 0:
                         continue
-                    shortest_path = paths[0]
-                    shortest_path_with_nodenames = []
-                    for node in shortest_path:
-                        shortest_path_with_nodenames.append(networkGraph.vs['name'][node])
-                    named_paths.append(shortest_path_with_nodenames)
+                    paths.sort(key=lambda x: str(x))
+                    paths.sort(key=lambda x: len(x))
+                    shortest_path = paths[0]  # Shortest path with node indizes as nodes
+                    # Translate node indizes to node names
+                    shortest_path_nodenames = [networkGraph.vs['name'][node]
+                                               for node in shortest_path]
+                    shortest_paths.append(shortest_path_nodenames)
+
+        # Iterate over shortest paths and store subpaths that need to be installed on the nodes.
+        # Also, it is made sure that all paths and reverse paths are the same
+        shortest_paths.sort(key=lambda x: len(x), reverse=True)
+        for path in shortest_paths:
+            # Replace already existing subpaths of the path to make sure that no two paths between
+            # two nodes exist
+            path = IPRoutingHelper.replaceExistingSubpaths(path, existing_paths)
+
+            # Mark all subpaths of path to install on nodes, unless they already exist
+            subpaths = IPRoutingHelper.calculateAllSubPaths(path)
+            for subpath in subpaths:
+                if (subpath[0], subpath[-1]) not in existing_paths:
+                    existing_paths[(subpath[0], subpath[-1])] = subpath
 
         # Iterate over all paths and configure the routes using the 'route add'
         info('Configure routes on all nodes\n')
-        for path in named_paths:
+        for path in existing_paths.values():
             start_node = path[0]
             end_node = path[-1]
             mini_start = net.get(start_node)
@@ -119,16 +187,17 @@ class IPRoutingHelper(object):
             link_info = IPRoutingHelper.findLinkInformation(mini_links, path[0], path[1])
             start_intf = link_info.start_intf_name
 
+            # Configure the route for every IP address of the destination
             for intf in mini_end.intfs:
                 addr = mini_end.intfs[intf].ip
                 if len(path) == 2:
                     # For direct connection, configure exit interface
-                    info('[{}] route add -host {} dev {}\n'.format(start_node, addr, start_intf))
+                    debug('[{}] route add -host {} dev {}\n'.format(start_node, addr, start_intf))
                     mini_start.cmd('route add -host {} dev {}'.format(addr, start_intf))
                 elif len(path) > 2:
                     # For longer paths, configure next hop as gateway
                     gateway_ip = link_info.end_ip
-                    info('[{}] route add -host {} dev {} gw {}\n'
-                         .format(start_node, addr, start_intf, gateway_ip))
+                    debug('[{}] route add -host {} dev {} gw {}\n'
+                          .format(start_node, addr, start_intf, gateway_ip))
                     mini_start.cmd('route add -host {} dev {} gw {}'
                                    .format(addr, start_intf, gateway_ip))
