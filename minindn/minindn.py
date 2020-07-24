@@ -49,6 +49,8 @@ class Minindn(object):
         5) Some other utility functions
     """
     ndnSecurityDisabled = False
+    workDir = '/tmp/minindn'
+    resultDir = None
 
     def __init__(self, parser=argparse.ArgumentParser(), topo=None, topoFile=None, **mininetParams):
         """Create MiniNDN object
@@ -60,8 +62,8 @@ class Minindn(object):
         self.parser = Minindn.parseArgs(parser)
         self.args = self.parser.parse_args()
 
-        self.workDir = self.args.workDir
-        self.resultDir = self.args.resultDir
+        Minindn.workDir = os.path.abspath(self.args.workDir)
+        Minindn.resultDir = self.args.resultDir
 
         if not topoFile:
             # Args has default topology if none specified
@@ -85,7 +87,7 @@ class Minindn(object):
             if 'params' not in host.params:
                 host.params['params'] = {}
 
-            homeDir = '{}/{}'.format(self.workDir, host.name)
+            homeDir = '{}/{}'.format(Minindn.workDir, host.name)
             host.params['params']['homeDir'] = homeDir
             host.cmd('mkdir -p {}'.format(homeDir))
             host.cmd('export HOME={} && cd ~'.format(homeDir))
@@ -199,11 +201,11 @@ class Minindn(object):
             cleanup()
         self.net.stop()
 
-        if self.resultDir is not None:
-            info("Moving results to \'{}\'\n".format(self.resultDir))
-            os.system("mkdir -p {}".format(self.resultDir))
-            for file in glob.glob('{}/*'.format(self.workDir)):
-                shutil.move(file, self.resultDir)
+        if Minindn.resultDir is not None:
+            info("Moving results to \'{}\'\n".format(Minindn.resultDir))
+            os.system("mkdir -p {}".format(Minindn.resultDir))
+            for file in glob.glob('{}/*'.format(Minindn.workDir)):
+                shutil.move(file, Minindn.resultDir)
 
     @staticmethod
     def cleanUp():
