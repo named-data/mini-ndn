@@ -113,3 +113,16 @@ machine to an external machine.
 
 Also, if the local machine has a public IP, Mini-NDN nodes can be
 reached via external machines.
+
+Generate NDN testbed topology
+___________________________________________
+
+Run the following install.sh command
+
+::
+
+    python3 util/testbed_topo_generator.py
+
+This will place a "testbed.conf" file in the topologies subdirectory,
+where it can be referenced as desired. To update the topology, simply
+rerun this command.

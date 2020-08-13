@@ -103,7 +103,7 @@ else
 fi
 
 function patchDummy {
-    git -C $NDN_SRC/ndn-cxx apply $(pwd)/patches/ndn-cxx-dummy-keychain-from-ndnsim.patch
+    git -C $NDN_SRC/ndn-cxx apply $(pwd)/util/patches/ndn-cxx-dummy-keychain-from-ndnsim.patch
     if [[ "$?" -ne 0 ]]; then
         echo "Patch might already be applied"
     fi
@@ -320,6 +320,10 @@ function jNDN {
     popd
 }
 
+function testbedTopo {
+    python3 ./testbed_topo_generator.py
+}
+
 function commonClientLibraries {
     ndn_cpp
     pyNDN
@@ -369,6 +373,7 @@ else
         mininet
         minindn
         commonClientLibraries
+        testbedTopo
         break
         ;;
         c)    commonClientLibraries;;
