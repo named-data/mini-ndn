@@ -99,7 +99,8 @@ class Minindn(object):
             Minindn.ndnSecurityDisabled = '/dummy/KEY/-%9C%28r%B8%AA%3B%60' in \
                                           check_output('ndnsec-get-default -k'.split()). \
                                               decode('utf-8').split('\n')
-            info('Dummy key chain patch is installed in ndn-cxx. Security will be disabled.\n')
+            if Minindn.ndnSecurityDisabled:
+                info('Dummy key chain patch is installed in ndn-cxx. Security will be disabled.\n')
         except:
             pass
 
