@@ -27,3 +27,4 @@ Helpful Links
 * `Mininet Documentation <http://mininet.org/>`_
 * `Mini-NDN redmine <https://redmine.named-data.net/projects/mini-ndn>`_
 * `Mailing list <http://www.lists.cs.ucla.edu/mailman/listinfo/mini-ndn>`_
+* :doc:`Mini-NDN Team <authors>`

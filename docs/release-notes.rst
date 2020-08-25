@@ -1,6 +1,62 @@
 Release Notes
 =============
 
+Mini-NDN version 0.5.0 (Major changes since version 0.4.0)
+----------------------------------------------------------
+
+**Breaking Changes**:
+
+-  `Mini-NDN re-design <https://redmine.named-data.net/issues/5062>`__: simple and robust design with better quality, control, and more consistency with Mininet
+
+**New features**:
+
+-  Add a script to generate up-to-date NDN testbed topologies for Mini-NDN
+
+-  Add Mini-NDN utility application for PCAP logging
+
+-  Add NDN routing helper to compute centralized LS and HR routes
+
+-  Add routing helper to allow IP communication in experiments
+
+-  Add startup experiments for NLSR and current testbed topology
+
+-  Move the NDNPing wrapper method to a helper class
+
+-  Create a helper class to provide a wrapper around ``nfdc``
+
+**Improvements and Bug Fixes**:
+
+-  Change workDir and resultDir to be class attribute
+
+-  Quiet apt install for Vagrant
+
+-  Fix route computation bug in ``ndn_routing_helper``
+
+-  Fix overwriting of existing prefixes in ``ndn_routing_helper``
+
+-  Move log files to resultDir after evaluation finishes
+
+-  Check for duplicate HR coordinates in the topology file
+
+-  Check PSync integration and add a tests case for it
+
+-  Bug fixes in nfdc and experiments
+
+-  Added functionality to check Mini-NDN dependencies
+
+-  Parser fix to avoid an infinite loop
+
+-  Allow use of NFD and NLSR PPA with Mini-NDN
+
+-  Remove arbitrary arguments in favor of parsing arguments from experiment files
+
+-  Auto-complete command-line arguments
+
+-  Add option to set CS size
+
+-  Adjust to use ndn-cxx logging
+
+
 Mini-NDN version 0.4.0 (changes since version 0.3.0)
 ----------------------------------------------------
 

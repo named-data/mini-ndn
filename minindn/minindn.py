@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2019, The University of Memphis,
+# Copyright (C) 2015-2020, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -26,7 +26,7 @@ import sys
 import time
 import os
 import configparser
-from subprocess import call, check_output
+from subprocess import call, Popen, PIPE
 import shutil
 import glob
 
@@ -98,11 +98,13 @@ class Minindn(object):
             self.ethernetPairConnectivity()
 
         try:
-            Minindn.ndnSecurityDisabled = '/dummy/KEY/-%9C%28r%B8%AA%3B%60' in \
-                                          check_output('ndnsec-get-default -k'.split()). \
-                                              decode('utf-8').split('\n')
-            if Minindn.ndnSecurityDisabled:
-                info('Dummy key chain patch is installed in ndn-cxx. Security will be disabled.\n')
+            process = Popen(['ndnsec-get-default', '-k'], stdout=PIPE, stderr=PIPE)
+            output, error = process.communicate()
+            if process.returncode == 0:
+              Minindn.ndnSecurityDisabled = '/dummy/KEY/-%9C%28r%B8%AA%3B%60' in output
+              info('Dummy key chain patch is installed in ndn-cxx. Security will be disabled.\n')
+            else:
+              debug(error)
         except:
             pass
 
