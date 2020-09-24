@@ -28,7 +28,8 @@ from itertools import cycle
 from mininet.log import info
 
 from minindn.helpers.nfdc import Nfdc
-from minindn.helpers.ndnpingclient import NDNPingClient
+from minindn.helpers.ndnping import NDNPing
+from minindn.util import getSafeName
 
 class Experiment(object):
     @staticmethod
@@ -70,7 +71,8 @@ class Experiment(object):
         for host in hosts:
             host.cmd('mkdir -p ping-data')
             Nfdc.setStrategy(host, '/ndn/', strategy)
-            host.cmd('ndnpingserver /ndn/{}-site/{} > ping-server &'.format(host.name, host.name))
+            prefix = getSafeName('/ndn/{}-site/{}'.format(host.name, host.name))
+            NDNPing.startPingServer(host, prefix)
 
     @staticmethod
     def startPctPings(net, nPings, pctTraffic=1.0):
@@ -95,7 +97,8 @@ class Experiment(object):
 
                 # Do not ping self
                 if host.name != other.name:
-                    NDNPingClient.ping(host, other, nPings)
+                    destPrefix = getSafeName('/ndn/{}-site/{}'.format(other.name, other.name))
+                    NDNPing.ping(host, destPrefix, other.name, nPings)
                     nodesPingedList.append(other)
 
                 # Always increment because in 100% case a node should not ping itself

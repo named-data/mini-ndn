@@ -25,13 +25,13 @@ import time
 
 # Todo: convert to app
 
-class NDNPingClient(object):
+class NDNPing(object):
     @staticmethod
-    def ping(source, prefix, nPings=1, interval=None, timeout=None, starting_seq_num=None,
-             identifier=None, allow_stale_data=False, print_timestamp=True, sleepTime=0.2):
+    def ping(source, prefix, pingDataFile="output-client", nPings=1, interval=None, timeout=None,
+            starting_seq_num=None, identifier=None, allow_stale_data=False, print_timestamp=True, sleepTime=0.2):
         print('Scheduling ping(s) from {} for {}'.format(source.name, prefix))
         # Use '&' to run in background and perform parallel pings
-        source.cmd("mkdir ping-data")
+        source.cmd("mkdir -p ping-data")
         source.cmd('ndnping{1}{2}{3}{4}{5}{6}{7} {0} >> ping-data/{8}.txt &'
         .format(
             prefix,
@@ -42,6 +42,30 @@ class NDNPingClient(object):
             ' -p {}'.format(identifier) if identifier else '',
             ' -a' if allow_stale_data else '',
             ' -t' if print_timestamp else '',
-            str.replace(prefix[1:], "/", "-")
+            pingDataFile
         ))
         time.sleep(sleepTime)
+
+    def startPingServer(source, prefix, pingDataFile="output-server", freshness=None, satisfy=None, 
+            size=None, timestamp=False, quiet=False):
+        """
+        Start a pingserver
+         :param string preifx: prefix to start pingserver on
+         :param int freshness: FreshnessPeriod of the ping response, in milliseconds
+         :param int satisfy: maximum number of pings to satisfy
+         :param int size: size of response payload
+         :param boolean timestamp: prepend a timestamp to each log message
+         :param boolean quite: do not print a log message each time a ping packet is received
+        """
+        print('Staring ping server on prefix {}'.format(prefix))
+        source.cmd("mkdir -p ping-data")
+        cmd = 'ndnpingserver {1}{2}{3}{4}{5} {0}>> ping-data/{6}.txt &'.format(
+            prefix,
+            '-f {}'.format(freshness) if freshness else '',
+            '-p {}'.format(satisfy) if satisfy else '',
+            '-s {}'.format(size) if size else '',
+            '{}'.format('-t') if timestamp else '',
+            '{}'.format('-q') if quiet else '',
+            pingDataFile
+        )
+        source.cmd(cmd)

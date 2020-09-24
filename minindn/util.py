@@ -24,12 +24,25 @@
 import sys
 from os.path import isfile
 from subprocess import call
+from six.moves.urllib.parse import quote
+
 from mininet.cli import CLI
 from mn_wifi.cli import CLI as CLI_wifi
 
 sshbase = ['ssh', '-q', '-t', '-i/home/mininet/.ssh/id_rsa']
 scpbase = ['scp', '-i', '/home/mininet/.ssh/id_rsa']
 devnull = open('/dev/null', 'w')
+
+def getSafeName(namePrefix):
+    """
+    Check if the prefix/string is safe to use with ndn commands or not.
+        return safe prefix.
+    :param namePrefix: name of the prefix
+    """
+    # remove redundant "/"es, multiple "/"es are an invalid representation for empty name component
+    # https://named-data.net/doc/NDN-packet-spec/current/changelog.html#version-0-3
+    namePrefix= "/" + ("/".join(filter(None, namePrefix.split("/"))))
+    return quote(namePrefix, safe='/')
 
 def ssh(login, cmd):
     rcmd = sshbase + [login, cmd]
