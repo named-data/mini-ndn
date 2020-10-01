@@ -320,10 +320,6 @@ function jNDN {
     popd
 }
 
-function testbedTopo {
-    python3 ./testbed_topo_generator.py
-}
-
 function commonClientLibraries {
     ndn_cpp
     pyNDN
@@ -373,7 +369,6 @@ else
         mininet
         minindn
         commonClientLibraries
-        testbedTopo
         break
         ;;
         c)    commonClientLibraries;;
