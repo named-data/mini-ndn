@@ -95,7 +95,7 @@ class Experiment(object):
 
                 # Do not ping self
                 if host.name != other.name:
-                    NDNPingClient.ping(host, other, nPings)
+                    NDNPingClient.ping(host, other.name, nPings)
                     nodesPingedList.append(other)
 
                 # Always increment because in 100% case a node should not ping itself
