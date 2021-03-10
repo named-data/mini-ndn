@@ -42,12 +42,14 @@ from mn_wifi.link import WirelessLink
 from minindn.minindn import Minindn
 
 class MinindnWifi(Minindn):
-    """ Class for handling default args, Mininet object and home directories """
-    def __init__(self, parser=argparse.ArgumentParser(), topo=None, topoFile=None, **mininetParams):
+    """ Class for handling default args, Mininet-wifi object and home directories """
+    def __init__(self, parser=argparse.ArgumentParser(), topo=None, topoFile=None, noTopo=False, link=WirelessLink, **mininetParams):
         """Create Mini-NDN-Wifi object
         parser: Parent parser of Mini-NDN-Wifi parser (use to specify experiment arguments)
         topo: Mininet topo object (optional)
         topoFile: topology file location (optional)
+        noTopo: Allows specification of topology after network object is initialized (optional)
+        link: Allows specification of default Mininet/Mininet-Wifi link type for connections between nodes (optional)
         mininetParams: Any params to pass to Mininet-WiFi
         """
         self.parser = self.parseArgs(parser)
@@ -63,7 +65,7 @@ class MinindnWifi(Minindn):
         else:
             self.topoFile = topoFile
 
-        if topo is None:
+        if topo is None and not noTopo:
             try:
                 info('Using topology file {}\n'.format(self.topoFile))
                 self.topo = self.processTopo(self.topoFile)
@@ -73,24 +75,23 @@ class MinindnWifi(Minindn):
         else:
             self.topo = topo
 
-        self.net = Mininet_wifi(topo=self.topo, ifb=self.args.ifb, link=WirelessLink, **mininetParams)
+        if not noTopo:
+            self.net = Mininet_wifi(topo=self.topo, ifb=self.args.ifb, link=link, **mininetParams)
+        else:
+            self.net = Mininet_wifi(ifb=self.args.ifb, link=link, **mininetParams)
 
-        for host in self.net.stations:
-            if 'params' not in host.params:
-                host.params['params'] = {}
-            host.params['params']['workDir'] = Minindn.workDir
-            homeDir = "{}/{}".format(Minindn.workDir, host.name)
-            host.params['params']['homeDir'] = homeDir
-            debug(host.cmd("mkdir -p {}".format(homeDir)))
-            debug(host.cmd('export HOME={} && cd ~'.format(homeDir)))
+        # Prevents crashes running mixed topos
+        nodes = self.net.stations + self.net.hosts + self.net.cars
+        self.initParams(nodes)
+
         try:
             process = Popen(['ndnsec-get-default', '-k'], stdout=PIPE, stderr=PIPE)
             output, error = process.communicate()
             if process.returncode == 0:
-              Minindn.ndnSecurityDisabled = '/dummy/KEY/-%9C%28r%B8%AA%3B%60' in output
-              info('Dummy key chain patch is installed in ndn-cxx. Security will be disabled.\n')
+                Minindn.ndnSecurityDisabled = '/dummy/KEY/-%9C%28r%B8%AA%3B%60' in output
+                info('Dummy key chain patch is installed in ndn-cxx. Security will be disabled.\n')
             else:
-              debug(error)
+                debug(error)
         except:
             pass
 

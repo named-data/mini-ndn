@@ -53,11 +53,13 @@ class Minindn(object):
     workDir = '/tmp/minindn'
     resultDir = None
 
-    def __init__(self, parser=argparse.ArgumentParser(), topo=None, topoFile=None, **mininetParams):
+    def __init__(self, parser=argparse.ArgumentParser(), topo=None, topoFile=None, noTopo=False, link=TCLink, **mininetParams):
         """Create MiniNDN object
         parser: Parent parser of Mini-NDN parser
         topo: Mininet topo object (optional)
         topoFile: Mininet topology file location (optional)
+        noTopo: Allows specification of topology after network object is initialized (optional)
+        link: Allows specification of default Mininet link type for connections between nodes (optional)
         mininetParams: Any params to pass to Mininet
         """
         self.parser = Minindn.parseArgs(parser)
@@ -72,7 +74,7 @@ class Minindn(object):
         else:
             self.topoFile = topoFile
 
-        if topo is None:
+        if topo is None and not noTopo:
             try:
                 info('Using topology file {}\n'.format(self.topoFile))
                 self.topo = self.processTopo(self.topoFile)
@@ -82,16 +84,12 @@ class Minindn(object):
         else:
             self.topo = topo
 
-        self.net = Mininet(topo=self.topo, link=TCLink, **mininetParams)
+        if not noTopo:
+            self.net = Mininet(topo=self.topo, link=link, **mininetParams)
+        else:
+            self.net = Mininet(link=link, **mininetParams)
 
-        for host in self.net.hosts:
-            if 'params' not in host.params:
-                host.params['params'] = {}
-
-            homeDir = '{}/{}'.format(Minindn.workDir, host.name)
-            host.params['params']['homeDir'] = homeDir
-            host.cmd('mkdir -p {}'.format(homeDir))
-            host.cmd('export HOME={} && cd ~'.format(homeDir))
+        self.initParams(self.net.hosts)
 
         self.cleanups = []
 
@@ -102,10 +100,10 @@ class Minindn(object):
             process = Popen(['ndnsec-get-default', '-k'], stdout=PIPE, stderr=PIPE)
             output, error = process.communicate()
             if process.returncode == 0:
-              Minindn.ndnSecurityDisabled = '/dummy/KEY/-%9C%28r%B8%AA%3B%60' in output
-              info('Dummy key chain patch is installed in ndn-cxx. Security will be disabled.\n')
+                Minindn.ndnSecurityDisabled = '/dummy/KEY/-%9C%28r%B8%AA%3B%60' in output
+                info('Dummy key chain patch is installed in ndn-cxx. Security will be disabled.\n')
             else:
-              debug(error)
+                debug(error)
         except:
             pass
 
@@ -240,3 +238,14 @@ class Minindn(object):
         Minindn.cleanUp()
         info(format_exc())
         exit(1)
+
+    def initParams(self, nodes):
+        '''Initialize Mini-NDN parameters for array of nodes'''
+        for host in nodes:
+            if 'params' not in host.params:
+                host.params['params'] = {}
+            host.params['params']['workDir'] = Minindn.workDir
+            homeDir = '{}/{}'.format(Minindn.workDir, host.name)
+            host.params['params']['homeDir'] = homeDir
+            host.cmd('mkdir -p {}'.format(homeDir))
+            host.cmd('export HOME={} && cd ~'.format(homeDir))
