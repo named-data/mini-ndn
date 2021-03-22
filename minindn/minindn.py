@@ -145,7 +145,7 @@ class Minindn(object):
 
     @staticmethod
     def processTopo(topoFile):
-        config = configparser.ConfigParser(delimiters=' ')
+        config = configparser.ConfigParser(delimiters=' ', allow_no_value=True)
         config.read(topoFile)
         topo = Topo()
 
@@ -154,7 +154,7 @@ class Minindn(object):
 
         for item in items:
             name = item[0].split(':')[0]
-            if item[1] in coordinates:
+            if item[1] in coordinates and item[1] != '_':
                 error("FATAL: Duplicate Coordinate, \'{}\' used by multiple nodes\n" \
                      .format(item[1]))
                 sys.exit(1)
