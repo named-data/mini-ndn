@@ -42,6 +42,6 @@ class NDNPingClient(object):
             ' -p {}'.format(identifier) if identifier else '',
             ' -a' if allow_stale_data else '',
             ' -t' if print_timestamp else '',
-            str.replace(prefix[1:], "/", "-")
+            unicode.replace(prefix[1:], "/", "-")
         ))
         time.sleep(sleepTime)
