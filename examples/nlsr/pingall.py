@@ -35,6 +35,10 @@ from minindn.helpers.nfdc import Nfdc
 
 from nlsr_common import getParser
 
+# THIS EXPERIMENT WILL USE EITHER A PASSED TOPOLOGY FILE VIA CLI ARGUMENTS
+# OR THE DEFAULT (located at mini-ndn/topologies/default-topology.conf)
+# IF NOT SPECIFIED. SEE THE DOCUMENTATION ON WRITING YOUR OWN TOPOLOGY FILES.
+
 if __name__ == '__main__':
     setLogLevel('info')
 

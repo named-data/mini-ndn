@@ -30,6 +30,10 @@ from minindn.apps.nfd import Nfd
 from minindn.apps.nlsr import Nlsr
 from minindn.apps.tshark import Tshark
 
+# THIS EXPERIMENT WILL USE EITHER A PASSED TOPOLOGY FILE OR THE DEFAULT
+# (located at mini-ndn/topologies/default-topology.conf) IF NOT SPECIFIED.
+# SEE THE DOCUMENTATION ON WRITING YOUR OWN TOPOLOGY FILES.
+
 if __name__ == '__main__':
     setLogLevel('info')
 

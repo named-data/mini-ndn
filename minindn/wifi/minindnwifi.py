@@ -26,7 +26,7 @@ import sys
 import time
 import os
 import configparser
-from subprocess import call, check_output, Popen
+from subprocess import call, check_output, Popen, PIPE
 from sys import exit
 
 from mininet.link import TCLink
@@ -67,7 +67,7 @@ class MinindnWifi(Minindn):
 
         if topo is None and not noTopo:
             try:
-                info('Using topology file {}\n'.format(self.topoFile))
+                info('\n### Generating topology from file {}\n'.format(self.topoFile))
                 self.topo = self.processTopo(self.topoFile)
             except configparser.NoSectionError as e:
                 info('Error reading config file: {}\n'.format(e))

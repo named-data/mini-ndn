@@ -29,6 +29,10 @@ from minindn.apps.nfd import Nfd
 from minindn.apps.nlsr import Nlsr
 from minindn.helpers.ip_routing_helper import IPRoutingHelper
 
+# THIS EXPERIMENT WILL USE EITHER A PASSED TOPOLOGY FILE VIA CLI ARGUMENTS
+# OR THE DEFAULT (located at mini-ndn/topologies/default-topology.conf)
+# IF NOT SPECIFIED. SEE THE DOCUMENTATION ON WRITING YOUR OWN TOPOLOGY FILES.
+
 """
 This scenario demonstrates the functionality of the IPRoutingHelper. First, the routing helper
 calculates and configures routes between all nodes and then calls the `pingAll` command to

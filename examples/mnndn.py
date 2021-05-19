@@ -29,6 +29,9 @@ from minindn.apps.app_manager import AppManager
 from minindn.apps.nfd import Nfd
 from minindn.apps.nlsr import Nlsr
 
+# THIS EXPERIMENT WILL USE EITHER A PASSED TOPOLOGY FILE OR THE DEFAULT
+# (located at mini-ndn/topologies/default-topology.conf) IF NOT SPECIFIED.
+# SEE THE DOCUMENTATION ON WRITING YOUR OWN TOPOLOGY FILES.
 if __name__ == '__main__':
     setLogLevel('info')
 

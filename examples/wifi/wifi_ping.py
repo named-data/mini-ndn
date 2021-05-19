@@ -22,6 +22,7 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 from mininet.log import setLogLevel, info
+from mn_wifi.topo import Topo
 from minindn.wifi.minindnwifi import MinindnWifi
 from minindn.util import MiniNDNWifiCLI, getPopen
 from minindn.apps.app_manager import AppManager
@@ -31,11 +32,19 @@ from minindn.helpers.ndnpingclient import NDNPingClient
 from time import sleep
 # This experiment uses the singleap topology and is intended to be a basic
 # test case where we see if two nodes can send interests to each other.
+# This topology can be replicated in other wifi experiments using the
+# provided singleap-topology.conf. 
 def runExperiment():
     setLogLevel('info')
 
     info("Starting network")
-    ndnwifi = MinindnWifi()
+    topo = Topo()
+    sta1 = topo.addStation("sta1", range=150, speed=5)
+    sta2 = topo.addStation("sta2", range=200)
+    ap1 = topo.addAccessPoint("ap1", position="150,150,0", range=150)
+    topo.addLink(sta1, ap1, delay="10ms")
+    topo.addLink(sta2, ap1, delay="10ms")
+    ndnwifi = MinindnWifi(topo=topo)
     a = ndnwifi.net["sta1"]
     b = ndnwifi.net["sta2"]
     # Test for model-based mobility
@@ -46,14 +55,15 @@ def runExperiment():
         info("Running with mobility...")
 
         p1, p2, p3, p4 = dict(), dict(), dict(), dict()
-        p1 = {'position': '40.0,30.0,0.0'}
-        p2 = {'position': '40.0,40.0,0.0'}
-        p3 = {'position': '31.0,10.0,0.0'}
-        p4 = {'position': '200.0,200.0,0.0'}
+        p1 = {'position': '150.0,150.0,0.0'}
+        p2 = {'position': '140.0,130.0,0.0'}
+
+        p3 = {'position': '250.0,250.0,0.0'}
+        p4 = {'position': '301.0,301.0,0.0'}
 
         ndnwifi.net.mobility(a, 'start', time=1, **p1)
-        ndnwifi.net.mobility(b, 'start', time=2, **p2)
         ndnwifi.net.mobility(a, 'stop', time=12, **p3)
+        ndnwifi.net.mobility(b, 'start', time=2, **p2)
         ndnwifi.net.mobility(b, 'stop', time=22, **p4)
         ndnwifi.net.stopMobility(time=23)
         ndnwifi.startMobility(time=0, mob_rep=1, reverse=False)

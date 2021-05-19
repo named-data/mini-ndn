@@ -14,6 +14,7 @@ Mini-NDN: A Mininet-based NDN emulator
    install
    experiment
    howtos
+   guide
    release-notes
    faq
    hackathon
@@ -28,3 +29,4 @@ Helpful Links
 * `Mini-NDN redmine <https://redmine.named-data.net/projects/mini-ndn>`_
 * `Mailing list <http://www.lists.cs.ucla.edu/mailman/listinfo/mini-ndn>`_
 * :doc:`Mini-NDN Team <authors>`
+* `Demo Video (Tentative) <https://livememphis-my.sharepoint.com/:v:/g/personal/awlane_memphis_edu/EVYzlffndK5OsOmLTqTxuuUBhj0xmtJs0GfrUGJXA8GASQ?e=96Vt5X>`

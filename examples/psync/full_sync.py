@@ -31,6 +31,10 @@ from minindn.apps.app_manager import AppManager
 from minindn.apps.nfd import Nfd
 from minindn.helpers.nfdc import Nfdc
 
+# THIS EXPERIMENT WILL USE EITHER A PASSED TOPOLOGY FILE OR THE DEFAULT
+# (located at mini-ndn/topologies/default-topology.conf) IF NOT SPECIFIED.
+# SEE THE DOCUMENTATION ON WRITING YOUR OWN TOPOLOGY FILES.
+
 def registerRouteToAllNeighbors(ndn, host, syncPrefix):
     for node in ndn.net.hosts:
         for neighbor in node.connectionsTo(host):

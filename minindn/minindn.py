@@ -76,7 +76,7 @@ class Minindn(object):
 
         if topo is None and not noTopo:
             try:
-                info('Using topology file {}\n'.format(self.topoFile))
+                info('Generating topology frp, file {}\n'.format(self.topoFile))
                 self.topo = self.processTopo(self.topoFile)
             except configparser.NoSectionError as e:
                 info('Error reading config file: {}\n'.format(e))

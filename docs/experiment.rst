@@ -4,7 +4,10 @@ Experiment
 Configuration
 -------------
 
-Mini-NDN uses a configuration file describing the topology and its parameters to setup a network.
+Mini-NDN can use a configuration file describing the topology and its parameters to setup a network, or alternatively set it up in the Mininet API if you don't need to swap topologies between runs.
+
+Configuration File format
+^^^^^
 
 The [nodes] section:
 
@@ -74,6 +77,20 @@ Example configuration file
     a:b delay=10ms bw=100
 
 See ``ndn_utils/topologies`` for more sample files
+
+Configuration via API
+^^^^^
+
+Configuration of topologies via the API uses the Topo object from mininet.topo. These are invoked via creating a Topo object, calling methods to create network objects on them (passing the same parameters from conf files as arguments) in the following manner:
+::
+    from minindn.topo import Topo
+    
+    topo = Topo()
+    a = topo.addHost('a')
+    b = topo.addHost('b')
+    topo.addLink(a, b, delay='10ms', bw=10)
+    ndn = Minindn(topo=topo)
+
 
 Sample
 ------
@@ -155,7 +172,7 @@ After Mini-NDN is installed, users can run examples from anywhere with python di
 
     sudo python /path/to/myexample.py
 
-The user no longer needs to create an experiment in the old Mini-NDN way, then install it to the system before executing it via the minindn binary. The new examples can be separate from the Mini-NDN folder if the core is not being modified.
+The user no longer needs to install an experiment in the old Mini-NDN way, then install it to the system before running it via the minindn executable. The new examples can be separate from the Mini-NDN folder if the core is not being modified.
 
 CLI Interface
 _____________
