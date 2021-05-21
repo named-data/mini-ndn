@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2020, The University of Memphis,
+# Copyright (C) 2015-2021, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -23,7 +23,7 @@
 
 from mininet.log import setLogLevel, info
 from minindn.wifi.minindnwifi import MinindnWifi
-from minindn.util import MiniNDNWifiCLI, getPopen
+from minindn.util import MiniNDNWifiCLI
 from minindn.apps.app_manager import AppManager
 from minindn.apps.nfd import Nfd
 from minindn.helpers.nfdc import Nfdc
@@ -61,7 +61,7 @@ def runExperiment():
     ndnwifi.start()
     info("Starting NFD")
     sleep(2)
-    nfds = AppManager(ndnwifi, ndnwifi.net.stations, Nfd)
+    AppManager(ndnwifi, ndnwifi.net.stations, Nfd)
 
     info("Starting pingserver...")
     NDNPing.startPingServer(b, "/example")

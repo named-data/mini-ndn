@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2020, The University of Memphis,
+# Copyright (C) 2015-2021, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -23,20 +23,13 @@
 
 import argparse
 import sys
-import time
-import os
 import configparser
-from subprocess import call, check_output, Popen
-from sys import exit
+from subprocess import Popen, PIPE
 
-from mininet.link import TCLink
-from mininet.node import Switch
-from mininet.util import ipStr, ipParse
 from mininet.log import info, debug
 
 from mn_wifi.topo import Topo as Topo_WiFi
 from mn_wifi.net import Mininet_wifi
-from mn_wifi.node import OVSKernelAP
 from mn_wifi.link import WirelessLink
 
 from minindn.minindn import Minindn

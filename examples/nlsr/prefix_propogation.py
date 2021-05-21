@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2019, The University of Memphis,
+# Copyright (C) 2015-2021, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -22,6 +22,7 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 import time
+import sys
 
 from mininet.log import setLogLevel, info
 
