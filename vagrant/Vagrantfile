@@ -1,0 +1,16 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# This vagrant box is built with Ubuntu 20.04 basebox from bento. Mini-NDN is
+# pre-installed in this box. Recommended resource allocation for mini NDN:
+# memory = "4096" cpus = "4". However, modifiy the memory, cups and other
+# configuration as per your need.
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "sdulal/mini-ndn"
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "4096"
+    vb.cpus = "4"
+    vb.name = "mini-ndn-box"
+  end
+end

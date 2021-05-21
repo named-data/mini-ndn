@@ -46,6 +46,13 @@ Some notable flags are:
 - ``--ppa`` prefers installing NDN software from `named-data PPA <https://launchpad.net/~named-data/+archive/ubuntu/ppa>`_.
   This shortens installation time by downloading binary packages, but is only available on Ubuntu.
 - ``--source`` prefers installing NDN software from source code.
+
+IMPORTANT: For now, Mininet-WiFi only works with ``--source`` installation because the current NFD release (0.7.1) doesn't
+incorporate `issue 5155 <https://redmine.named-data.net/issues/5155>`, a required patch for WiFi module to work properly.
+With the next NFD release, Mininet-WiFi will work with both ``source`` and ``ppa``. Alternatively, you can
+checkout (at your own risk) a third-party source "`Use NFD nightly with Mini-NDN <https://yoursunny.com/t/2021/NFD-nightly-minindn/>`", which provides
+NFD-nightly version and contains all the necessary patches. 
+
 - ``--dummy-keychain`` patches ndn-cxx to use an in-memory dummy KeyChain, which reduces CPU overhead
   and allows you to scale up Mini-NDN experiments. Large Mini-NDN experiments would run significantly
   faster after applying this patch. However, your experiments cannot use any NDN security related
@@ -66,6 +73,7 @@ changes will be reflected immediately.
 If NDN software is installed from source code (not PPA), the code is downloaded to ``dl`` directory
 under your ``mini-ndn`` clone. If you modify the source code, you need to manually recompile and
 reinstall the software (``./waf && sudo ./waf install``).
+
 
 Installing Dependencies
 -----------------------
