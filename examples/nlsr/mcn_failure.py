@@ -32,7 +32,7 @@ from minindn.apps.nfd import Nfd
 from minindn.apps.nlsr import Nlsr
 from minindn.helpers.experiment import Experiment
 from minindn.helpers.nfdc import Nfdc
-from minindn.helpers.ndnpingclient import NDNPingClient
+from minindn.helpers.ndnping import NDNPing
 
 from nlsr_common import getParser
 
@@ -63,7 +63,7 @@ def mcnFailure(ndn, nfds, nlsrs, args):
     if args.nPings != 0:
         Experiment.setupPing([mcn], Nfdc.STRATEGY_BEST_ROUTE)
         for nodeToPing in pingedDict[mcn]:
-            NDNPingClient.ping(mcn, nodeToPing, PING_COLLECTION_TIME_AFTER_RECOVERY)
+            NDNPing.ping(mcn, nodeToPing, PING_COLLECTION_TIME_AFTER_RECOVERY)
 
         time.sleep(PING_COLLECTION_TIME_AFTER_RECOVERY)
 

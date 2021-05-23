@@ -21,43 +21,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Mini-NDN, e.g., in COPYING.md file.
 # If not, see <http://www.gnu.org/licenses/>.
-#
-# This file incorporates work covered by the following copyright and
-# permission notice:
-#
-#   Mininet 2.3.0d1 License
-#
-#   Copyright (c) 2013-2016 Open Networking Laboratory
-#   Copyright (c) 2009-2012 Bob Lantz and The Board of Trustees of
-#   The Leland Stanford Junior University
-#
-#   Original authors: Bob Lantz and Brandon Heller
-#
-#   We are making Mininet available for public use and benefit with the
-#   expectation that others will use, modify and enhance the Software and
-#   contribute those enhancements back to the community. However, since we
-#   would like to make the Software available for broadest use, with as few
-#   restrictions as possible permission is hereby granted, free of charge, to
-#   any person obtaining a copy of this Software to deal in the Software
-#   under the copyrights without restriction, including without limitation
-#   the rights to use, copy, modify, merge, publish, distribute, sublicense,
-#   and/or sell copies of the Software, and to permit persons to whom the
-#   Software is furnished to do so, subject to the following conditions:
-#
-#   The above copyright notice and this permission notice shall be included
-#   in all copies or substantial portions of the Software.
-#
-#   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-#   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-#   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-#   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-#   CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-#   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-#   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-#   The name and trademarks of copyright holder(s) may NOT be used in
-#   advertising or publicity pertaining to the Software or any derivatives
-#   without specific, written prior permission.
 
 test -e /etc/debian_version && DIST="Debian"
 grep Ubuntu /etc/lsb-release &> /dev/null && DIST="Ubuntu"
@@ -92,9 +55,9 @@ NDN_GITHUB="https://github.com/named-data"
 NDN_CXX_VERSION="master"
 NFD_VERSION="master"
 PSYNC_VERSION="master"
-CHRONOSYNC_VERSION="master"
 NLSR_VERSION="master"
 NDN_TOOLS_VERSION="master"
+NDN_TRAFFIC_GENERATOR="master"
 
 if [ $SUDO_USER ]; then
     REAL_USER=$SUDO_USER
@@ -160,20 +123,35 @@ function ndn {
     fi
 
     if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
-        $install git libsqlite3-dev libboost-all-dev make g++ libssl-dev libpcap-dev pkg-config python-pip
+        $install libsqlite3-dev libboost-all-dev make g++ libssl-dev libpcap-dev libsystemd-dev pkg-config python3-pip
     fi
 
     if [[ $DIST == Fedora ]]; then
-        $install gcc-c++ sqlite-devel boost-devel openssl-devel libpcap-devel python-pip
+        $install gcc-c++ sqlite-devel boost-devel openssl-devel libpcap-devel systemd-devel python3-pip
     fi
 
     ndn_install ndn-cxx $NDN_CXX_VERSION
     ndn_install NFD $NFD_VERSION --without-websocket
     ndn_install PSync $PSYNC_VERSION --with-examples
-    ndn_install ChronoSync $CHRONOSYNC_VERSION
     ndn_install NLSR $NLSR_VERSION
     ndn_install ndn-tools $NDN_TOOLS_VERSION
+    ndn_install ndn-traffic-generator $NDN_TRAFFIC_GENERATOR
     infoedit
+}
+
+function ndn-ppa {
+    if [[ $DIST == Ubuntu ]]; then
+        $update
+        $install libsqlite3-dev libboost-all-dev make g++ libssl-dev libpcap-dev libsystemd-dev pkg-config python3-pip
+
+        $install software-properties-common
+        sudo add-apt-repository ppa:named-data/ppa
+        $update
+        $install ndn-cxx nfd libpsync nlsr ndn-tools ndn-traffic-generator
+        infoedit
+    else
+        ndn
+    fi
 }
 
 function mininet {
@@ -188,7 +166,7 @@ function mininet {
 
     git clone --depth 1 https://github.com/mininet/mininet
     pushd mininet
-    sudo ./util/install.sh -nv
+    sudo PYTHON=python3 ./util/install.sh -nv
     popd
 }
 
@@ -204,7 +182,7 @@ function wifi {
 
     git clone --depth 1 https://github.com/intrig-unicamp/mininet-wifi.git
     pushd mininet-wifi
-    sudo ./util/install.sh -Wlfnv
+    sudo PYTHON=python3 ./util/install.sh -Wlfnv
     popd
 }
 
@@ -242,106 +220,7 @@ function minindn {
     sudo cp topologies/geo_hyperbolic_test.conf "$install_dir"
     sudo cp topologies/geant.conf "$install_dir"
     sudo cp topologies/wifi/singleap-topology.conf "$install_dir"
-    sudo python setup.py develop
-}
-
-function ndn_cpp {
-    if [[ updated != true ]]; then
-        $update
-        updated="true"
-    fi
-
-    if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
-        $install git build-essential libssl-dev libsqlite3-dev libboost-all-dev libprotobuf-dev protobuf-compiler
-    fi
-
-    if [[ $DIST == Fedora ]]; then
-        printf '\nNDN-CPP does not support Fedora yet.\n'
-        return
-    fi
-
-    git clone --depth 1 $NDN_GITHUB/ndn-cpp $NDN_SRC/ndn-cpp
-    pushd $NDN_SRC/ndn-cpp
-    ./configure
-    proc=$(nproc)
-    make -j$proc
-    sudo make install
-    sudo ldconfig
-    popd
-}
-
-function pyNDN {
-    if [[ updated != true ]]; then
-        $update
-        updated="true"
-    fi
-
-    if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
-        $install git build-essential libssl-dev libffi-dev python-dev python-pip
-    fi
-
-    if [[ $DIST == Fedora ]]; then
-        printf '\nPyNDN does not support Fedora yet.\n'
-        return
-    fi
-
-    sudo pip install cryptography trollius protobuf pytest mock
-    git clone --depth 1 $NDN_GITHUB/PyNDN2 $NDN_SRC/PyNDN2
-    pushd $NDN_SRC/PyNDN2
-    # Update the user's PYTHONPATH.
-    echo "export PYTHONPATH=\$PYTHONPATH:`pwd`/python" >> ~/.bashrc
-    # Also update root's PYTHONPATH in case of running under sudo.
-    echo "export PYTHONPATH=\$PYTHONPATH:`pwd`/python" | sudo tee -a /root/.bashrc > /dev/null
-    popd
-}
-
-function ndn_js {
-    if [[ updated != true ]]; then
-        $update
-        updated="true"
-    fi
-
-    if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
-        $install git nodejs npm
-    fi
-
-    if [[ $DIST == Fedora ]]; then
-        printf '\nNDN-JS does not support Fedora yet.\n'
-        return
-    fi
-
-    sudo ln -fs /usr/bin/nodejs /usr/bin/node
-    sudo npm install -g mocha
-    sudo npm install rsa-keygen sqlite3
-    git clone --depth 1 $NDN_GITHUB/ndn-js $NDN_SRC/ndn-js
-}
-
-function jNDN {
-    if [[ updated != true ]]; then
-        $update
-        updated="true"
-    fi
-
-    if [[ $DIST == Ubuntu || $DIST == Debian ]]; then
-        $install git openjdk-8-jdk maven
-    fi
-
-    if [[ $DIST == Fedora ]]; then
-        printf '\nNDN-JS does not support Fedora yet.\n'
-        return
-    fi
-
-    git clone --depth 1 $NDN_GITHUB/jndn $NDN_SRC/jndn
-    pushd $NDN_SRC/jndn
-    mvn install
-    popd
-}
-
-function commonClientLibraries {
-    ndn_cpp
-    pyNDN
-    ndn_js
-    jNDN
+    sudo python3 setup.py develop
 }
 
 function buildDocumentation {
@@ -365,12 +244,12 @@ function usage {
     printf 'options:\n' >&2
     printf -- ' -a: install all the required dependencies\n' >&2
     printf -- ' -A: install all the required dependencies (wired only)\n' >&2
-    printf -- ' -c: install Common Client Libraries\n' >&2
     printf -- ' -d: build documentation\n' >&2
     printf -- ' -h: print this (H)elp message\n' >&2
     printf -- ' -i: install mini-ndn\n' >&2
     printf -- ' -m: install mininet and dependencies (for wired-only installation)\n' >&2
-    printf -- ' -n: install NDN dependencies of mini-ndn including infoedit\n' >&2
+    printf -- ' -n: install NDN dependencies including infoedit\n' >&2
+    printf -- ' -N: install NDN dependencies from PPA including infoedit\n' >&2 
     printf -- ' -p: patch ndn-cxx with dummy key chain\n' >&2
     printf -- ' -q: quiet install (must be specified first)\n' >&2
     printf -- ' -w: install mininet-wifi and dependencies\n' >&2
@@ -380,29 +259,27 @@ function usage {
 if [[ $# -eq 0 ]]; then
     usage
 else
-    while getopts 'aAcdhimnpqw' OPTION
+    while getopts 'aAdhimnNpqw' OPTION
     do
         case $OPTION in
         a)
-        ndn
+        ndn-ppa
         wifi
         minindn
-        commonClientLibraries
         break
         ;;
         A)
-        ndn
+        ndn-ppa
         mininet
         minindn
-        commonClientLibraries
         break
         ;;
-        c)    commonClientLibraries;;
         d)    buildDocumentation;;
         h)    usage;;
         i)    minindn;;
         m)    mininet;;
         n)    ndn;;
+        N)    ndn-ppa;;
         p)    patchDummy;;
         q)    quiet_install;;
         w)    wifi ;;

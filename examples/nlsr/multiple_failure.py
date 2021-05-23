@@ -32,7 +32,7 @@ from minindn.apps.nfd import Nfd
 from minindn.apps.nlsr import Nlsr
 from minindn.helpers.experiment import Experiment
 from minindn.helpers.nfdc import Nfdc
-from minindn.helpers.ndnpingclient import NDNPingClient
+from minindn.helpers.ndnping import NDNPing
 
 from nlsr_common import getParser
 
@@ -82,7 +82,7 @@ def multipleFailure(ndn, nfds, nlsrs, args):
 
         # Restart pings
         for nodeToPing in pingedDict[host]:
-            NDNPingClient.ping(host, nodeToPing, nPings)
+            NDNPing.ping(host, nodeToPing, nPings)
 
         time.sleep(RECOVERY_INTERVAL - recovery_time)
 
