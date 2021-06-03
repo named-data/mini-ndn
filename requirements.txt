@@ -1,2 +1,3 @@
 python-igraph
 setuptools
+tqdm

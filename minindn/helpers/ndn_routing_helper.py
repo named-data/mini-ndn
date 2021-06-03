@@ -33,6 +33,7 @@ from math import sin, cos, sinh, cosh, acos, acosh
 import json
 import operator
 from collections import defaultdict
+from tqdm import tqdm
 
 from mininet.log import info, debug, error, warn
 from minindn.helpers.nfdc import Nfdc as nfdc
@@ -294,7 +295,7 @@ class NdnRoutingHelper(object):
 
     def globalRoutingHelperHandler(self):
         info('Creating faces and adding routes to FIB\n')
-        for host in self.net.hosts:
+        for host in tqdm(self.net.hosts):
             neighborIPs = self.getNeighbor(host)
             self.createFaces(host, neighborIPs)
             self.routeAdd(host, neighborIPs)
