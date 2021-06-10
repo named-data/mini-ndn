@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2019, The University of Memphis,
+# Copyright (C) 2015-2021, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -32,7 +32,7 @@ from minindn.apps.nfd import Nfd
 from minindn.apps.nlsr import Nlsr
 from minindn.helpers.experiment import Experiment
 from minindn.helpers.nfdc import Nfdc
-from minindn.helpers.ndnpingclient import NDNPingClient
+from minindn.helpers.ndnping import NDNPing
 
 from nlsr_common import getParser
 
@@ -45,7 +45,7 @@ def multipleFailure(ndn, nfds, nlsrs, args):
     FAILURE_INTERVAL = 60
     RECOVERY_INTERVAL = 60
 
-    # This is the number of pings required to make it through the full experiment
+    # Number of pings required to make it through the full experiment
     nInitialPings = (PING_COLLECTION_TIME_BEFORE_FAILURE +
                      len(ndn.net.hosts) * (FAILURE_INTERVAL + RECOVERY_INTERVAL))
     print('Scheduling with {} initial pings'.format(nInitialPings))
@@ -82,11 +82,11 @@ def multipleFailure(ndn, nfds, nlsrs, args):
 
         # Restart pings
         for nodeToPing in pingedDict[host]:
-            NDNPingClient.ping(host, nodeToPing, nPings)
+            NDNPing.ping(host, nodeToPing, nPings=nPings)
 
         time.sleep(RECOVERY_INTERVAL - recovery_time)
 
-    #Experiment.checkConvergence(ndn, ndn.net.hosts, args.ctime, quit=True)
+    Experiment.checkConvergence(ndn, ndn.net.hosts, args.ctime, quit=True)
 
 if __name__ == '__main__':
     setLogLevel('info')

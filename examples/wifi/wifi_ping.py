@@ -27,7 +27,7 @@ from minindn.util import MiniNDNWifiCLI, getPopen
 from minindn.apps.app_manager import AppManager
 from minindn.apps.nfd import Nfd
 from minindn.helpers.nfdc import Nfdc
-from minindn.helpers.ndnpingclient import NDNPingClient
+from minindn.helpers.ndnping import NDNPing
 from time import sleep
 # This experiment uses the singleap topology and is intended to be a basic
 # test case where we see if two nodes can send interests to each other.
@@ -64,13 +64,14 @@ def runExperiment():
     nfds = AppManager(ndnwifi, ndnwifi.net.stations, Nfd)
 
     info("Starting pingserver...")
-    ping_server_proc = getPopen(b, "ndnpingserver /example")
+    NDNPing.startPingServer(b, "/example")
     Nfdc.createFace(a, b.IP())
     Nfdc.registerRoute(a, "/example", b.IP())
 
     info("Starting ping...")
-    NDNPingClient.ping(a, "/example", 10)
+    NDNPing.ping(a, "/example", nPings=10)
 
+    sleep(10)
     # Start the CLI
     MiniNDNWifiCLI(ndnwifi.net)
     ndnwifi.net.stop()

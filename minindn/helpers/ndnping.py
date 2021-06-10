@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2020, The University of Memphis,
+# Copyright (C) 2015-2021, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -28,7 +28,8 @@ import time
 class NDNPing(object):
     @staticmethod
     def ping(source, prefix, pingDataFile="output-client", nPings=1, interval=None, timeout=None,
-            starting_seq_num=None, identifier=None, allow_stale_data=False, print_timestamp=True, sleepTime=0.2):
+             starting_seq_num=None, identifier=None, allow_stale_data=False, print_timestamp=True,
+             sleepTime=0.2):
         print('Scheduling ping(s) from {} for {}'.format(source.name, prefix))
         # Use '&' to run in background and perform parallel pings
         source.cmd("mkdir -p ping-data")
@@ -46,8 +47,9 @@ class NDNPing(object):
         ))
         time.sleep(sleepTime)
 
-    def startPingServer(source, prefix, pingDataFile="output-server", freshness=None, satisfy=None, 
-            size=None, timestamp=False, quiet=False):
+    @staticmethod
+    def startPingServer(source, prefix, pingDataFile="output-server", freshness=None, satisfy=None,
+                        size=None, timestamp=False, quiet=False):
         """
         Start a pingserver
          :param string preifx: prefix to start pingserver on
