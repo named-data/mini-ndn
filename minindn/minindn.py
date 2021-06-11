@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2020, The University of Memphis,
+# Copyright (C) 2015-2021, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -40,7 +40,8 @@ from mininet.log import info, debug, error
 
 
 class Minindn(object):
-    """ This class provides the following features to the user:
+    """
+    This class provides the following features to the user:
         1) Wrapper around Mininet object with option to pass topology directly
            1.1) Users can pass custom argument parser to extend the default on here
         2) Parses the topology file given via command line if user does not pass a topology object
@@ -53,14 +54,18 @@ class Minindn(object):
     workDir = '/tmp/minindn'
     resultDir = None
 
-    def __init__(self, parser=argparse.ArgumentParser(), topo=None, topoFile=None, noTopo=False, link=TCLink, **mininetParams):
-        """Create MiniNDN object
-        parser: Parent parser of Mini-NDN parser
-        topo: Mininet topo object (optional)
-        topoFile: Mininet topology file location (optional)
-        noTopo: Allows specification of topology after network object is initialized (optional)
-        link: Allows specification of default Mininet link type for connections between nodes (optional)
-        mininetParams: Any params to pass to Mininet
+    def __init__(self, parser=argparse.ArgumentParser(), topo=None, topoFile=None, noTopo=False,
+                 link=TCLink, **mininetParams):
+        """
+        Create MiniNDN object
+        :param parser: Parent parser of Mini-NDN parser
+        :param topo: Mininet topo object (optional)
+        :param topoFile: Mininet topology file location (optional)
+        :param noTopo: Allows specification of topology after network object is
+          initialized (optional)
+        :param link: Allows specification of default Mininet link type for connections between
+          nodes (optional)
+        :param mininetParams: Any params to pass to Mininet
         """
         self.parser = Minindn.parseArgs(parser)
         self.args = self.parser.parse_args()
@@ -152,17 +157,18 @@ class Minindn(object):
 
         for item in items:
             name = item[0].split(':')[0]
-            if item[1] in coordinates and item[1] != '_':
-                error("FATAL: Duplicate Coordinate, \'{}\' used by multiple nodes\n" \
-                     .format(item[1]))
-                sys.exit(1)
-            coordinates.append(item[1])
-
             params = {}
-            for param in item[1].split(' '):
-                if param == '_':
-                    continue
-                params[param.split('=')[0]] = param.split('=')[1]
+            if item[1]:
+                if all (x in item[1] for x in ['radius', 'angle']) and item[1] in coordinates:
+                    error("FATAL: Duplicate Coordinate, \'{}\' used by multiple nodes\n" \
+                        .format(item[1]))
+                    sys.exit(1)
+                coordinates.append(item[1])
+
+                for param in item[1].split(' '):
+                    if param == '_':
+                        continue
+                    params[param.split('=')[0]] = param.split('=')[1]
 
             topo.addHost(name, params=params)
 
@@ -234,13 +240,13 @@ class Minindn(object):
 
     @staticmethod
     def handleException():
-        'Utility method to perform cleanup steps and exit after catching exception'
+        """Utility method to perform cleanup steps and exit after catching exception"""
         Minindn.cleanUp()
         info(format_exc())
         exit(1)
 
     def initParams(self, nodes):
-        '''Initialize Mini-NDN parameters for array of nodes'''
+        """Initialize Mini-NDN parameters for array of nodes"""
         for host in nodes:
             if 'params' not in host.params:
                 host.params['params'] = {}
