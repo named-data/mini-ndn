@@ -65,8 +65,8 @@ def runExperiment():
 
     info("Starting pingserver...")
     NDNPing.startPingServer(b, "/example")
-    Nfdc.createFace(a, b.IP())
-    Nfdc.registerRoute(a, "/example", b.IP())
+    faceID = Nfdc.createFace(a, b.IP())
+    Nfdc.registerRoute(a, "/example", faceID)
 
     info("Starting ping...")
     NDNPing.ping(a, "/example", nPings=10)

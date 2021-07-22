@@ -35,8 +35,8 @@ def registerRouteToAllNeighbors(ndn, host, syncPrefix):
     for node in ndn.net.hosts:
         for neighbor in node.connectionsTo(host):
             ip = node.IP(neighbor[0])
-            Nfdc.createFace(host, ip)
-            Nfdc.registerRoute(host, syncPrefix, ip)
+            faceID = Nfdc.createFace(host, ip)
+            Nfdc.registerRoute(host, syncPrefix, faceID)
 
 if __name__ == '__main__':
     setLogLevel('info')

@@ -357,8 +357,8 @@ class NdnRoutingHelper(object):
             prefixes = [defaultPrefix] + self.namePrefixes[destination]
             for prefix in prefixes:
                 # Register routes to all the available destination name prefix/s
-                nfdc.registerRoute(node, prefix, neighborIPs[nextHop], \
-                                   nfdc.PROTOCOL_UDP, cost=cost)
+                faceID = nfdc.createFace(node, neighborIPs[nextHop])
+                nfdc.registerRoute(node, prefix, faceID, cost=cost)
     @staticmethod
     def getNeighbor(node):
         # Nodes to IP mapping

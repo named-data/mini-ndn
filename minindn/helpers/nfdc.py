@@ -36,41 +36,65 @@ class Nfdc(object):
     PROTOCOL_ETHER = 'ether'
 
     @staticmethod
-    def registerRoute(node, namePrefix, remoteNodeAddress, protocol=PROTOCOL_UDP, origin=255,
+    def registerRoute(node, namePrefix, remoteNode, protocol=PROTOCOL_UDP, origin=255,
                       cost=0, inheritFlag=True, captureFlag=False, expirationInMillis=None):
-        cmd = ('nfdc route add {} {}://{} origin {} cost {} {}{}{}').format(
-            namePrefix,
-            protocol,
-            remoteNodeAddress,
-            origin,
-            cost,
-            'no-inherit ' if not inheritFlag else '',
-            'capture ' if captureFlag else '',
-            'expires {}'.format(expirationInMillis) if expirationInMillis else ''
-        )
-
+        cmd = ""
+        if remoteNode.isdigit() and not protocol == "fd":
+            cmd = ('nfdc route add {} {} origin {} cost {} {}{}{}').format(
+                namePrefix,
+                remoteNode,
+                origin,
+                cost,
+                'no-inherit ' if not inheritFlag else '',
+                'capture ' if captureFlag else '',
+                'expires {}'.format(expirationInMillis) if expirationInMillis else ''
+            )
+        else:
+            cmd = ('nfdc route add {} {}://{} origin {} cost {} {}{}{}').format(
+                namePrefix,
+                protocol,
+                remoteNode,
+                origin,
+                cost,
+                'no-inherit ' if not inheritFlag else '',
+                'capture ' if captureFlag else '',
+                'expires {}'.format(expirationInMillis) if expirationInMillis else ''
+            )
         debug(node.cmd(cmd))
         Minindn.sleep(SLEEP_TIME)
 
     @staticmethod
-    def unregisterRoute(node, namePrefix, remoteNodeAddress, origin=255):
-        cmd = 'nfdc route remove {} {} {}'.format(namePrefix, remoteNodeAddress, origin)
+    def unregisterRoute(node, namePrefix, remoteNode, origin=255):
+        cmd = ""
+        if remoteNode.isdigit() and not protocol == "fd":
+            cmd = 'nfdc route remove {} {} {}'.format(namePrefix, remoteNode, origin)
+        else:
+            cmd = 'nfdc route remove {} {} {}'.format(namePrefix, remoteNode, origin)
         debug(node.cmd(cmd))
         Minindn.sleep(SLEEP_TIME)
 
     @staticmethod
     def createFace(node, remoteNodeAddress, protocol='udp', isPermanent=False):
+        '''Create face in node's NFD instance. Returns FaceID of created face or -1 if failed.'''
         cmd = ('nfdc face create {}://{} {}'.format(
             protocol,
             remoteNodeAddress,
             'permanent' if isPermanent else 'persistent'
         ))
-        debug(node.cmd(cmd))
+        output = node.cmd(cmd)
+        debug(output)
         Minindn.sleep(SLEEP_TIME)
+        if "face-created" not in output:
+            return -1
+        faceID = output.split(" ")[1][3:]
+        return faceID
 
     @staticmethod
-    def destroyFace(node, remoteNodeAddress, protocol='udp'):
-        debug(node.cmd('nfdc face destroy {}://{}'.format(protocol, remoteNodeAddress)))
+    def destroyFace(node, remoteNode, protocol='udp'):
+        if remoteNode.isdigit() and not protocol == "fd":
+            debug(node.cmd('nfdc face destroy {}'.format(protocol, remoteNode)))
+        else:
+            debug(node.cmd('nfdc face destroy {}://{}'.format(protocol, remoteNode)))
         Minindn.sleep(SLEEP_TIME)
 
     @staticmethod
@@ -83,3 +107,19 @@ class Nfdc(object):
     def unsetStrategy(node, namePrefix):
         debug(node.cmd("nfdc strategy unset {}".format(namePrefix)))
         Minindn.sleep(SLEEP_TIME)
+
+    @staticmethod
+    def getFaceId(node, remoteNodeAddress, localEndpoint=None, protocol="udp", portNum="6363"):
+        '''Returns the faceId for a remote node based on FaceURI, or -1 if a face is not found'''
+        #Should this be cached or is the hit not worth it?
+        local = ""
+        if localEndpoint:
+            local = " local {}".format(localEndpoint)
+        output = node.cmd("nfdc face list remote {}://{}:{}{}".format(protocol, remoteNodeAddress, portNum, local))
+        debug(output)
+        Minindn.sleep(SLEEP_TIME)
+        # This is fragile but we don't have that many better options
+        if "faceid=" not in output:
+            return -1
+        faceId = output.split(" ")[0][7:]
+        return faceId
