@@ -4,11 +4,13 @@ Install
 Prerequisites
 -------------
 
-For this guide, you will need a laptop/desktop with a recent version of
-a Linux distro that is supported by Mininet. For this guide, the *Ubuntu 18.04 LTS* release was used.
-Some tweaks maybe required to Mini-NDN's install.sh file for other distros.
-Note that you'll need administrative privileges in order to download and install
-extra packages and also to execute **Mini-NDN**.
+Mini-NDN is tested on the following Linux distributions:
+
+- Ubuntu 20.04 (recommended)
+- Debian 11 (WiFi scenario does not work)
+- Fedora 33 (WiFi scenario does not work)
+
+You must have sudo privileges to install and run Mini-NDN.
 
 Using Vagrantfile
 -----------------
@@ -21,65 +23,55 @@ can be found in /home/vagrant/mini-ndn which is a symlink to /vagrant if Vagrant
 Using install.sh
 ----------------
 
-Mini-NDN depends on Mininet and NDN software to be installed in the system.
-If you have all the dependencies (see sections below) **installed in the system** simply
-clone this repository and run:
+Mini-NDN has the following dependencies:
+
+- `NDN Forwarding Daemon (NFD) <https://named-data.net/doc/NFD/>`_
+- `Named Data Link State Routing (NLSR) <https://named-data.net/doc/NLSR/>`_
+- `NDN Essential Tools (ndn-tools) <https://github.com/named-data/ndn-tools>`_
+- `NDN Traffic Generator <https://github.com/named-data/ndn-traffic-generator>`_
+- `infoedit <https://github.com/NDN-Routing/infoedit>`_
+- `Mininet <http://mininet.org/>`_
+- `Mininet-WiFi <https://mininet-wifi.github.io/>`_ (optional)
+
+To install Mini-NDN and its dependencies, clone this repository and run:
 
 ::
 
-    ./install.sh -i
+    ./install.sh
 
-The ``-i`` option uses ``setup.py develop`` to point the system install
-to the current directory. So any changes made to the cloned ``mini-ndn``
-folder will be used without having to install it again to the system.
-If you do not need to modify the core of Mini-NDN, then setup.py install (or pip install .)
-can be used directly. See :doc:`experiment <experiment>` for more information on running.
+The script accepts various command line flags.
+Some notable flags are:
 
-If you don't have the dependencies, the following command will
-install them from source along with Mini-NDN. The dependencies include
-Mininet, NDN core (ndn-cxx, NFD, Chronosync, PSync, NLSR), Infoedit,
-and NDN Common Client Libraries (CCL). If you do not wish to install
-the master versions of the NDN core or want to switch to specific versions,
-you can edit the install.sh with release tags/specific versions.
+- ``-y`` skips interactive confirmation before installation.
+- ``--ppa`` prefers installing NDN software from `named-data PPA <https://launchpad.net/~named-data/+archive/ubuntu/ppa>`_.
+  This shortens installation time by downloading binary packages, but is only available on Ubuntu.
+- ``--source`` prefers installing NDN software from source code.
+- ``--dummy-keychain`` patches ndn-cxx to use an in-memory dummy KeyChain, which reduces CPU overhead
+  and allows you to scale up Mini-NDN experiments. Large Mini-NDN experiments would run significantly
+  faster after applying this patch. However, your experiments cannot use any NDN security related
+  features (signatures, verifier, access control, etc).
+- ``--no-wifi`` skips Mininet-WiFi dependency.
+  Currently Mininet-WiFi only works on Ubuntu, so that you must specify this option when installing on other distros.
 
-.. _scaling-note:
-.. important::
-    If you wish to scale Mini-NDN experiments and do not have use for security extensions
-    in your emulations, you should apply the ndn-cxx patch given in the ``patches`` folder
-    using ``./install.sh -p`` before running the following commands. The ndn-cxx patch is
-    taken from ndnSIM which provides an in-memory dummy KeyChain to reduce CPU computations.
-    After these patches are applied sleep time after NFD, nfdc, NLSR, etc. is not required
-    making the startup **MUCH** faster and scaling of Mini-NDN **MUCH** better.
+You can see all command line flags by running:
 
 ::
 
-    ./install.sh -a
+    ./install.sh -h
 
-This pulls the NDN software from Github to ``ndn-src`` folder under the project.
+The script uses ``setup.py develop`` to point the system install of Python packages to the codebase
+directory. Therefore, you can modify ``mininet``, ``mininet-wifi``, and ``mini-ndn``, and the
+changes will be reflected immediately.
 
-.. note::
-    If any changes are made to ``ndn-src`` folder, please don't forgot to re-install
-    the sources to the system.
-
-To install without CCL, use:
-
-::
-
-    ./install.sh -mni
-
-To install in "quiet" mode (without user interaction), use:
-
-::
-    ./install.sh -qa
-
-.. note::
-    The order of the flag -q is important to ensure that the environment is ready for
-    a quiet install.
-
-See ``install.sh -h`` for detailed options.
+If NDN software is installed from source code (not PPA), the code is downloaded to ``dl`` directory
+under your ``mini-ndn`` clone. If you modify the source code, you need to manually recompile and
+reinstall the software (``./waf && sudo ./waf install``).
 
 Installing Dependencies
 -----------------------
+
+This section outlines how to install dependnecies manually.
+If you used ``install.sh``, you do not need to perform these steps.
 
 Mininet
 _______

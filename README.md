@@ -27,6 +27,6 @@ Bug reports and feedback are highly appreciated and can be made through our
 Please refer to http://minindn.memphis.edu/ or [docs/index.rst](docs/index.rst) for installation, usage, and other documentation.
 The documentation can be built using:
 
-    ./install.sh -d
+    ./docs/build.sh
 
 and is available under `docs/_build/html`.

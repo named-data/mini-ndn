@@ -27,7 +27,6 @@ from subprocess import call
 from six.moves.urllib.parse import quote
 
 from mininet.cli import CLI
-from mn_wifi.cli import CLI as CLI_wifi
 
 sshbase = ['ssh', '-q', '-t', '-i/home/mininet/.ssh/id_rsa']
 scpbase = ['scp', '-i', '/home/mininet/.ssh/id_rsa']
@@ -90,7 +89,15 @@ class MiniNDNCLI(CLI):
     def __init__(self, mininet, stdin=sys.stdin, script=None):
         CLI.__init__(self, mininet, stdin, script)
 
-class MiniNDNWifiCLI(CLI_wifi):
-    prompt = 'mini-ndn-wifi> '
-    def __init__(self, mininet, stdin=sys.stdin, script=None):
-        CLI_wifi.__init__(self, mininet, stdin, script)
+try:
+    from mn_wifi.cli import CLI as CLI_wifi
+
+    class MiniNDNWifiCLI(CLI_wifi):
+        prompt = 'mini-ndn-wifi> '
+        def __init__(self, mininet, stdin=sys.stdin, script=None):
+            CLI_wifi.__init__(self, mininet, stdin, script)
+
+except ImportError:
+    class MiniNDNWifiCLI:
+        def __init__(self):
+            raise ImportError('Mininet-WiFi is not installed')
