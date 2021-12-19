@@ -1,6 +1,50 @@
 Release Notes
 =============
 
+Mini-NDN version 0.6.0 (Major changes since version 0.5.0)
+----------------------------------------------------------
+
+**Breaking Changes**:
+
+- Rewrite install script (`issue: 4630 <https://redmine.named-data.net/issues/4630>`__)
+
+  -  Set dependency versions: PPA, git repository & commit
+  -  Separate download and build+install steps
+  -  Don't reinstall package if it's already installed
+  -  More details `here <https://github.com/named-data/mini-ndn/blob/master/docs/install.rst>`__
+
+- `Note: <https://redmine.named-data.net/issues/5161>`__ We have dropped support for python 2, the latest Mini-NDN requires at least python 3.0
+
+**New features**:
+
+-  Update Mini-NDN codebase with Mini-NDN-Wifi code (`issue: 4858 <https://redmine.named-data.net/issues/4858>`__)
+
+-  Provide pre-built Mini-NDN Vagrant box and Docker container
+
+-  Added several new examples:
+
+  - consumer/producer
+  - ndnping
+  - traffic generator
+  - catchunks/putchunks
+
+- Allow for creation of net object without topology (`issue: 5162 <https://redmine.named-data.net/issues/5162>`__)
+
+**Improvements and Bug Fixes**:
+
+-  Support running NDN applications on mixed topologies (`issue: 5160 <https://redmine.named-data.net/issues/5160>`__)
+
+-  Support route addition using face-id in `Nfdc` helper (`issue: 5130 <https://redmine.named-data.net/issues/5130>`__)
+
+-  Add wrapper for `ndnpingserver` and fix passing the Mininet host object as a prefix on ndnpingclient
+
+-  Show status of route calculation in `NdnRoutingHelper`
+
+-  Incorporate changes of `NDNPing` Class (wrapper of pingserver and pingclient) in the examples
+
+-  Support simple topology files with no additional parameters
+
+
 Mini-NDN version 0.5.0 (Major changes since version 0.4.0)
 ----------------------------------------------------------
 
