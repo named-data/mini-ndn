@@ -1,8 +1,8 @@
 diff --git a/ndn-cxx/security/key-chain.cpp b/ndn-cxx/security/key-chain.cpp
-index 50eaa226..d4acbe61 100644
+index 2cc22ede..920e6c37 100644
 --- a/ndn-cxx/security/key-chain.cpp
 +++ b/ndn-cxx/security/key-chain.cpp
-@@ -163,7 +164,7 @@ KeyChain::getDefaultKeyParams()
+@@ -153,7 +153,7 @@ KeyChain::getDefaultKeyParams()
  //
  
  KeyChain::KeyChain()
@@ -13,7 +13,7 @@ index 50eaa226..d4acbe61 100644
  
 diff --git a/ndn-cxx/util/dummy-keychain.cpp b/ndn-cxx/util/dummy-keychain.cpp
 new file mode 100644
-index 00000000..d9228c8e
+index 00000000..a2d75cc3
 --- /dev/null
 +++ b/ndn-cxx/util/dummy-keychain.cpp
 @@ -0,0 +1,352 @@
@@ -152,7 +152,7 @@ index 00000000..d9228c8e
 +
 +void
 +DummyPib::addKey(const Name& identity, const Name& keyName,
-+                 const uint8_t* key, size_t keyLen)
++                 span<const uint8_t> key)
 +{
 +}
 +
@@ -272,13 +272,13 @@ index 00000000..d9228c8e
 +
 +bool
 +DummyKeyHandle::doVerify(DigestAlgorithm digestAlgorithm, const InputBuffers& bufs,
-+                         const uint8_t* sig, size_t sigLen) const
++                         span<const uint8_t> sig) const
 +{
 +  return true;
 +}
 +
 +ConstBufferPtr
-+DummyKeyHandle::doDecrypt(const uint8_t* cipherText, size_t cipherTextLen) const
++DummyKeyHandle::doDecrypt(span<const uint8_t> cipherText) const
 +{
 +  throw Error("Not supported");
 +}
@@ -350,7 +350,7 @@ index 00000000..d9228c8e
 +}
 +
 +void
-+DummyTpm::doImportKey(const Name& keyName, const uint8_t* pkcs8, size_t pkcs8Len, const char* pw, size_t pwLen)
++DummyTpm::doImportKey(const Name& keyName, span<const uint8_t> pkcs8, const char* pw, size_t pwLen)
 +{
 +  throw Error("Not supported");
 +}
@@ -371,7 +371,7 @@ index 00000000..d9228c8e
 +} // namespace ndn
 diff --git a/ndn-cxx/util/dummy-keychain.hpp b/ndn-cxx/util/dummy-keychain.hpp
 new file mode 100644
-index 00000000..b0634db2
+index 00000000..c35b3341
 --- /dev/null
 +++ b/ndn-cxx/util/dummy-keychain.hpp
 @@ -0,0 +1,226 @@
@@ -460,8 +460,8 @@ index 00000000..b0634db2
 +  hasKey(const Name& keyName) const override;
 +
 +  void
-+  addKey(const Name& identity, const Name& keyName, const uint8_t* key,
-+         size_t keyLen) override;
++  addKey(const Name& identity, const Name& keyName,
++         span<const uint8_t> key) override;
 +
 +  void
 +  removeKey(const Name& keyName) override;
@@ -526,10 +526,10 @@ index 00000000..b0634db2
 +
 +  bool
 +  doVerify(DigestAlgorithm digestAlgorithm, const InputBuffers& bufs,
-+           const uint8_t* sig, size_t sigLen) const final;
++            span<const uint8_t> sig) const final;
 +
 +  ConstBufferPtr
-+  doDecrypt(const uint8_t* cipherText, size_t cipherTextLen) const final;
++  doDecrypt(span<const uint8_t> cipherText) const final;
 +
 +  ConstBufferPtr
 +  doDerivePublicKey() const final;
@@ -588,7 +588,7 @@ index 00000000..b0634db2
 +  doExportKey(const Name& keyName, const char* pw, size_t pwLen) final;
 +
 +  void
-+  doImportKey(const Name& keyName, const uint8_t* pkcs8, size_t pkcs8Len, const char* pw, size_t pwLen) final;
++  doImportKey(const Name& keyName, span<const uint8_t> pkcs8, const char* pw, size_t pwLen) final;
 +
 +  void
 +  doImportKey(const Name& keyName, shared_ptr<transform::PrivateKey> key) final;
