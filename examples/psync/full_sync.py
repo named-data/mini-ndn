@@ -68,7 +68,7 @@ if __name__ == '__main__':
     time.sleep(300)
 
     totalUpdates = int(host.cmd('grep -r Update {}/*/psync.logs | wc -l'
-                                .format(args.workDir)))
+                                .format(ndn.workDir)))
 
     expectedUpdates = (maxUpdatesPerUserPrefixPerNode *
                       len(ndn.net.hosts) * (len(ndn.net.hosts) - 1) * numUserPrefixesPerNode)

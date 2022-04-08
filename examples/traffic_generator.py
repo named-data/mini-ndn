@@ -25,7 +25,7 @@
 """
 This example demonstrates the functionality of the Traffic generator. It consists of a traffic
 server and client. The server will listen for interest on the prefix specified in the server
-configuration file. The client will send a designated number of interests to the server and 
+configuration file. The client will send a designated number of interests to the server and
 get the data back.
 More details on traffic generator here: https://github.com/named-data/ndn-traffic-generator
 """
@@ -91,8 +91,8 @@ if __name__ == '__main__':
     # lets make node "a" as a traffic-server node, and node "c" as a traffic-client node
     server  = ndn.net['a']
     client = ndn.net['c']
-    serverConf = '{}/{}/server-conf'.format(ndn.args.workDir, server.name)
-    clientConf = '{}/{}/client-conf'.format(ndn.args.workDir, client.name)
+    serverConf = '{}/{}/server-conf'.format(ndn.workDir, server.name)
+    clientConf = '{}/{}/client-conf'.format(ndn.workDir, client.name)
 
     copyExistentFile(server, possibleServerConfPath, serverConf)
     copyExistentFile(server, possibleClientConfPath, clientConf)

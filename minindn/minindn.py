@@ -55,7 +55,7 @@ class Minindn(object):
     resultDir = None
 
     def __init__(self, parser=argparse.ArgumentParser(), topo=None, topoFile=None, noTopo=False,
-                 link=TCLink, **mininetParams):
+                 link=TCLink, workDir=None, **mininetParams):
         """
         Create MiniNDN object
         :param parser: Parent parser of Mini-NDN parser
@@ -70,7 +70,11 @@ class Minindn(object):
         self.parser = Minindn.parseArgs(parser)
         self.args = self.parser.parse_args()
 
-        Minindn.workDir = os.path.abspath(self.args.workDir)
+        if not workDir:
+            Minindn.workDir = os.path.abspath(self.args.workDir)
+        else:
+            Minindn.workDir = os.path.abspath(workDir)
+
         Minindn.resultDir = self.args.resultDir
 
         if not topoFile:

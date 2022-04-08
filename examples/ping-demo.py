@@ -80,7 +80,7 @@ def run():
 
     # Start ping server
     info("Starting pings...\n")
-    pingserver_log = open("/tmp/minindn/c/ndnpingserver.log", "w")
+    pingserver_log = open("{}/c/ndnpingserver.log".format(ndn.workDir), "w")
     getPopen(ndn.net["c"], "ndnpingserver {}".format(PREFIX), stdout=pingserver_log,\
              stderr=pingserver_log)
 

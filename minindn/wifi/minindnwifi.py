@@ -21,6 +21,7 @@
 # along with Mini-NDN, e.g., in COPYING.md file.
 # If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import argparse
 import sys
 import configparser
@@ -36,7 +37,7 @@ from minindn.minindn import Minindn
 
 class MinindnWifi(Minindn):
     """ Class for handling default args, Mininet-wifi object and home directories """
-    def __init__(self, parser=argparse.ArgumentParser(), topo=None, topoFile=None, noTopo=False, link=WirelessLink, **mininetParams):
+    def __init__(self, parser=argparse.ArgumentParser(), topo=None, topoFile=None, noTopo=False, link=WirelessLink, workDir=None, **mininetParams):
         """Create Mini-NDN-Wifi object
         parser: Parent parser of Mini-NDN-Wifi parser (use to specify experiment arguments)
         topo: Mininet topo object (optional)
@@ -48,7 +49,11 @@ class MinindnWifi(Minindn):
         self.parser = self.parseArgs(parser)
         self.args = self.parser.parse_args()
 
-        Minindn.workDir = self.args.workDir
+        if not workDir:
+            Minindn.workDir = os.path.abspath(self.args.workDir)
+        else:
+            Minindn.workDir = os.path.abspath(workDir)
+
         Minindn.resultDir = self.args.resultDir
 
         self.topoFile = None
