@@ -81,7 +81,7 @@ class MinindnWifi(Minindn):
             process = Popen(['ndnsec-get-default', '-k'], stdout=PIPE, stderr=PIPE)
             output, error = process.communicate()
             if process.returncode == 0:
-                Minindn.ndnSecurityDisabled = '/dummy/KEY/-%9C%28r%B8%AA%3B%60' in output
+                Minindn.ndnSecurityDisabled = '/dummy/KEY/-%9C%28r%B8%AA%3B%60' in output.decode("utf-8")
                 info('Dummy key chain patch is installed in ndn-cxx. Security will be disabled.\n')
             else:
                 debug(error)
