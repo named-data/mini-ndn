@@ -238,6 +238,19 @@ When security is enabled, NLSR security certificates are stored in:
 certificate, Mini-NDN installs root.cert in security folder for each
 NLSR.
 
+While a host's NLSR neighbors are by default populated by adjacent nodes in wired scenarios,
+for those running NLSR on wifi stations it is required that you specify "neighbor" faces
+manually. The framework for this is provided either via a dictionary object or through
+additional sections in topology files, and may also be used for wired experiments.
+See an example of a topo of this sort in ``mini-ndn/topologies/wifi/nlsr_wifi_example.conf``.
+NLSR faces to be created can be manually specified from topology files in a ``[faces]``
+section, with the format ``nodeA:nodeB [cost=X]``. You should then call the ``setupFaces()``
+method of an initialized Mini-NDN object to get a dictionary based on this parse in the format
+``faceA:[(faceB, cost), (faceC, cost),...]``, which can finally be passed to the NLSR
+helper via the faceDict parameter. An example experiment using this methodology is located
+at ``mini-ndn/examples/wifi/nlsr_wifi.py``. Note that the aforementioned dict can also be
+created manually in the previously established format.
+
 Routing Options
 ----------------
 

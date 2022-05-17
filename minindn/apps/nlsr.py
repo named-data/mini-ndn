@@ -41,8 +41,16 @@ class Nlsr(Application):
     SYNC_PSYNC = 'psync'
 
     def __init__(self, node, logLevel='NONE', security=False, sync=SYNC_PSYNC,
-                 faceType='udp', nFaces=3, routingType=ROUTING_LINK_STATE):
+                 faceType='udp', nFaces=3, routingType=ROUTING_LINK_STATE, faceDict=None):
         Application.__init__(self, node)
+        try:
+            from mn_wifi.node import Node_wifi
+            if isinstance(node, Node_wifi) and faceDict == None:
+                warn("Wifi nodes need to have faces configured manually. Please see \
+                      documentation on provided helper methods.\r\n")
+                sys.exit(1)
+        except ImportError:
+            pass
 
         self.network = '/ndn/'
         self.node = node
@@ -63,6 +71,8 @@ class Nlsr(Application):
         self.sync = sync
         self.faceType = faceType
         self.infocmd = 'infoedit -f nlsr.conf'
+        # Expected format- node : tuple (node name, IP, cost)
+        self.faceDict = faceDict
 
         self.parameters = self.node.params['params']
 
@@ -181,7 +191,10 @@ class Nlsr(Application):
     def createConfigFile(self):
 
         self.__editGeneralSection()
-        self.__editNeighborsSection()
+        if self.faceDict:
+            self.__editNeighborsSectionManual()
+        else:
+            self.__editNeighborsSection()
         self.__editHyperbolicSection()
         self.__editFibSection()
         self.__editAdvertisingSection()
@@ -224,6 +237,22 @@ class Nlsr(Application):
                           <<<\'name {}{}-site/%C1.Router/cs/{} face-uri {}://{}\n link-cost {}\''
                           .format(self.infocmd, self.network, other.name, other.name,
                                   self.faceType, ip, linkCost))
+
+    def __editNeighborsSectionManual(self):
+
+        self.node.cmd('{} -d neighbors.neighbor'.format(self.infocmd))
+        if self.node not in self.faceDict:
+            return
+        for link in self.faceDict[self.node]:
+            nodeName = link[0]
+            nodeIP = link[1]
+            linkCost = link[2]
+
+            self.node.cmd('{} -a neighbors.neighbor \
+                          <<<\'name {}{}-site/%C1.Router/cs/{} face-uri {}://{}\n link-cost {}\''
+                          .format(self.infocmd, self.network, nodeName, nodeName,
+                                  self.faceType, nodeIP, linkCost))
+
 
     def __editHyperbolicSection(self):
 

@@ -38,7 +38,6 @@ from mininet.node import Switch
 from mininet.util import ipStr, ipParse
 from mininet.log import info, debug, error
 
-
 class Minindn(object):
     """
     This class provides the following features to the user:
@@ -83,10 +82,11 @@ class Minindn(object):
         else:
             self.topoFile = topoFile
 
+        self.faces_to_create = {}
         if topo is None and not noTopo:
             try:
                 info('Using topology file {}\n'.format(self.topoFile))
-                self.topo = self.processTopo(self.topoFile)
+                self.topo, self.faces_to_create = self.processTopo(self.topoFile)
             except configparser.NoSectionError as e:
                 info('Error reading config file: {}\n'.format(e))
                 sys.exit(1)
@@ -122,13 +122,15 @@ class Minindn(object):
 
         # nargs='?' required here since optional argument
         parser.add_argument('topoFile', nargs='?', default='/usr/local/etc/mini-ndn/default-topology.conf',
-                            help='If no template_file is given, topologies/default-topology.conf will be used.')
+                            help='If no template_file is given, topologies/default-topology.conf \
+                            will be used.')
 
         parser.add_argument('--work-dir', action='store', dest='workDir', default='/tmp/minindn',
                             help='Specify the working directory; default is /tmp/minindn')
 
         parser.add_argument('--result-dir', action='store', dest='resultDir', default=None,
-                            help='Specify the full path destination folder where experiment results will be moved')
+                            help='Specify the full path destination folder where experiment \
+                            results will be moved')
 
         return parser
 
@@ -201,6 +203,28 @@ class Minindn(object):
 
             topo.addLink(link[0], link[1], **params)
 
+        faces = {}
+        try:
+            items = config.items('faces')
+            debug("Faces")
+            for item in items:
+                face_a, face_b = item[0].split(':')
+                debug(item)
+                cost = -1
+                for param in item[1].split(' '):
+                    if param.split("=")[0] == 'cost':
+                        cost = param.split("=")[1]
+                face_info = (face_b, int(cost))
+                if face_a not in faces:
+                    faces[face_a] = [face_info]
+                else:
+                    faces[face_a].append(face_info)
+        except configparser.NoSectionError:
+            debug("Faces section is optional")
+            pass
+
+        return (topo, faces)
+
         return topo
 
     def start(self):
@@ -249,6 +273,16 @@ class Minindn(object):
         info(format_exc())
         exit(1)
 
+    def getInterfaceDelay(self, node, interface):
+        tc_output = node.cmd("tc qdisc show dev {}".format(interface))
+        for line in tc_output.splitlines():
+            if "qdisc netem 10:" in line:
+                split_line = line.split(" ")
+                for index in range(0, len(split_line)):
+                    if split_line[index] == "delay":
+                        return float(split_line[index + 1][:-2])
+        return 0.0
+
     def initParams(self, nodes):
         """Initialize Mini-NDN parameters for array of nodes"""
         for host in nodes:
@@ -259,3 +293,82 @@ class Minindn(object):
             host.params['params']['homeDir'] = homeDir
             host.cmd('mkdir -p {}'.format(homeDir))
             host.cmd('export HOME={} && cd ~'.format(homeDir))
+
+    def nfdcBatchProcessing(self, station, faces):
+        # Input format: [IP, protocol, isPermanent]
+        batch_file = open("{}/{}/nfdc.batch".format(Minindn.workDir, station.name), "w")
+        lines = []
+        for face in faces:
+            ip = face[0]
+            protocol = face[1]
+            if face[2]:
+                face_type = "permanent"
+            else:
+                face_type = "persistent"
+            nfdc_command = "face create {}://{} {}\n".format(protocol, ip, face_type)
+            lines.append(nfdc_command)
+        batch_file.writelines(lines)
+        batch_file.close()
+        debug(station.cmd("nfdc -f {}/{}/nfdc.batch".format(Minindn.workDir, station.name)))
+
+    def setupFaces(self, faces_to_create=None):
+        """ Method to create unicast faces between connected nodes;
+            Returns dict- {node: (other node name, other node IP, other node's delay as int)}. 
+            This is intended to pass to the NLSR helper via the faceDict param """
+        if not faces_to_create:
+            faces_to_create = self.faces_to_create
+        # (nodeName, IP, delay as int)
+        # list of tuples
+        created_faces = dict()
+        batch_faces = dict()
+        for nodeAname in faces_to_create.keys():
+            if not nodeAname in batch_faces.keys():
+                batch_faces[nodeAname] = []
+            for nodeBname, faceCost in faces_to_create[nodeAname]:
+                if not nodeBname in batch_faces.keys():
+                    batch_faces[nodeBname] = []
+                nodeA = self.net[nodeAname]
+                nodeB = self.net[nodeBname]
+                if nodeA.connectionsTo(nodeB):
+                    best_interface = None
+                    delay = None
+                    for interface in nodeA.connectionsTo(nodeB):
+                        interface_delay = self.getInterfaceDelay(nodeA, interface[0])
+                        if not delay or int(interface_delay) < delay:
+                            best_interface = interface
+                    faceAIP = best_interface[0].IP()
+                    faceBIP = best_interface[1].IP()
+                    # Node delay will be symmetrical for connected nodes
+                    nodeDelay = int(self.getInterfaceDelay(nodeA, best_interface[0]))
+                    #nodeBDelay = int(self.getInterfaceDelay(nodeB, best_interface[1]))
+                else:
+                    # If no direct wired connections exist (ie when using a switch),
+                    # assume the default interface
+                    faceAIP = nodeA.IP()
+                    faceBIP = nodeB.IP()
+                    nodeADelay = int(self.getInterfaceDelay(nodeA, nodeA.defaultIntf()))
+                    nodeBDelay = int(self.getInterfaceDelay(nodeB, nodeB.defaultIntf()))
+                    nodeDelay = nodeADelay + nodeBDelay
+
+                if not faceCost == -1:
+                    nodeALink = (nodeA.name, faceAIP, faceCost)
+                    nodeBLink = (nodeB.name, faceBIP, faceCost)
+                else:
+                    nodeALink = (nodeA.name, faceAIP, nodeDelay)
+                    nodeBLink = (nodeB.name, faceBIP, nodeDelay)
+
+                # Importing this before initialization causes issues
+                batch_faces[nodeAname].append([faceBIP, "udp", True])
+                batch_faces[nodeBname].append([faceAIP, "udp", True])
+
+                if nodeA not in created_faces:
+                    created_faces[nodeA] = [nodeBLink]
+                else:
+                    created_faces[nodeA].append(nodeBLink)
+                if nodeB not in created_faces:
+                    created_faces[nodeB] = [nodeALink]
+                else:
+                    created_faces[nodeB].append(nodeALink)
+        for station_name in batch_faces.keys():
+            self.nfdcBatchProcessing(self.net[station_name], batch_faces[station_name])
+        return created_faces
