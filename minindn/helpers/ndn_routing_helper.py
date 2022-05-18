@@ -34,6 +34,7 @@ import json
 import operator
 from collections import defaultdict
 from tqdm import tqdm
+from joblib import Parallel, delayed
 
 from mininet.log import info, debug, error, warn
 from minindn.helpers.nfdc import Nfdc as nfdc
@@ -295,12 +296,21 @@ class NdnRoutingHelper(object):
 
     def globalRoutingHelperHandler(self):
         info('Creating faces and adding routes to FIB\n')
-        for host in tqdm(self.net.hosts):
-            neighborIPs = self.getNeighbor(host)
-            self.createFaces(host, neighborIPs)
-            self.routeAdd(host, neighborIPs)
+
+        res = Parallel(n_jobs=-1, require='sharedmem',
+                       prefer="threads")(delayed(self.addNodeRoutes)(host) for host in tqdm(self.net.hosts))
 
         info('Processed all the routes to NFD\n')
+
+    def addNodeRoutes(self, node):
+        """
+        Create faces to neighbors and add all routes for one node
+
+        :param Node node: Node from net object
+        """
+        neighborIPs = self.getNeighbor(node)
+        self.createFaces(node, neighborIPs)
+        self.routeAdd(node, neighborIPs)
 
     def addOrigin(self, nodes, prefix):
         """

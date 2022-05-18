@@ -24,7 +24,9 @@
 from mininet.log import debug
 from minindn.minindn import Minindn
 
-SLEEP_TIME = 0.2
+# If needed (e.g. to speed up the process), use a smaller (or larger value) 
+# based on your machines resource (CPU, memory)
+SLEEP_TIME = 0.1
 
 class Nfdc(object):
     STRATEGY_ASF = 'asf'

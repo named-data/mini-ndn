@@ -72,4 +72,4 @@ class Nfd(Application):
 
     def start(self):
         Application.start(self, 'nfd --config {}'.format(self.confFile), logfile=self.logFile)
-        Minindn.sleep(2)
+        Minindn.sleep(0.5)
