@@ -1,20 +1,12 @@
 
 [comments]: The original author of Mini-NDN docker is Md Ashiqur Rahman (marahman@email.arizona.edu)
 
-| :exclamation:  Mini-NDN docker is in experimental phase, it uses older version of Mini-NDN and is incompatible with the current version |
-|-----------------------------------------------------------------------------------------------------------------------------------------|
+### `docker build`
 
-### `docker build` or `docker pull`
-
-The [Dockerfile](https://github.com/ashiqopu/docker-minindn/blob/master/Dockerfile) can be used directly to `build` an image from scratch.
+The Dockerfile can be used directly to `build` an image from scratch.
 
 * Build with `Dockerfile`:
-  * Open terminal and use the following command:
-    ```bash
-    git clone https://github.com/ashiqopu/docker-minindn
-    cd docker-minindn
-    ```
-  * Type and enter.
+  * Clone the repository and type.
     ```bash
     docker build -t minindn .
     ```
