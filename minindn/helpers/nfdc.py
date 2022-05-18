@@ -74,7 +74,7 @@ class Nfdc(object):
         Minindn.sleep(SLEEP_TIME)
 
     @staticmethod
-    def createFace(node, remoteNodeAddress, protocol='udp', isPermanent=False):
+    def createFace(node, remoteNodeAddress, protocol='udp', isPermanent=False, allowExisting=True):
         '''Create face in node's NFD instance. Returns FaceID of created face or -1 if failed.'''
         cmd = ('nfdc face create {}://{} {}'.format(
             protocol,
@@ -84,10 +84,10 @@ class Nfdc(object):
         output = node.cmd(cmd)
         debug(output)
         Minindn.sleep(SLEEP_TIME)
-        if "face-created" not in output:
-            return -1
-        faceID = output.split(" ")[1][3:]
-        return faceID
+        if "face-created" in output or (allowExisting and "face-exists" in output):
+            faceID = output.split(" ")[1][3:]
+            return faceID
+        return -1
 
     @staticmethod
     def destroyFace(node, remoteNode, protocol='udp'):
