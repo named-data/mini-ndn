@@ -1,8 +1,8 @@
 diff --git a/ndn-cxx/security/key-chain.cpp b/ndn-cxx/security/key-chain.cpp
-index 2cc22ede..920e6c37 100644
+index f65b2861..5806c784 100644
 --- a/ndn-cxx/security/key-chain.cpp
 +++ b/ndn-cxx/security/key-chain.cpp
-@@ -153,7 +153,7 @@ KeyChain::getDefaultKeyParams()
+@@ -155,7 +155,7 @@ KeyChain::getDefaultKeyParams()
  //
  
  KeyChain::KeyChain()
@@ -13,7 +13,7 @@ index 2cc22ede..920e6c37 100644
  
 diff --git a/ndn-cxx/util/dummy-keychain.cpp b/ndn-cxx/util/dummy-keychain.cpp
 new file mode 100644
-index 00000000..a2d75cc3
+index 00000000..dfee171a
 --- /dev/null
 +++ b/ndn-cxx/util/dummy-keychain.cpp
 @@ -0,0 +1,352 @@
@@ -168,7 +168,7 @@ index 00000000..a2d75cc3
 +    arrayStream
 +    is(reinterpret_cast<const char*>(DUMMY_CERT), sizeof(DUMMY_CERT));
 +    auto cert = io::load<v2::Certificate>(is, io::BASE64);
-+    return cert->getPublicKey();
++    return Buffer(cert->getContent().value(), cert->getContent().value_size());
 +}
 +
 +std::set<Name>
@@ -371,7 +371,7 @@ index 00000000..a2d75cc3
 +} // namespace ndn
 diff --git a/ndn-cxx/util/dummy-keychain.hpp b/ndn-cxx/util/dummy-keychain.hpp
 new file mode 100644
-index 00000000..c35b3341
+index 00000000..5f6a4350
 --- /dev/null
 +++ b/ndn-cxx/util/dummy-keychain.hpp
 @@ -0,0 +1,226 @@
