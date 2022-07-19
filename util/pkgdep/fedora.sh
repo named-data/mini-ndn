@@ -1,6 +1,6 @@
 # -*- Mode:bash; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2021, The University of Memphis,
+# Copyright (C) 2015-2022, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -45,7 +45,7 @@ install_pkgs() {
 }
 
 prepare_ld() {
-  if ! $SUDO ldconfig -v 2>/dev/null | grep -q /usr/local/lib64; then 
+  if ! $SUDO ldconfig -v 2>/dev/null | grep -q /usr/local/lib64; then
     echo 'Enabling /usr/local/lib64 in dynamic linker'
     $SUDO mkdir -p /etc/ld.so.conf.d
     echo /usr/local/lib64 | $SUDO tee /etc/ld.so.conf.d/usr-local-lib64.conf >/dev/null

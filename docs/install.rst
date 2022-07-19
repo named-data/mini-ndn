@@ -7,6 +7,7 @@ Prerequisites
 Mini-NDN is tested on the following Linux distributions:
 
 - Ubuntu 20.04 (recommended)
+- Ubuntu 22.04
 - Debian 11 (WiFi scenario does not work)
 - Fedora 33 (WiFi scenario does not work)
 

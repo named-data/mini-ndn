@@ -1,6 +1,6 @@
 # -*- Mode:bash; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2021, The University of Memphis,
+# Copyright (C) 2015-2022, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -30,8 +30,16 @@ fi
 
 source "$PKGDEPDIR/debian-like.sh"
 
-APT_PKGS+=(
-  libigraph0-dev
-)
+if [[ $VERSION_ID == '20.04' ]]; then
+  APT_PKGS+=(
+    libigraph0-dev
+  )
+else
+  APT_PKGS+=(
+    libigraph-dev
+  )
+fi
 
-PPA_AVAIL=1
+if [[ $VERSION_ID == '20.04' ]] || [[ $VERSION_ID == '21.10' ]]; then
+  PPA_AVAIL=1
+fi

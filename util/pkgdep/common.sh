@@ -1,6 +1,6 @@
 # -*- Mode:bash; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2021, The University of Memphis,
+# Copyright (C) 2015-2022, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -21,7 +21,7 @@
 # along with Mini-NDN, e.g., in COPYING.md file.
 # If not, see <http://www.gnu.org/licenses/>.
 
-# needed by Python version detection logic in Mininet & Mininet-WiFi install script
+# needed by Python version detection logic in Mininet install script
 export PYTHON=python3
 
 # DEP_INFO key should match *_VERSION variable name.
@@ -75,15 +75,28 @@ build_MININET() {
   $SUDO cp /usr/local/bin/mn /usr/local/bin/mn.mininet
 }
 build_MNWIFI() {
+  # issue: git repository is not owned by root, causing "unsafe repository" error
+  # workaround: chown the git repository to root
+  $SUDO chown -R 0:0 .
+
   # issue: util/install.sh attempts to patch hostap every time, causing "Assume -R?" prompt
   # during reinstalls
-  # workaround: revert hostap repository to clean state
+  # workaround: revert hostap submodule to clean state
   $SUDO git -C hostap clean -fdx || true
   $SUDO git -C hostap checkout -- . || true
 
-  # issue: util/install.sh is not using 'sudo' where needed
-  # solution: run whole script in 'sudo'
-  $SUDO env PYTHON="$PYTHON" ./util/install.sh -Wl
+  # issue: util/install.sh is not setting noninteractive mode for apt-get
+  # workaround: temporarily disable needrestart
+  if [[ -d /etc/needrestart/conf.d ]]; then
+    $SUDO tee /etc/needrestart/conf.d/99-disabled-by-minindn.conf > /dev/null <<'EOT'
+$nrconf{restart} = 'l';
+$nrconf{kernelhints} = 0;
+EOT
+  fi
+
+  # issue: util/install.sh is not using 'sudo' where needed such as 'make install'
+  # workaround: run whole script in 'sudo'
+  $SUDO env PYTHON=$PYTHON ./util/install.sh -Wl
 
   # issue: setup.py reports "Cannot load backend 'TkAgg' which requires the 'tk' interactive
   # framework, as 'headless' is currently running" when running over SSH
@@ -95,6 +108,14 @@ build_MNWIFI() {
   if [[ -x /usr/local/bin/mn.mininet ]]; then
     $SUDO cp /usr/local/bin/mn.mininet /usr/local/bin/mn
   fi
+
+  # chown the git repository to current user, so that user can modify code without root
+  if [[ $(id -u) -ne 0 ]]; then
+    $SUDO chown -R $(id -u):$(id -g) .
+  fi
+
+  # re-enable needrestart
+  $SUDO rm -f /etc/needrestart/conf.d/99-disabled-by-minindn.conf
 }
 
 # Waf configure options
