@@ -270,15 +270,17 @@ class MinindnWifi(Minindn):
         except configparser.NoSectionError:
             debug("Mobility section is optional\n")
 
-    def startMobility(self, max_x=1000, max_y=1000, **kwargs):
+    def startMobility(self, max_x=1000, max_y=1000, plot=True, **kwargs):
         """ Method to run a basic mobility setup on your net"""
-        self.net.plotGraph(max_x=max_x, max_y=max_y)
-        self.net.startMobility(**kwargs)
+        if plot:
+            self.net.plotGraph(max_x=max_x, max_y=max_y)
+        self.net.startMobility(max_x=max_x, max_y=max_y, **kwargs)
 
-    def startMobilityModel(self, max_x=1000, max_y=1000, **kwargs):
+    def startMobilityModel(self, max_x=1000, max_y=1000, plot=True, **kwargs):
         """ Method to run a mobility model on your net until exited"""
-        self.net.plotGraph(max_x=max_x, max_y=max_y)
-        self.net.setMobilityModel(**kwargs)
+        if plot:
+            self.net.plotGraph(max_x=max_x, max_y=max_y)
+        self.net.setMobilityModel(max_x=max_x, max_y=max_y, **kwargs)
 
     def getWifiInterfaceDelay(self, node, interface=None):
         """Method to return the configured tc delay of a wifi node's interface as a float"""
