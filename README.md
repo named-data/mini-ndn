@@ -2,7 +2,7 @@ Mini-NDN
 ========
 
 If you are new to the NDN community of software generally, read the
-[Contributor's Guide](https://github.com/named-data/NFD/blob/master/CONTRIBUTING.md).
+[Contributor's Guide](https://github.com/named-data/.github/blob/master/CONTRIBUTING.md).
 
 ### What is Mini-NDN?
 
@@ -17,7 +17,7 @@ please refer to [COPYING.md](COPYING.md).
 
 The first release of Mini-NDN is developed by members of the NSF-sponsored NDN project team.
 Mini-NDN is open to contribution from the public.
-For more details, please refer to [AUTHORS.md](AUTHORS.md).
+For more details, please refer to [AUTHORS.rst](AUTHORS.rst).
 Bug reports and feedback are highly appreciated and can be made through our
 [Redmine site](http://redmine.named-data.net/projects/mini-ndn) and the
 [mini-ndn mailing list](http://www.lists.cs.ucla.edu/mailman/listinfo/mini-ndn).
