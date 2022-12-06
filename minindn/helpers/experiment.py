@@ -33,38 +33,60 @@ from minindn.util import getSafeName
 
 class Experiment(object):
     @staticmethod
-    def checkConvergence(ndn, hosts, convergenceTime, quit=False):
+    def checkConvergence(ndn, hosts, convergenceTime, quit=False, returnConvergenceInfo=False):
         # Wait for convergence time period
         info('Waiting {} seconds for convergence...\n'.format(convergenceTime))
         time.sleep(convergenceTime)
         info('...done\n')
 
-        # To check whether all the nodes of NLSR have converged
         didNlsrConverge = True
+        convergeInfo = {}
 
-        # Checking for convergence
         for host in hosts:
+            convergeInfo[host.name] = {}
             statusRouter = host.cmd('nfdc fib list | grep site/%C1.Router/cs/')
             statusPrefix = host.cmd('nfdc fib list | grep ndn | grep site | grep -v Router')
-            didNodeConverge = True
             for node in hosts:
                 # Node has its own router name in the fib list, but not name prefix
-                if (('/ndn/{}-site/%C1.Router/cs/{}'.format(node.name, node.name)) not in statusRouter or
-                      host.name != node.name and ('/ndn/{}-site/{}'.format(node.name, node.name)) not in statusPrefix):
-                    didNodeConverge = False
+                routerPrefix = ('/ndn/{}-site/%C1.Router/cs/{}'.format(node.name, node.name))
+                namePrefix = ('/ndn/{}-site/{}'.format(node.name, node.name))
+
+                statusRouterCheck = routerPrefix not in statusRouter
+                statusPrefixCheck = host.name != node.name and namePrefix not in statusPrefix
+
+                if statusRouterCheck or statusPrefixCheck:
                     didNlsrConverge = False
+                    host.cmd('echo {} > convergence-result &'.format(False))
 
-            host.cmd('echo {} > convergence-result &'.format(didNodeConverge))
+                    if returnConvergenceInfo:
+                        convergeInfo[host.name][node.name] = []
+                        if statusRouterCheck:
+                            convergeInfo[host.name][node.name].append(routerPrefix)
 
-        if not didNlsrConverge:
-            info('NLSR has not converged. Exiting...\n')
+                        if statusPrefixCheck:
+                            convergeInfo[host.name][node.name].append(namePrefix)
+                else:
+                    host.cmd('echo {} > convergence-result &'.format(True))
+
+        if didNlsrConverge:
             if quit:
+                info('NLSR has converged successfully. Exiting...\n')
+                ndn.stop()
+                sys.exit(0)
+            else:
+                info('NLSR has converged successfully.\n')
+        else:
+            if quit:
+                info('NLSR has not converged. Exiting...\n')
                 ndn.stop()
                 sys.exit(1)
-        else:
-            info('NLSR has converged successfully.\n')
+            else:
+                info('NLSR has not converged.\n')
 
-        return didNlsrConverge
+        if returnConvergenceInfo:
+            return didNlsrConverge, convergeInfo
+        else:
+            return didNlsrConverge
 
     @staticmethod
     def setupPing(hosts, strategy):
