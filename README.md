@@ -1,5 +1,4 @@
-Mini-NDN
-========
+# Mini-NDN
 
 If you are new to the NDN community of software generally, read the
 [Contributor's Guide](https://github.com/named-data/.github/blob/master/CONTRIBUTING.md).
@@ -24,7 +23,7 @@ Bug reports and feedback are highly appreciated and can be made through our
 
 ## Documentation
 
-Please refer to http://minindn.memphis.edu/ or [docs/index.rst](docs/index.rst) for installation, usage, and other documentation.
+Please refer to [this presentation](https://named-data.net/wp-content/uploads/2022/09/3-ICN22-Mini-NDN.pdf) or [docs/index.rst](docs/index.rst) for installation, usage, and other documentation.
 The documentation can be built using:
 
     ./docs/build.sh
