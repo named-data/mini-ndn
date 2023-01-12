@@ -21,11 +21,23 @@ Bug reports and feedback are highly appreciated and can be made through our
 [Redmine site](http://redmine.named-data.net/projects/mini-ndn) and the
 [mini-ndn mailing list](http://www.lists.cs.ucla.edu/mailman/listinfo/mini-ndn).
 
+## Installation
+
+Mini-NDN can be installed from source using the following commands:
+
+```bash
+git clone https://github.com/named-data/mini-ndn.git
+cd mini-ndn
+./install.sh --source
+```
+
 ## Documentation
 
 Please refer to [this presentation](https://named-data.net/wp-content/uploads/2022/09/3-ICN22-Mini-NDN.pdf) from ICN 2022 or [docs/index.rst](docs/index.rst) for installation, usage, and other documentation.
 The documentation can be built using:
 
-    ./docs/build.sh
+```bash
+./docs/build.sh
+```
 
 and is available under `docs/_build/html`.
