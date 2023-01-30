@@ -21,6 +21,19 @@ Bug reports and feedback are highly appreciated and can be made through our
 [Redmine site](http://redmine.named-data.net/projects/mini-ndn) and the
 [mini-ndn mailing list](http://www.lists.cs.ucla.edu/mailman/listinfo/mini-ndn).
 
+Mini-NDN works on Ubuntu 20.04. It will also run on Debian 11 and Fedora 33 without the WiFi scenario.
+
+Mini-NDN's dependencies are:
+
+- Mininet
+- Mininet-wifi (optional)
+- NDN Forwarding Daemon (NFD)
+- Named Data Link State Routing (NLSR)
+- NDN Essential Tools (ndn-tools)
+- NDN Traffic Generator
+- ndn-cxx
+- Infoedit
+
 ## Installation
 
 Mini-NDN can be installed from source using the following commands:
@@ -30,6 +43,12 @@ git clone https://github.com/named-data/mini-ndn.git
 cd mini-ndn
 ./install.sh --source
 ```
+
+`./install.sh --source` will install NDN packages from source.
+
+`./install.sh --ppa` will install NDN packages from PPA repository.
+
+`./install.sh --[source or ppa] --no-wifi` will install Mini-NDN without the wifi module.
 
 ## Documentation
 
