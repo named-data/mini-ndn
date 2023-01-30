@@ -21,7 +21,7 @@ Bug reports and feedback are highly appreciated and can be made through our
 [Redmine site](http://redmine.named-data.net/projects/mini-ndn) and the
 [mini-ndn mailing list](http://www.lists.cs.ucla.edu/mailman/listinfo/mini-ndn).
 
-Mini-NDN works on Ubuntu 20.04. It will also run on Debian 11 and Fedora 33 without the WiFi scenario.
+Mini-NDN works on Ubuntu 20.04 and 22.04. It will also run on Debian 11 and Fedora 33 without the WiFi scenario.
 
 Mini-NDN's dependencies are:
 
