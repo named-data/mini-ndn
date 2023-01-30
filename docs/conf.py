@@ -14,7 +14,7 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 from datetime import datetime
-from minindn import __version__
+# from minindn import __version__
 
 # -- Project information -----------------------------------------------------
 
