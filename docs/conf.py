@@ -23,8 +23,10 @@ copyright = '2015-{}, Mini-NDN. This research is partially supported by NSF.'.fo
 author = 'Mini-NDN'
 
 # The full version, including alpha/beta/rc tags
-release = __version__
-version = __version__
+# release = __version__
+# version = __version__
+release = '0.5.0'
+version = '0.5.0'
 
 # -- General configuration ---------------------------------------------------
 
