@@ -25,8 +25,8 @@ author = 'Mini-NDN'
 # The full version, including alpha/beta/rc tags
 # release = __version__
 # version = __version__
-release = '0.5.0'
-version = '0.5.0'
+release = '0.6.0'
+version = '0.6.0'
 
 # -- General configuration ---------------------------------------------------
 
