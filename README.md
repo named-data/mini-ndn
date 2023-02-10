@@ -10,29 +10,7 @@ research on the NDN platform based on [Mininet](https://github.com/mininet/minin
 Mini-NDN uses the NDN libraries, NFD, NLSR, and tools released by the
 [NDN project](http://named-data.net/codebase/platform/) to emulate an NDN network on a single system.
 
-Mini-NDN is open and free software licensed under the GPL 3.0 license. Mini-NDN is free to all
-users and developers. For more information about licensing details and limitations,
-please refer to [COPYING.md](COPYING.md).
-
-The first release of Mini-NDN is developed by members of the NSF-sponsored NDN project team.
-Mini-NDN is open to contribution from the public.
-For more details, please refer to [AUTHORS.rst](AUTHORS.rst).
-Bug reports and feedback are highly appreciated and can be made through our
-[Redmine site](http://redmine.named-data.net/projects/mini-ndn) and the
-[mini-ndn mailing list](http://www.lists.cs.ucla.edu/mailman/listinfo/mini-ndn).
-
 Mini-NDN works on Ubuntu 20.04 and 22.04. It will also run on Debian 11 and Fedora 33 without the WiFi scenario.
-
-Mini-NDN's dependencies are:
-
-- Mininet
-- Mininet-wifi (optional)
-- NDN Forwarding Daemon (NFD)
-- Named Data Link State Routing (NLSR)
-- NDN Essential Tools (ndn-tools)
-- NDN Traffic Generator
-- ndn-cxx
-- Infoedit
 
 ## Installation
 
@@ -52,11 +30,37 @@ cd mini-ndn
 
 ## Documentation
 
-Please refer to [this presentation](https://named-data.net/wp-content/uploads/2022/09/3-ICN22-Mini-NDN.pdf) from ICN 2022 or [docs/index.rst](docs/index.rst) for installation, usage, and other documentation.
-The documentation can be built using:
+Full documentation for Mini-NDN can be found at its [ReadTheDocs](https://mini-ndn.readthedocs.io/en/latest/).
+
+Alternatively, the docs can be built from source by cloning this repo and running:
 
 ```bash
 ./docs/build.sh
 ```
 
-and is available under `docs/_build/html`.
+The output can be found in `docs/_build/html`.
+
+Additionally, the [ICN 2022 presentation](https://named-data.net/wp-content/uploads/2022/09/3-ICN22-Mini-NDN.pdf) is a good starting point to get an overview.
+
+---
+
+Mini-NDN is open and free software licensed under the GPL 3.0 license. Mini-NDN is free to all
+users and developers. For more information about licensing details and limitations,
+please refer to [COPYING.md](COPYING.md).
+
+The first release of Mini-NDN is developed by members of the NSF-sponsored NDN project team.
+Mini-NDN is open to contribution from the public.
+For more details, please refer to [AUTHORS.rst](AUTHORS.rst).
+Bug reports and feedback are highly appreciated and can be made through our
+[Redmine site](http://redmine.named-data.net/projects/mini-ndn) and the
+[mini-ndn mailing list](http://www.lists.cs.ucla.edu/mailman/listinfo/mini-ndn).
+
+Learn more about Mini-NDN's dependencies:
+
+- [Mininet](http://mininet.org)
+- [Mininet-wifi](https://mininet-wifi.github.io) (optional)
+- [NDN Forwarding Daemon (NFD)](https://docs.named-data.net/NFD/current/)
+- [Named Data Link State Routing (NLSR)](https://docs.named-data.net/NLSR/current/)
+- [NDN Essential Tools (ndn-tools)](https://github.com/named-data/ndn-tools)
+- [NDN Traffic Generator](https://github.com/named-data/ndn-traffic-generator)
+- [ndn-cxx](https://docs.named-data.net/ndn-cxx/current/INSTALL.html)
