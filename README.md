@@ -1,10 +1,5 @@
 # Mini-NDN
 
-If you are new to the NDN community of software generally, read the
-[Contributor's Guide](https://github.com/named-data/.github/blob/master/CONTRIBUTING.md).
-
-## What is Mini-NDN?
-
 Mini-NDN is a lightweight networking emulation tool that enables testing, experimentation, and
 research on the NDN platform based on [Mininet](https://github.com/mininet/mininet).
 Mini-NDN uses the NDN libraries, NFD, NLSR, and tools released by the
@@ -43,6 +38,9 @@ The output can be found in `docs/_build/html`.
 Additionally, the [ICN 2022 presentation](https://named-data.net/wp-content/uploads/2022/09/3-ICN22-Mini-NDN.pdf) is a good starting point to get an overview.
 
 ---
+
+If you are new to the NDN community of software generally, read the
+[Contributor's Guide](https://github.com/named-data/.github/blob/master/CONTRIBUTING.md).
 
 Mini-NDN is open and free software licensed under the GPL 3.0 license. Mini-NDN is free to all
 users and developers. For more information about licensing details and limitations,
