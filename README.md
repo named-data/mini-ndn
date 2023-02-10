@@ -39,7 +39,7 @@ sudo python examples/mnndn.py my-topology.conf
 
 More information on how to make your own topologies and configuration file can be found [here](https://mini-ndn.readthedocs.io/en/latest/experiment.html#configuration)
 
-A sample experiment can be found in [/experiments](/experiments) or in the documentaion [here](https://mini-ndn.readthedocs.io/en/latest/experiment.html#sample).
+A sample experiment can be found in [/examples](/examples) or in the documentaion [here](https://mini-ndn.readthedocs.io/en/latest/experiment.html#sample).
 
 ## Documentation
 
