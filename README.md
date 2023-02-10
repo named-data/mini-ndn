@@ -23,6 +23,24 @@ cd mini-ndn
 
 `./install.sh --[source or ppa] --no-wifi` will install Mini-NDN without the wifi module.
 
+## Quickstart
+
+To run Mini-NDN with the default toplology, run:
+
+```bash
+sudo python examples/mnndn.py
+```
+
+To run Mini-NDN with a topology file, provide a filname as the first argument:
+
+```bash
+sudo python examples/mnndn.py my-topology.conf
+```
+
+More information on how to make your own topologies and configuration file can be found [here](https://mini-ndn.readthedocs.io/en/latest/experiment.html#configuration)
+
+A sample experiment can be found in [/experiments](/experiments) or in the documentaion [here](https://mini-ndn.readthedocs.io/en/latest/experiment.html#sample).
+
 ## Documentation
 
 Full documentation for Mini-NDN can be found at its [ReadTheDocs](https://mini-ndn.readthedocs.io/en/latest/).
@@ -37,7 +55,7 @@ The output can be found in `docs/_build/html`.
 
 Additionally, the [ICN 2022 presentation](https://named-data.net/wp-content/uploads/2022/09/3-ICN22-Mini-NDN.pdf) is a good starting point to get an overview.
 
----
+## Contributing
 
 If you are new to the NDN community of software generally, read the
 [Contributor's Guide](https://github.com/named-data/.github/blob/master/CONTRIBUTING.md).
