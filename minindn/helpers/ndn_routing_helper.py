@@ -33,7 +33,6 @@ from math import sin, cos, sinh, cosh, acos, acosh
 import json
 import operator
 from collections import defaultdict
-from tqdm import tqdm
 from joblib import Parallel, delayed
 
 from mininet.log import info, debug, error, warn
@@ -298,7 +297,7 @@ class NdnRoutingHelper(object):
         info('Creating faces and adding routes to FIB\n')
 
         res = Parallel(n_jobs=-1, require='sharedmem',
-                       prefer="threads")(delayed(self.addNodeRoutes)(host) for host in tqdm(self.net.hosts))
+                       prefer="threads", verbose=1)(delayed(self.addNodeRoutes)(host) for host in self.net.hosts)
 
         info('Processed all the routes to NFD\n')
 
@@ -309,8 +308,8 @@ class NdnRoutingHelper(object):
         :param Node node: Node from net object
         """
         neighborIPs = self.getNeighbor(node)
-        self.createFaces(node, neighborIPs)
-        self.routeAdd(node, neighborIPs)
+        neighborFaces = self.createFaces(node, neighborIPs)
+        self.routeAdd(node, neighborFaces)
 
     def addOrigin(self, nodes, prefix):
         """
@@ -348,10 +347,15 @@ class NdnRoutingHelper(object):
         self.calculateNPossibleRoutes(nFaces=1)
 
     def createFaces(self, node, neighborIPs):
-        for ip in neighborIPs.values():
-            nfdc.createFace(node, ip, self.faceType)
+        neighborFaces = {}
+        for k, ip in neighborIPs.items():
+            faceID = nfdc.createFace(node, ip, self.faceType)
+            if not isinstance(faceID, str): raise ValueError(faceID)
+            neighborFaces[k] = faceID
+        return neighborFaces
 
-    def routeAdd(self, node, neighborIPs):
+
+    def routeAdd(self, node, neighborFaces):
         """
         Add route from a node to its neighbors for each prefix/s  advertised by destination node
 
@@ -367,8 +371,7 @@ class NdnRoutingHelper(object):
             prefixes = [defaultPrefix] + self.namePrefixes[destination]
             for prefix in prefixes:
                 # Register routes to all the available destination name prefix/s
-                faceID = nfdc.createFace(node, neighborIPs[nextHop])
-                nfdc.registerRoute(node, prefix, faceID, cost=cost)
+                nfdc.registerRoute(node, prefix, neighborFaces[nextHop], cost=cost)
     @staticmethod
     def getNeighbor(node):
         # Nodes to IP mapping
