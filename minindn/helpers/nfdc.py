@@ -21,12 +21,12 @@
 # along with Mini-NDN, e.g., in COPYING.md file.
 # If not, see <http://www.gnu.org/licenses/>.
 
-from mininet.log import debug
+from mininet.log import debug, warn
 from minindn.minindn import Minindn
 
 # If needed (e.g. to speed up the process), use a smaller (or larger value) 
 # based on your machines resource (CPU, memory)
-SLEEP_TIME = 0.1
+SLEEP_TIME = 0.0015
 
 class Nfdc(object):
     STRATEGY_ASF = 'asf'
@@ -89,6 +89,7 @@ class Nfdc(object):
         if "face-created" in output or (allowExisting and "face-exists" in output):
             faceID = output.split(" ")[1][3:]
             return faceID
+        warn("["+ node.name + "] Face register failed: " + output)
         return -1
 
     @staticmethod
@@ -102,7 +103,9 @@ class Nfdc(object):
     @staticmethod
     def setStrategy(node, namePrefix, strategy):
         cmd = 'nfdc strategy set {} ndn:/localhost/nfd/strategy/{}'.format(namePrefix, strategy)
-        debug(node.cmd(cmd))
+        out = node.cmd(cmd)
+        if out.find('error') != -1:
+            warn("[" + node.name + "] Error on strategy set out: " + out)
         Minindn.sleep(SLEEP_TIME)
 
     @staticmethod
