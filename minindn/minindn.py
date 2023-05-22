@@ -195,9 +195,9 @@ class Minindn(object):
             for param in item[1].split(' '):
                 key = param.split('=')[0]
                 value = param.split('=')[1]
-                if key in ['bw', 'jitter', 'max_queue_size']:
+                if key in ['jitter', 'max_queue_size']:
                     value = int(value)
-                if key == 'loss':
+                if key == 'loss' or key == 'bw':
                     value = float(value)
                 params[key] = value
 
