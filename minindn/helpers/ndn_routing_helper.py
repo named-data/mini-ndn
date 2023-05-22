@@ -285,10 +285,11 @@ class NdnRoutingHelper(object):
     :param Routing routingType: (optional) Routing algorithm, link-state or hr etc
 
     """
-    def __init__(self, netObject, faceType=nfdc.PROTOCOL_UDP, routingType="link-state"):
+    def __init__(self, netObject, faceType=nfdc.PROTOCOL_UDP, routingType="link-state", permanentFaces=False):
         self.net = netObject
         self.faceType = faceType
         self.routingType = routingType
+        self.permanentFaces = permanentFaces
         self.routes = []
         self.namePrefixes = {host_name.name: [] for host_name in self.net.hosts}
         self.routeObject = _CalculateRoutes(self.net, self.routingType)
@@ -349,7 +350,7 @@ class NdnRoutingHelper(object):
     def createFaces(self, node, neighborIPs):
         neighborFaces = {}
         for k, ip in neighborIPs.items():
-            faceID = nfdc.createFace(node, ip, self.faceType)
+            faceID = nfdc.createFace(node, ip, self.faceType, self.permanentFaces)
             if not isinstance(faceID, str): raise ValueError(faceID)
             neighborFaces[k] = faceID
         return neighborFaces
