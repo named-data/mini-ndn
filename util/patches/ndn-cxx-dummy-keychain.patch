@@ -1,8 +1,8 @@
 diff --git a/ndn-cxx/security/key-chain.cpp b/ndn-cxx/security/key-chain.cpp
-index f65b2861..5806c784 100644
+index 16f6c421..d01696e9 100644
 --- a/ndn-cxx/security/key-chain.cpp
 +++ b/ndn-cxx/security/key-chain.cpp
-@@ -155,7 +155,7 @@ KeyChain::getDefaultKeyParams()
+@@ -140,7 +140,7 @@ KeyChain::Locator KeyChain::s_defaultTpmLocator;
  //
  
  KeyChain::KeyChain()
@@ -13,7 +13,7 @@ index f65b2861..5806c784 100644
  
 diff --git a/ndn-cxx/util/dummy-keychain.cpp b/ndn-cxx/util/dummy-keychain.cpp
 new file mode 100644
-index 00000000..dfee171a
+index 00000000..dbf399dc
 --- /dev/null
 +++ b/ndn-cxx/util/dummy-keychain.cpp
 @@ -0,0 +1,352 @@
@@ -167,7 +167,7 @@ index 00000000..dfee171a
 +    typedef boost::iostreams::stream<boost::iostreams::array_source> arrayStream;
 +    arrayStream
 +    is(reinterpret_cast<const char*>(DUMMY_CERT), sizeof(DUMMY_CERT));
-+    auto cert = io::load<v2::Certificate>(is, io::BASE64);
++    auto cert = io::load<Certificate>(is, io::BASE64);
 +    return Buffer(cert->getContent().value(), cert->getContent().value_size());
 +}
 +
@@ -197,7 +197,7 @@ index 00000000..dfee171a
 +}
 +
 +void
-+DummyPib::addCertificate(const v2::Certificate& certificate)
++DummyPib::addCertificate(const Certificate& certificate)
 +{
 +}
 +
@@ -206,15 +206,15 @@ index 00000000..dfee171a
 +{
 +}
 +
-+v2::Certificate
++Certificate
 +DummyPib::getCertificate(const Name& certificateName) const
 +{
-+  static shared_ptr<v2::Certificate> cert = nullptr;
++  static shared_ptr<Certificate> cert = nullptr;
 +  if (cert == nullptr) {
 +    typedef boost::iostreams::stream<boost::iostreams::array_source> arrayStream;
 +    arrayStream
 +    is(reinterpret_cast<const char*>(DUMMY_CERT), sizeof(DUMMY_CERT));
-+    cert = io::load<v2::Certificate>(is, io::BASE64);
++    cert = io::load<Certificate>(is, io::BASE64);
 +  }
 +
 +  return *cert;
@@ -233,15 +233,15 @@ index 00000000..dfee171a
 +{
 +}
 +
-+v2::Certificate
++Certificate
 +DummyPib::getDefaultCertificateOfKey(const Name& keyName) const
 +{
-+  static shared_ptr<v2::Certificate> cert = nullptr;
++  static shared_ptr<Certificate> cert = nullptr;
 +  if (cert == nullptr) {
 +    typedef boost::iostreams::stream<boost::iostreams::array_source> arrayStream;
 +    arrayStream
 +    is(reinterpret_cast<const char*>(DUMMY_CERT), sizeof(DUMMY_CERT));
-+    cert = io::load<v2::Certificate>(is, io::BASE64);
++    cert = io::load<Certificate>(is, io::BASE64);
 +  }
 +
 +  return *cert;
@@ -371,7 +371,7 @@ index 00000000..dfee171a
 +} // namespace ndn
 diff --git a/ndn-cxx/util/dummy-keychain.hpp b/ndn-cxx/util/dummy-keychain.hpp
 new file mode 100644
-index 00000000..5f6a4350
+index 00000000..bdaea8a2
 --- /dev/null
 +++ b/ndn-cxx/util/dummy-keychain.hpp
 @@ -0,0 +1,226 @@
@@ -483,12 +483,12 @@ index 00000000..5f6a4350
 +  hasCertificate(const Name& certName) const override;
 +
 +  void
-+  addCertificate(const v2::Certificate& certificate) override;
++  addCertificate(const Certificate& certificate) override;
 +
 +  void
 +  removeCertificate(const Name& certName) override;
 +
-+  v2::Certificate
++  Certificate
 +  getCertificate(const Name& certificateName) const override;
 +
 +  std::set<Name>
@@ -497,7 +497,7 @@ index 00000000..5f6a4350
 +  void
 +  setDefaultCertificateOfKey(const Name& keyName, const Name& certName) override;
 +
-+  v2::Certificate
++  Certificate
 +  getDefaultCertificateOfKey(const Name& keyName) const override;
 +
 +  static std::string
