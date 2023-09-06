@@ -37,7 +37,9 @@ class Application(object):
     def start(self, command, logfile, envDict=None):
         if self.process is None:
             self.logfile = open('{}/{}'.format(self.logDir, logfile), 'w')
-            self.process = getPopen(self.node, command.split(), envDict,
+            if isinstance(command, str):
+                command = command.split()
+            self.process = getPopen(self.node, command, envDict,
                                     stdout=self.logfile, stderr=self.logfile)
 
     def stop(self):
