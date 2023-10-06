@@ -13,10 +13,10 @@ index 16f6c421..d01696e9 100644
  
 diff --git a/ndn-cxx/util/dummy-keychain.cpp b/ndn-cxx/util/dummy-keychain.cpp
 new file mode 100644
-index 00000000..dbf399dc
+index 00000000..9421fb24
 --- /dev/null
 +++ b/ndn-cxx/util/dummy-keychain.cpp
-@@ -0,0 +1,352 @@
+@@ -0,0 +1,348 @@
 +/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 +/**
 + * Copyright (c) 2011-2015  Regents of the University of California.
@@ -164,11 +164,12 @@ index 00000000..dbf399dc
 +Buffer
 +DummyPib::getKeyBits(const Name& keyName) const
 +{
++  static auto cert = [] {
 +    typedef boost::iostreams::stream<boost::iostreams::array_source> arrayStream;
-+    arrayStream
-+    is(reinterpret_cast<const char*>(DUMMY_CERT), sizeof(DUMMY_CERT));
-+    auto cert = io::load<Certificate>(is, io::BASE64);
-+    return Buffer(cert->getContent().value(), cert->getContent().value_size());
++    arrayStream is(reinterpret_cast<const char*>(DUMMY_CERT), sizeof(DUMMY_CERT));
++    return io::loadTlv<Certificate>(is, io::BASE64);
++  }();
++  return Buffer(cert.getContent().value(), cert.getContent().value_size());
 +}
 +
 +std::set<Name>
@@ -209,15 +210,12 @@ index 00000000..dbf399dc
 +Certificate
 +DummyPib::getCertificate(const Name& certificateName) const
 +{
-+  static shared_ptr<Certificate> cert = nullptr;
-+  if (cert == nullptr) {
++  static auto cert = [] {
 +    typedef boost::iostreams::stream<boost::iostreams::array_source> arrayStream;
-+    arrayStream
-+    is(reinterpret_cast<const char*>(DUMMY_CERT), sizeof(DUMMY_CERT));
-+    cert = io::load<Certificate>(is, io::BASE64);
-+  }
-+
-+  return *cert;
++    arrayStream is(reinterpret_cast<const char*>(DUMMY_CERT), sizeof(DUMMY_CERT));
++    return io::loadTlv<Certificate>(is, io::BASE64);
++  }();
++  return cert;
 +}
 +
 +std::set<Name>
@@ -236,15 +234,12 @@ index 00000000..dbf399dc
 +Certificate
 +DummyPib::getDefaultCertificateOfKey(const Name& keyName) const
 +{
-+  static shared_ptr<Certificate> cert = nullptr;
-+  if (cert == nullptr) {
++  static auto cert = [] {
 +    typedef boost::iostreams::stream<boost::iostreams::array_source> arrayStream;
-+    arrayStream
-+    is(reinterpret_cast<const char*>(DUMMY_CERT), sizeof(DUMMY_CERT));
-+    cert = io::load<Certificate>(is, io::BASE64);
-+  }
-+
-+  return *cert;
++    arrayStream is(reinterpret_cast<const char*>(DUMMY_CERT), sizeof(DUMMY_CERT));
++    return io::loadTlv<Certificate>(is, io::BASE64);
++  }();
++  return cert;
 +}
 +
 +std::string
@@ -267,7 +262,8 @@ index 00000000..dbf399dc
 +ConstBufferPtr
 +DummyKeyHandle::doSign(DigestAlgorithm digestAlgorithm, const InputBuffers& bufs) const
 +{
-+  return make_shared<Buffer>(DUMMY_SIGNATURE, sizeof(DUMMY_SIGNATURE));
++  thread_local auto buff = make_shared<Buffer>(DUMMY_SIGNATURE, sizeof(DUMMY_SIGNATURE));
++  return buff;
 +}
 +
 +bool
