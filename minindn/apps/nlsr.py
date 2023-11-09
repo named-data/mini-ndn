@@ -112,11 +112,11 @@ class Nlsr(Application):
 
     @staticmethod
     def createKey(host, name, outputFile):
-        host.cmd('ndnsec-keygen {} > {}'.format(name, outputFile))
+        host.cmd('ndnsec-key-gen {} > {}'.format(name, outputFile))
 
     @staticmethod
     def createCertificate(host, signer, keyFile, outputFile):
-        host.cmd('ndnsec-certgen -s {} -r {} > {}'.format(signer, keyFile, outputFile))
+        host.cmd('ndnsec-cert-gen -s {} -r {} > {}'.format(signer, keyFile, outputFile))
 
     def createKeysAndCertificates(self):
         securityDir = '{}/security'.format(Minindn.workDir)
@@ -128,7 +128,7 @@ class Nlsr(Application):
         rootCertFile = '{}/root.cert'.format(securityDir)
         if not os.path.isfile(rootCertFile):
             # Create root certificate
-            sh('ndnsec-keygen {}'.format(rootName)) # Installs a self-signed cert into the system
+            sh('ndnsec-key-gen {}'.format(rootName)) # Installs a self-signed cert into the system
             sh('ndnsec-cert-dump -i {} > {}'.format(rootName, rootCertFile))
 
         # Create necessary certificates for each site
@@ -151,7 +151,7 @@ class Nlsr(Application):
         siteCertFile = '{}/site.cert'.format(nodeSecurityFolder)
         Nlsr.createKey(self.node, siteName, siteKeyFile)
 
-        # Copy siteKeyFile from remote for ndnsec-certgen
+        # Copy siteKeyFile from remote for ndnsec-cert-gen
         if isinstance(self.node, RemoteMixin) and self.node.isRemote:
             login = 'mininet@{}'.format(self.node.server)
             src = '{}:{}'.format(login, siteKeyFile)
@@ -159,7 +159,7 @@ class Nlsr(Application):
             scp(src, dst)
 
         # Root key is in root namespace, must sign site key and then install on host
-        sh('ndnsec-certgen -s {} -r {} > {}'.format(rootName, siteKeyFile, siteCertFile))
+        sh('ndnsec-cert-gen -s {} -r {} > {}'.format(rootName, siteKeyFile, siteCertFile))
 
         # Copy root.cert and site.cert from localhost to remote host
         if isinstance(self.node, RemoteMixin) and self.node.isRemote:

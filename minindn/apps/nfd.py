@@ -68,7 +68,7 @@ class Nfd(Application):
 
         if not Minindn.ndnSecurityDisabled:
             # Generate key and install cert for /localhost/operator to be used by NFD
-            node.cmd('ndnsec-keygen /localhost/operator | ndnsec-install-cert -')
+            node.cmd('ndnsec-key-gen /localhost/operator | ndnsec-cert-install -')
 
     def start(self):
         Application.start(self, 'nfd --config {}'.format(self.confFile), logfile=self.logFile)
