@@ -28,14 +28,15 @@ from minindn.minindn import Minindn
 class Nfd(Application):
 
     def __init__(self, node, logLevel='NONE', csSize=65536,
-                 csPolicy='lru', csUnsolicitedPolicy='drop-all'):
+                 csPolicy='lru', csUnsolicitedPolicy='drop-all',
+                 defaultSocketLocation='/run/nfd'):
         Application.__init__(self, node)
 
         self.logLevel = node.params['params'].get('nfd-log-level', logLevel)
 
         self.confFile = '{}/nfd.conf'.format(self.homeDir)
         self.logFile = 'nfd.log'
-        self.sockFile = '/run/{}.sock'.format(node.name)
+        self.sockFile = '{}/{}.sock'.format(defaultSocketLocation, node.name)
         self.ndnFolder = '{}/.ndn'.format(self.homeDir)
         self.clientConf = '{}/client.conf'.format(self.ndnFolder)
 
