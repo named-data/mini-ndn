@@ -86,10 +86,12 @@ class Nfdc(object):
         output = node.cmd(cmd)
         debug(output)
         Minindn.sleep(SLEEP_TIME)
-        if "face-created" in output or (allowExisting and "face-exists" in output):
+        if "face-created" in output or (allowExisting and ("face-exists" in output or "face-updated" in output)):
             faceID = output.split(" ")[1][3:]
+            if "face-exists" in output or "face-updated" in output:
+               debug("[{}] Existing face found: {}\n".format(node.name, faceID))
             return faceID
-        warn("["+ node.name + "] Face register failed: " + output)
+        warn("[{}] Face register failed: {}\n".format(node.name, output))
         return -1
 
     @staticmethod
