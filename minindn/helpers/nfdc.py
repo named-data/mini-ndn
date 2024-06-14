@@ -23,6 +23,7 @@
 
 from mininet.log import debug, warn
 from minindn.minindn import Minindn
+from minindn.util import MACToEther
 
 # If needed (e.g. to speed up the process), use a smaller (or larger value) 
 # based on your machines resource (CPU, memory)
@@ -52,6 +53,8 @@ class Nfdc(object):
                 'expires {}'.format(expirationInMillis) if expirationInMillis else ''
             )
         else:
+            if protocol == "ether":
+                remoteNode = MACToEther(remoteNode)
             cmd = ('nfdc route add {} {}://{} origin {} cost {} {}{}{}').format(
                 namePrefix,
                 protocol,
@@ -66,22 +69,33 @@ class Nfdc(object):
         Minindn.sleep(SLEEP_TIME)
 
     @staticmethod
-    def unregisterRoute(node, namePrefix, remoteNode, origin=255):
+    def unregisterRoute(node, namePrefix, remoteNode, protocol=PROTOCOL_UDP, origin=255):
         cmd = ""
         if remoteNode.isdigit() and not protocol == "fd":
-            cmd = 'nfdc route remove {} {} {}'.format(namePrefix, remoteNode, origin)
+            cmd = 'nfdc route remove {} {} origin {}'.format(namePrefix, remoteNode, origin)
         else:
-            cmd = 'nfdc route remove {} {} {}'.format(namePrefix, remoteNode, origin)
+            if protocol == "ether":
+                remoteNode = MACToEther(remoteNode)
+            cmd = 'nfdc route remove {} {}://{} origin {}'.format(namePrefix, protocol, remoteNode, origin)
         debug(node.cmd(cmd))
         Minindn.sleep(SLEEP_TIME)
 
     @staticmethod
-    def createFace(node, remoteNodeAddress, protocol='udp', isPermanent=False, allowExisting=True):
+    def createFace(node, remoteNodeAddress, protocol=PROTOCOL_UDP, isPermanent=False, localInterface='', allowExisting=True):
         '''Create face in node's NFD instance. Returns FaceID of created face or -1 if failed.'''
-        cmd = ('nfdc face create {}://{} {}'.format(
+        if protocol == "ether" and not localInterface:
+            warn("Cannot create ethernet face without local interface!")
+            return
+        elif protocol != "ether" and localInterface:
+            warn("Cannot create non-ethernet face with local interface specified!")
+            return
+        elif protocol == "ether" and localInterface:
+            remoteNodeAddress = MACToEther(remoteNodeAddress)
+        cmd = ('nfdc face create {}://{} {}{}'.format(
             protocol,
             remoteNodeAddress,
-            'permanent' if isPermanent else 'persistent'
+            'local dev://{} '.format(localInterface) if localInterface else '',
+            'persistency permanent' if isPermanent else 'persistency persistent'
         ))
         output = node.cmd(cmd)
         debug(output)
@@ -95,10 +109,12 @@ class Nfdc(object):
         return -1
 
     @staticmethod
-    def destroyFace(node, remoteNode, protocol='udp'):
+    def destroyFace(node, remoteNode, protocol=PROTOCOL_UDP):
         if remoteNode.isdigit() and not protocol == "fd":
-            debug(node.cmd('nfdc face destroy {}'.format(protocol, remoteNode)))
+            debug(node.cmd('nfdc face destroy {}'.format(remoteNode)))
         else:
+            if protocol == "ether":
+                remoteNode = MACToEther(remoteNode)
             debug(node.cmd('nfdc face destroy {}://{}'.format(protocol, remoteNode)))
         Minindn.sleep(SLEEP_TIME)
 
@@ -116,13 +132,17 @@ class Nfdc(object):
         Minindn.sleep(SLEEP_TIME)
 
     @staticmethod
-    def getFaceId(node, remoteNodeAddress, localEndpoint=None, protocol="udp", portNum="6363"):
+    def getFaceId(node, remoteNodeAddress, localEndpoint=None, protocol=PROTOCOL_UDP, portNum="6363"):
         '''Returns the faceId for a remote node based on FaceURI, or -1 if a face is not found'''
         #Should this be cached or is the hit not worth it?
         local = ""
         if localEndpoint:
             local = " local {}".format(localEndpoint)
-        output = node.cmd("nfdc face list remote {}://{}:{}{}".format(protocol, remoteNodeAddress, portNum, local))
+        if protocol == "ether":
+            remoteNodeAddress = MACToEther(remoteNodeAddress)
+            output = node.cmd("nfdc face list remote {}://{}{}".format(protocol, remoteNodeAddress, local))
+        else:
+            output = node.cmd("nfdc face list remote {}://{}:{}{}".format(protocol, remoteNodeAddress, portNum, local))
         debug(output)
         Minindn.sleep(SLEEP_TIME)
         # This is fragile but we don't have that many better options

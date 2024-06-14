@@ -30,7 +30,7 @@ from mininet.log import warn
 from mininet.node import Switch
 
 from minindn.apps.application import Application
-from minindn.util import scp, copyExistentFile
+from minindn.util import scp, copyExistentFile, MACToEther
 from minindn.helpers.nfdc import Nfdc
 from minindn.minindn import Minindn
 
@@ -41,7 +41,7 @@ class Nlsr(Application):
     SYNC_PSYNC = 'psync'
 
     def __init__(self, node, logLevel='NONE', security=False, sync=SYNC_PSYNC,
-                 faceType='udp', nFaces=3, routingType=ROUTING_LINK_STATE, faceDict=None):
+                 faceType=Nfdc.PROTOCOL_UDP, nFaces=3, routingType=ROUTING_LINK_STATE, faceDict=None):
         Application.__init__(self, node)
         try:
             from mn_wifi.node import Node_wifi
@@ -92,7 +92,8 @@ class Nlsr(Application):
             warn('Check that each node has one radius value and one or two angle value(s).')
             sys.exit(1)
 
-        self.neighborIPs = []
+        self.neighborLocations = []
+        self.interfaceForNeighbor = dict()
         possibleConfPaths = ['/usr/local/etc/ndn/nlsr.conf.sample', '/etc/ndn/nlsr.conf.sample']
         copyExistentFile(node, possibleConfPaths, '{}/nlsr.conf'.format(self.homeDir))
 
@@ -107,8 +108,12 @@ class Nlsr(Application):
         Minindn.sleep(1)
 
     def createFaces(self):
-        for ip in self.neighborIPs:
-            Nfdc.createFace(self.node, ip, self.faceType, isPermanent=True)
+        for location in self.neighborLocations:
+            if self.faceType == Nfdc.PROTOCOL_ETHER:
+                localIntf = self.interfaceForNeighbor[location]
+                Nfdc.createFace(self.node, location, self.faceType, localInterface=localIntf, isPermanent=True)
+            else:
+                Nfdc.createFace(self.node, location, self.faceType, isPermanent=True)
 
     @staticmethod
     def createKey(host, name, outputFile):
@@ -224,19 +229,27 @@ class Nlsr(Application):
 
             if node1 == self.node:
                 other = node2
-                ip = other.IP(str(link.intf2))
+                if self.faceType == Nfdc.PROTOCOL_ETHER:
+                    location = MACToEther(link.intf2.MAC())
+                else:
+                    location = link.intf2.IP()
             else:
                 other = node1
-                ip = other.IP(str(link.intf1))
+                if self.faceType == Nfdc.PROTOCOL_ETHER:
+                    location = MACToEther(link.intf1.MAC())
+                else:
+                    location = link.intf1.IP()
 
             linkCost = intf.params.get('delay', '10ms').replace('ms', '')
 
-            self.neighborIPs.append(ip)
+            self.neighborLocations.append(location)
+            if self.faceType == Nfdc.PROTOCOL_ETHER:
+                self.interfaceForNeighbor[location] = intf
 
             self.node.cmd('{} -a neighbors.neighbor \
                           <<<\'name {}{}-site/%C1.Router/cs/{} face-uri {}://{}\n link-cost {}\''
                           .format(self.infocmd, self.network, other.name, other.name,
-                                  self.faceType, ip, linkCost))
+                                  self.faceType, location, linkCost))
 
     def __editNeighborsSectionManual(self):
 

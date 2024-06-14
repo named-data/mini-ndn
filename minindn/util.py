@@ -28,6 +28,10 @@ from six.moves.urllib.parse import quote
 
 from mininet.cli import CLI
 
+from mininet.log import error
+
+import re
+
 sshbase = ['ssh', '-q', '-t', '-i/home/mininet/.ssh/id_rsa']
 scpbase = ['scp', '-i', '/home/mininet/.ssh/id_rsa']
 devnull = open('/dev/null', 'w')
@@ -83,6 +87,17 @@ def popenGetEnv(node, envDict=None):
 def getPopen(host, cmd, envDict=None, **params):
     return host.popen(cmd, cwd=host.params['params']['homeDir'],
                       env=popenGetEnv(host, envDict), **params)
+
+def MACToEther(mac):
+    # We use the regex filters from face-uri.cpp in ndn-cxx with minor modifications
+    if re.match('^\[((?:[a-fA-F0-9]{1,2}\:){5}(?:[a-fA-F0-9]{1,2}))\]$', mac):
+        return mac
+    elif re.match('^((?:[a-fA-F0-9]{1,2}\:){5}(?:[a-fA-F0-9]{1,2}))$', mac):
+        # URI syntax requires nfdc to use brackets for MAC and ethernet addresses due
+        # to the use of colons as separators. Incomplete brackets are a code issue.
+        return '[%s]' % mac
+    error('Potentially malformed MAC address, passing without alteration: %s' % mac)
+    return mac
 
 class MiniNDNCLI(CLI):
     prompt = 'mini-ndn> '

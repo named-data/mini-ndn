@@ -38,6 +38,8 @@ from joblib import Parallel, delayed
 from mininet.log import info, debug, error, warn
 from minindn.helpers.nfdc import Nfdc as nfdc
 
+from minindn.util import MACToEther
+
 UNKNOWN_DISTANCE = -1
 HYPERBOLIC_COST_ADJUSTMENT_FACTOR = 1000
 
@@ -297,8 +299,13 @@ class NdnRoutingHelper(object):
     def globalRoutingHelperHandler(self):
         info('Creating faces and adding routes to FIB\n')
 
+        if self.faceType == nfdc.PROTOCOL_ETHER:
+            add_route_method = self.addNodeRoutesEther
+        else:
+            add_route_method = self.addNodeRoutes
+
         res = Parallel(n_jobs=-1, require='sharedmem',
-                       prefer="threads", verbose=1)(delayed(self.addNodeRoutes)(host) for host in self.net.hosts)
+                       prefer="threads", verbose=1)(delayed(add_route_method)(host) for host in self.net.hosts)
 
         info('Processed all the routes to NFD\n')
 
@@ -308,8 +315,18 @@ class NdnRoutingHelper(object):
 
         :param Node node: Node from net object
         """
-        neighborIPs = self.getNeighbor(node)
+        neighborIPs = self.getNeighborIP(node)
         neighborFaces = self.createFaces(node, neighborIPs)
+        self.routeAdd(node, neighborFaces)
+
+    def addNodeRoutesEther(self, node):
+        """
+        Create faces to neighbors and add all routes for one node
+
+        :param Node node: Node from net object
+        """
+        neighborAddrs = self.getNeighborEther(node)
+        neighborFaces = self.createEtherFaces(node, neighborAddrs)
         self.routeAdd(node, neighborFaces)
 
     def addOrigin(self, nodes, prefix):
@@ -355,6 +372,15 @@ class NdnRoutingHelper(object):
             neighborFaces[k] = faceID
         return neighborFaces
 
+    def createEtherFaces(self, node, neighborLocations):
+        neighborFaces = {}
+        for k, intfLocTuple in neighborLocations.items():
+            localIntf, etherAddr = intfLocTuple 
+            faceID = nfdc.createFace(node, etherAddr, self.faceType, self.permanentFaces, localIntf)
+            if not isinstance(faceID, str): raise ValueError(faceID)
+            neighborFaces[k] = faceID
+        return neighborFaces
+
 
     def routeAdd(self, node, neighborFaces):
         """
@@ -373,8 +399,9 @@ class NdnRoutingHelper(object):
             for prefix in prefixes:
                 # Register routes to all the available destination name prefix/s
                 nfdc.registerRoute(node, prefix, neighborFaces[nextHop], cost=cost)
+
     @staticmethod
-    def getNeighbor(node):
+    def getNeighborIP(node):
         # Nodes to IP mapping
         neighborIPs = defaultdict()
         for intf in node.intfList():
@@ -392,3 +419,21 @@ class NdnRoutingHelper(object):
                 # Used later to create faces
                 neighborIPs[other.name] = ip
         return neighborIPs
+
+    @staticmethod
+    def getNeighborEther(node):
+        # Nodes to IP mapping
+        neighborLocations = defaultdict()
+        for intf in node.intfList():
+            link = intf.link
+            if link:
+                node1, node2 = link.intf1.node, link.intf2.node
+                if node1 == node:
+                    other = node2
+                    intf_location = (link.intf1.name, MACToEther(link.intf2.MAC()))
+                else:
+                    other = node1
+                    intf_location = (link.intf2.name, MACToEther(link.intf1.MAC()))
+                # Used later to create faces
+                neighborLocations[other.name] = intf_location
+        return neighborLocations
