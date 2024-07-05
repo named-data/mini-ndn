@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2021, The University of Memphis,
+# Copyright (C) 2015-2024, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -73,8 +73,9 @@ def udp_run():
     It can also be set manually as follows. The important bit to note here
     is the use of the Nfdc command
     """
-    links = {"a":["b", "c"], "b":["c"]}
+    links = {"a": ["b", "c"], "b": ["c"]}
     nfdc_batches = dict()
+    info("Setting up routes and strategies...\n")
     for first in links:
         for second in links[first]:
             host1 = ndn.net[first]
@@ -84,23 +85,24 @@ def udp_run():
             Nfdc.createFace(host1, interface_ip)
             Nfdc.registerRoute(host1, PREFIX, interface_ip, cost=0)
             Nfdc.setStrategy(host1, PREFIX, Nfdc.STRATEGY_ASF)
-    sleep(1) 
-    debug(ndn.net["a"].cmd("nfdc face list"))
-    debug(ndn.net["a"].cmd("nfdc fib list"))
-    debug(ndn.net["a"].cmd("nfdc strategy show /example"))
+    sleep(1)
+    info(ndn.net["a"].cmd("nfdc face list"))
+    info(ndn.net["a"].cmd("nfdc fib list"))
+    info(ndn.net["a"].cmd("nfdc strategy show /example"))
 
     # Start ping server
     info("Starting pings...\n")
-    pingserver_log = open("{}/c/ndnpingserver.log".format(ndn.workDir), "w")
-    getPopen(ndn.net["c"], "ndnpingserver {}".format(PREFIX), stdout=pingserver_log,\
+    pingserver_log = open(f"{ndn.workDir}/c/ndnpingserver.log", "w")
+    getPopen(ndn.net["c"], f"ndnpingserver {PREFIX}", stdout=pingserver_log,\
              stderr=pingserver_log)
 
     # start ping client
-    ping1 = getPopen(ndn.net["a"], "ndnping {} -c 5".format(PREFIX), stdout=PIPE, stderr=PIPE)
+    ping1 = getPopen(ndn.net["a"], f"ndnping {PREFIX} -c 5", stdout=PIPE, stderr=PIPE)
     ping1.wait()
     printOutput(ping1.stdout.read())
 
-    links = {"a":["b", "c"], "b":["c"]}
+    info("Bringing down routes and strategies...\n")
+    links = {"a": ["b", "c"], "b": ["c"]}
     for first in links:
         for second in links[first]:
             host1 = ndn.net[first]
@@ -111,11 +113,11 @@ def udp_run():
             Nfdc.destroyFace(host1, interface_ip)
             Nfdc.unsetStrategy(host1, PREFIX)
     sleep(1)
-    debug(ndn.net["a"].cmd("nfdc face list"))
-    debug(ndn.net["a"].cmd("nfdc fib list"))
-    debug(ndn.net["a"].cmd("nfdc strategy show /example"))
+    info(ndn.net["a"].cmd("nfdc face list"))
+    info(ndn.net["a"].cmd("nfdc fib list"))
+    info(ndn.net["a"].cmd("nfdc strategy show /example"))
 
-    ping2 = getPopen(ndn.net["a"], "ndnping {} -c 5".format(PREFIX), stdout=PIPE, stderr=PIPE)
+    ping2 = getPopen(ndn.net["a"], f"ndnping {PREFIX} -c 5", stdout=PIPE, stderr=PIPE)
     ping2.wait()
     printOutput(ping2.stdout.read())
 
@@ -153,7 +155,8 @@ def eth_run():
     It can also be set manually as follows. The important bit to note here
     is the use of the Nfdc command
     """
-    links = {"a":["b", "c"], "b":["c"]}
+    info("Setting up routes and strategies...\n")
+    links = {"a": ["b", "c"], "b": ["c"]}
     nfdc_batches = dict()
     for first in links:
         for second in links[first]:
@@ -165,21 +168,23 @@ def eth_run():
             Nfdc.createFace(host1, interface_addr, protocol=Nfdc.PROTOCOL_ETHER, localInterface=sender_interface)
             Nfdc.registerRoute(host1, PREFIX, interface_addr, cost=0, protocol=Nfdc.PROTOCOL_ETHER)
             Nfdc.setStrategy(host1, PREFIX, Nfdc.STRATEGY_ASF)
-    sleep(1) 
-    debug(ndn.net["a"].cmd("nfdc face list"))
-    debug(ndn.net["a"].cmd("nfdc fib list"))
-    debug(ndn.net["a"].cmd("nfdc strategy show /example"))
+    sleep(1)
+    info(ndn.net["a"].cmd("nfdc face list"))
+    info(ndn.net["a"].cmd("nfdc fib list"))
+    info(ndn.net["a"].cmd("nfdc strategy show /example"))
 
     # Start ping server
     info("Starting pings...\n")
-    pingserver_log = open("{}/c/ndnpingserver.log".format(ndn.workDir), "w")
-    getPopen(ndn.net["c"], "ndnpingserver {}".format(PREFIX), stdout=pingserver_log,\
+    pingserver_log = open(f"{ndn.workDir}/c/ndnpingserver.log", "w")
+    getPopen(ndn.net["c"], f"ndnpingserver {PREFIX}", stdout=pingserver_log,\
              stderr=pingserver_log)
 
     # start ping client
-    ping1 = getPopen(ndn.net["a"], "ndnping {} -c 5".format(PREFIX), stdout=PIPE, stderr=PIPE)
+    ping1 = getPopen(ndn.net["a"], f"ndnping {PREFIX} -c 5", stdout=PIPE, stderr=PIPE)
     ping1.wait()
     printOutput(ping1.stdout.read())
+
+    info("Bringing down routes and strategies...\n")
 
     links = {"a":["b", "c"], "b":["c"]}
     for first in links:
@@ -192,11 +197,11 @@ def eth_run():
             Nfdc.destroyFace(host1, interface_addr, protocol=Nfdc.PROTOCOL_ETHER)
             Nfdc.unsetStrategy(host1, PREFIX)
     sleep(1)
-    debug(ndn.net["a"].cmd("nfdc face list"))
-    debug(ndn.net["a"].cmd("nfdc fib list"))
-    debug(ndn.net["a"].cmd("nfdc strategy show /example"))
+    info(ndn.net["a"].cmd("nfdc face list"))
+    info(ndn.net["a"].cmd("nfdc fib list"))
+    info(ndn.net["a"].cmd("nfdc strategy show /example"))
 
-    ping2 = getPopen(ndn.net["a"], "ndnping {} -c 5".format(PREFIX), stdout=PIPE, stderr=PIPE)
+    ping2 = getPopen(ndn.net["a"], f"ndnping {PREFIX} -c 5", stdout=PIPE, stderr=PIPE)
     ping2.wait()
     printOutput(ping2.stdout.read())
 
@@ -234,6 +239,10 @@ def udp_nlsr_run():
     Experiment.startPctPings(ndn.net, 60)
 
     sleep(70)
+    
+    info(ndn.net["a"].cmd("nfdc face list"))
+    info(ndn.net["a"].cmd("nfdc fib list"))
+    info(ndn.net["a"].cmd("nfdc strategy show /example"))
 
     ndn.stop()
 
@@ -267,6 +276,10 @@ def eth_nlsr_run():
     Experiment.startPctPings(ndn.net, 60)
 
     sleep(70)
+    
+    info(ndn.net["a"].cmd("nfdc face list"))
+    info(ndn.net["a"].cmd("nfdc fib list"))
+    info(ndn.net["a"].cmd("nfdc strategy show /example"))
 
     ndn.stop()
 
@@ -311,18 +324,18 @@ def udp_static_run():
 
     info('Route addition to NFD completed succesfully\n')
 
-    debug(ndn.net["a"].cmd("nfdc face list"))
-    debug(ndn.net["a"].cmd("nfdc fib list"))
-    debug(ndn.net["a"].cmd("nfdc strategy show /example"))
+    info(ndn.net["a"].cmd("nfdc face list"))
+    info(ndn.net["a"].cmd("nfdc fib list"))
+    info(ndn.net["a"].cmd("nfdc strategy show /example"))
 
     # Start ping server
     info("Starting pings...\n")
-    pingserver_log = open("{}/c/ndnpingserver.log".format(ndn.workDir), "w")
-    getPopen(ndn.net["c"], "ndnpingserver {}".format(PREFIX), stdout=pingserver_log,\
+    pingserver_log = open(f"{ndn.workDir}/c/ndnpingserver.log", "w")
+    getPopen(ndn.net["c"], f"ndnpingserver {PREFIX}", stdout=pingserver_log,\
              stderr=pingserver_log)
 
     # start ping client
-    ping1 = getPopen(ndn.net["a"], "ndnping {} -c 5".format(PREFIX), stdout=PIPE, stderr=PIPE)
+    ping1 = getPopen(ndn.net["a"], f"ndnping {PREFIX} -c 5", stdout=PIPE, stderr=PIPE)
     ping1.wait()
     printOutput(ping1.stdout.read())
 
@@ -369,28 +382,34 @@ def eth_static_run():
 
     info('Route addition to NFD completed succesfully\n')
 
-    debug(ndn.net["a"].cmd("nfdc face list"))
-    debug(ndn.net["a"].cmd("nfdc fib list"))
-    debug(ndn.net["a"].cmd("nfdc strategy show /example"))
+    info(ndn.net["a"].cmd("nfdc face list"))
+    info(ndn.net["a"].cmd("nfdc fib list"))
+    info(ndn.net["a"].cmd("nfdc strategy show /example"))
 
     # Start ping server
     info("Starting pings...\n")
-    pingserver_log = open("{}/c/ndnpingserver.log".format(ndn.workDir), "w")
-    getPopen(ndn.net["c"], "ndnpingserver {}".format(PREFIX), stdout=pingserver_log,\
+    pingserver_log = open(f"{ndn.workDir}/c/ndnpingserver.log", "w")
+    getPopen(ndn.net["c"], f"ndnpingserver {PREFIX}", stdout=pingserver_log,\
              stderr=pingserver_log)
 
     # start ping client
-    ping1 = getPopen(ndn.net["a"], "ndnping {} -c 5".format(PREFIX), stdout=PIPE, stderr=PIPE)
+    ping1 = getPopen(ndn.net["a"], f"ndnping {PREFIX} -c 5", stdout=PIPE, stderr=PIPE)
     ping1.wait()
     printOutput(ping1.stdout.read())
 
     ndn.stop()
 
 if __name__ == '__main__':
-    setLogLevel("debug")
+    setLogLevel("info")
+    info("\n\nUDP FACES\n")
     udp_run()
+    info("\n\nETHERNET FACES\n")
     eth_run()
+    info("\n\nNLSR WITH UDP FACES\n")
     udp_nlsr_run()
+    info("\n\nNLSR WITH ETHERNET FACES\n")
     eth_nlsr_run()
+    info("\n\nSTATIC ROUTING HELPER WITH UDP FACES\n")
     udp_static_run()
+    info("\n\nSTATIC ROUTING HELPER WITH ETHERNET FACES\n")
     eth_static_run()
