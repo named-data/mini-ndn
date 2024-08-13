@@ -24,8 +24,8 @@ Bug reports and feedback are highly appreciated and can be made through our
 
 ### Documentation
 
-Please refer to http://minindn.memphis.edu/ or [docs/index.rst](docs/index.rst) for installation, usage, and other documentation.
-The documentation can be built using:
+Please refer to http://minindn.memphis.edu/ for installation, usage, and other documentation.
+The documentation can also be built locally using:
 
     ./docs/build.sh
 

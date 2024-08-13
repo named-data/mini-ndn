@@ -117,12 +117,9 @@ reached via external machines.
 Generate NDN testbed topology
 ___________________________________________
 
-Run the following install.sh command
-
-::
-
-    python3 util/testbed_topo_generator.py
-
-This will place a "testbed.conf" file in the topologies subdirectory,
-where it can be referenced as desired. To update the topology, simply
-rerun this command.
+Visit the  `NDN Play testbed <https://play.ndn.today/?testbed=1>`_
+page and utilize the `MiniNDN Config` button after setting loss
+and latency parameters. This will export an up to date topology
+modeled on the testbed. We also provide a topology at
+`topologies/testbed.conf`, which is based on a sample from 2020
+which has latencies based on measurements from that configuration.

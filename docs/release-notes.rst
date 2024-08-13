@@ -1,6 +1,56 @@
 Release Notes
 =============
 
+Mini-NDN version 0.7.0 (Major changes since version 0.6.0)
+----------------------------------------------------------
+
+**Breaking Changes**:
+
+- Install behavior regarding existing installation of dependencies has been reversed; by default, these are now ignored. This is meant
+  to clear up confusion regarding installing on existing installs which have been used for NDN development previously. The previous
+  behavior can be enabled using `--use-existing`.
+
+**New features**:
+
+- Added `NFDCBatch` to NFDC helper, which allows the user to use the existing NFDC wrapper API to instead create and execute a batch file.
+  When running large numbers of commands, this significantly speeds up performance due to not needing to add delay between individual CLI
+  calls.
+- Added `MinindnAdhoc` class which can be used to construct adhoc Mini-NDN-Wifi networks from topology files. 
+- Model mobility parameters can now also be passed to Mini-NDN-Wifi via topology files.
+- Working directory can be passed as constructor argument to `Minindn` objects
+- We have added a new `--release` flag to the installer which simplifies installing matching releases of dependencies. Reference
+  `the install documentation <./install.rst>`__ for more information.
+- Experimental wifi support for NLSR helper. See `experiment docs <experiment>` for details (`issue: 5232 <https://redmine.named-data.net/issues/5232>`__)
+- Added a Dockerfile for Mini-NDN. A prebuilt image for *linux/amd64* platforms is available on the
+  `GitHub container registry <https://github.com/named-data/mini-ndn/pkgs/container/mini-ndn>`__
+- The previous testbed topology generation script has been deprecated and removed. Please reference the `NDN Play website <https://play.ndn.today/?testbed=1>`__
+  for a replacement
+
+**Improvements**:
+
+- Ethernet unicast faces are now supported natively by NLSR wrapper, NFDC wrapper, and NDN routing helper. No additional formatting by the user is needed
+  for ethernet addresses extracted from the Mininet API when passed to these functions (`issue: 5321 <https://redmine.named-data.net/issues/5232>`__)
+- `NdnRoutingHelper` has been parallelized along with minor optimizations. You can now also use it to create
+  permanent faces (`issue: 5264 <https://redmine.named-data.net/issues/5264>`__)
+- `checkConvergence` method of `Experiment` helper can now output more detailed information when flag `returnConvergenceInfo` is set
+  (`issue: 5236 <https://redmine.named-data.net/issues/5236>`__)
+- `getPopen` can now accept commands formatted as lists as well as strings
+- We now natively edit nfd.conf files using infoconv to read and write it as json rather than calling infoedit at the shell
+  (`issue: 5318 <https://redmine.named-data.net/issues/5318>`__)
+- Added Sprint PoP topology
+- Link bandwidth value (`bw`) can now be specified as decimal megabits rather than only integers in topology files
+- NFDC was significantly refactored for the `NFDCBatch` change.
+
+**Bug fixes**:
+
+- NFDC helper properly supports existing faces and no longer outputs unnecessary error messages if face exists by default.
+- Fixed out of date ndnsec commands
+- Socket path now defaults to NFD default as of release 24.07. You can specify a different path with the `defaultSocketLocation` 
+  argument in the `Nfd` object constructor (`issue: 5309 <https://redmine.named-data.net/issues/5309>`__)
+- Fixed jitter being parsed into incorrect type from topology files
+- Moved vestigial CLI arguments relating to `wifi_ping.py` example out of the Mini-NDN-Wifi class
+
+
 Mini-NDN version 0.6.0 (Major changes since version 0.5.0)
 ----------------------------------------------------------
 

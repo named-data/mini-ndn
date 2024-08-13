@@ -18,6 +18,7 @@ Mini-NDN: A Mininet-based NDN emulator
    faq
    hackathon
    videos
+   authors
 
 Helpful Links
 -------------

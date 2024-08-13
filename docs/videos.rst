@@ -1,7 +1,7 @@
 Video Tutorials
 ===============
 
-Maybe outdated since version 0.5.0.
+May be outdated since version 0.5.0.
 
 .. raw:: html
 
