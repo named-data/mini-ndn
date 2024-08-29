@@ -182,3 +182,29 @@ You can use these steps to run the sample pingall experiment:
 4. Issue the command:
    ``grep -c timeout /tmp/minindn/*/ping-data/*.txt``. Each file should
    report a count of 0.
+
+
+Release Versions
+----------------
+
+We provide a set of shortcuts to install major release versions of NDN
+dependencies from source.
+
+You can install the most recent release using:
+
+::
+
+    ./install.sh --source --release=current
+
+You can also select a specified release using:
+
+::
+
+    ./install.sh --source --release=[chosen version]
+
+
+Currently, the compatible versions include:
+
+- ``2024-08``: ndn-cxx 0.9.0, NFD 24.07, NLSR 24.08, PSync 0.5.0,
+  ndn-tools 24.07, and compatible versions of ndn-traffic-generator
+  and infoedit.

@@ -72,7 +72,7 @@ fi
 PREFER_FROM=ppa
 PPA_PKGS=()
 
-ARGS=$(getopt -o 'hy' -l 'help,dir:,jobs:,no-wifi,ppa,source,cxx:,dummy-keychain,nfd:,psync:,nlsr:,tools:,traffic:,infoedit:,mininet:,mnwifi:,dl-only,ignore-existing' -- "$@")
+ARGS=$(getopt -o 'hy' -l 'help,dir:,jobs:,no-wifi,ppa,source,release:,cxx:,dummy-keychain,nfd:,psync:,nlsr:,tools:,traffic:,infoedit:,mininet:,mnwifi:,dl-only,ignore-existing' -- "$@")
 eval set -- "$ARGS"
 while true; do
   case $1 in
@@ -83,6 +83,7 @@ while true; do
     --no-wifi) NO_WIFI=1; shift;;
     --ppa) PREFER_FROM=ppa; shift;;
     --source) PREFER_FROM=source; shift;;
+    --release) RELEASE_VERSION=$2; source util/releases/current_release.sh; NO_PPA=1; shift 2;;
     --cxx) CXX_VERSION=$2; NO_PPA=1; shift 2;;
     --dummy-keychain) CXX_DUMMY_KEYCHAIN=1; NO_PPA=1; shift;;
     --nfd) NFD_VERSION=$2; NO_PPA=1; shift 2;;
@@ -130,6 +131,9 @@ Install preference options:
       Install all packages from source code.
 
 Source code version options:
+  --release=[RELEASE]
+      Use specified major release. To install the most recent, use 'current'. A list of
+      other possible values is located in the installation docs.
   --cxx=[VERSION]
       Set ndn-cxx version.
   --dummy-keychain
