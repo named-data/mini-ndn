@@ -72,7 +72,7 @@ fi
 PREFER_FROM=ppa
 PPA_PKGS=()
 
-ARGS=$(getopt -o 'hy' -l 'help,dir:,jobs:,no-wifi,ppa,source,release:,cxx:,dummy-keychain,nfd:,psync:,nlsr:,tools:,traffic:,infoedit:,mininet:,mnwifi:,dl-only,ignore-existing' -- "$@")
+ARGS=$(getopt -o 'hy' -l 'help,dir:,jobs:,no-wifi,ppa,source,release:,cxx:,dummy-keychain,nfd:,psync:,nlsr:,tools:,traffic:,infoedit:,mininet:,mnwifi:,dl-only,use-existing' -- "$@")
 eval set -- "$ARGS"
 while true; do
   case $1 in
@@ -95,7 +95,7 @@ while true; do
     --mininet) MININET_VERSION=$2; shift 2;;
     --mnwifi) MNWIFI_VERSION=$2; shift 2;;
     --dl-only) DL_ONLY=1; shift;;
-    --ignore-existing) IGNORE_EXISTING=1; shift;;
+    --use-existing) USE_EXISTING=1; shift;;
     --) shift; break;;
     *) exit 1;;
   esac
@@ -166,9 +166,11 @@ Misc options:
   --dl-only
       Download the source code only.
       You may modify the code in ${CODEROOT} and then rerun this script to install them.
-  --ignore-existing
-      Ignore already installed binaries and libraries, and attempt to reinstall.
-      This is useful if you have modified source code checkout and want to install again.
+  --use-existing
+      Use already installed dependency binaries and libraries, rather than attempting to
+      reinstall. This is useful if you have modified source code checkout for some
+      repositories but still want to install any remaining dependencies or are
+      reinstalling Mini-NDN.
 EOT
   exit 0
 fi

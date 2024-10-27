@@ -47,6 +47,7 @@ Some notable flags are:
 - ``--ppa`` prefers installing NDN software from `named-data PPA <https://launchpad.net/~named-data/+archive/ubuntu/ppa>`_.
   This shortens installation time by downloading binary packages, but is only available on Ubuntu.
 - ``--source`` prefers installing NDN software from source code.
+- ``--use-existing`` will only install dependencies not already in the executable path.
 
 IMPORTANT: For now, Mininet-WiFi only works with ``--source`` installation because the current NFD release (0.7.1) doesn't
 incorporate `issue 5155 <https://redmine.named-data.net/issues/5155>`, a required patch for WiFi module to work properly.

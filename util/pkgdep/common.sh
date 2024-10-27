@@ -127,7 +127,7 @@ DEP_WAFOPTS=(
 
 # return whether dep is installed
 dep_exists() {
-  if [[ $IGNORE_EXISTING -eq 1 ]]; then
+  if [[ $USE_EXISTING -eq 0 ]]; then
     return 2
   fi
   local DETECT="${DEP_DETECT[$1]}"
