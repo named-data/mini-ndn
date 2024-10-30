@@ -195,7 +195,7 @@ class Minindn(object):
             for param in item[1].split(' '):
                 key = param.split('=')[0]
                 value = param.split('=')[1]
-                if key in ['jitter', 'max_queue_size']:
+                if key in ['max_queue_size']:
                     value = int(value)
                 if key == 'loss' or key == 'bw':
                     value = float(value)
@@ -313,7 +313,7 @@ class Minindn(object):
 
     def setupFaces(self, faces_to_create=None):
         """ Method to create unicast faces between connected nodes;
-            Returns dict- {node: (other node name, other node IP, other node's delay as int)}. 
+            Returns dict- {node: (other node name, other node IP, other node's delay as int)}.
             This is intended to pass to the NLSR helper via the faceDict param """
         if not faces_to_create:
             faces_to_create = self.faces_to_create
