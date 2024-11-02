@@ -203,9 +203,9 @@ class MinindnWifi(Minindn):
                     continue
                 key = param.split('=')[0]
                 value = param.split('=')[1]
-                if key in ['bw', 'jitter', 'max_queue_size']:
+                if key in ['jitter', 'max_queue_size']:
                     value = int(value)
-                if key == 'loss':
+                if key in ['loss', 'bw']:
                     value = float(value)
                 params[key] = value
 
