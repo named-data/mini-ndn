@@ -120,9 +120,6 @@ class MinindnWifi(Minindn):
         parser.add_argument('--result-dir', action='store', dest='resultDir', default=None,
                             help='Specify the full path destination folder where experiment results will be moved')
 
-        parser.add_argument('--mobility',action='store_true',dest='mobility',default=False,
-                            help='Enable custom mobility for topology (defined in topology file)')
-
         parser.add_argument('--ifb',action='store_true',dest='ifb',default=False,
                             help='Simulate delay on receiver-side by use of virtual IFB devices (see docs)')
 
@@ -390,9 +387,6 @@ class MinindnAdhoc(MinindnWifi):
 
         parser.add_argument('--result-dir', action='store', dest='resultDir', default=None,
                             help='Specify the full path destination folder where experiment results will be moved')
-
-        parser.add_argument('--mobility',action='store_true',dest='mobility',default=False,
-                            help='Enable custom mobility for topology (defined in topology file)')
 
         parser.add_argument('--ifb',action='store_true',dest='ifb',default=False,
                             help='Simulate delay on receiver-side by use of virtual IFB devices (see docs)')

@@ -23,6 +23,7 @@
 
 import time
 import sys
+import argparse
 from itertools import cycle
 
 from mininet.log import info
@@ -130,3 +131,15 @@ class Experiment(object):
             nodesPingedList = []
 
         return pingedDict
+
+    import argparse
+
+    @staticmethod
+    def getWifiExperimentParser(parent=argparse.ArgumentParser()):
+        parser = argparse.ArgumentParser(prog='minindn-wifi', parents=[parent], add_help=False)
+
+        parser.add_argument('--mobility',action='store_true',dest='mobility',default=False,
+                            help='Enable custom mobility for topology (defined in script)')
+        parser.add_argument('--model-mob',action='store_true',dest='modelMob',default=False,
+                            help='Enable model mobility for topology (defined in script; see adhoc experiment for how to specify in topology file)')
+        return parser

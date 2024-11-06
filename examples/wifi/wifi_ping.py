@@ -26,6 +26,7 @@ from minindn.wifi.minindnwifi import MinindnWifi
 from minindn.util import MiniNDNWifiCLI
 from minindn.apps.app_manager import AppManager
 from minindn.apps.nfd import Nfd
+from minindn.helpers.experiment import Experiment
 from minindn.helpers.nfdc import Nfdc
 from minindn.helpers.ndnping import NDNPing
 from time import sleep
@@ -33,9 +34,8 @@ from time import sleep
 # test case where we see if two nodes can send interests to each other.
 def runExperiment():
     setLogLevel('info')
-
     info("Starting network")
-    ndnwifi = MinindnWifi()
+    ndnwifi = MinindnWifi(parser=Experiment.getWifiExperimentParser())
     a = ndnwifi.net["sta1"]
     b = ndnwifi.net["sta2"]
     # Test for model-based mobility
@@ -59,16 +59,16 @@ def runExperiment():
         ndnwifi.startMobility(time=0, mob_rep=1, reverse=False)
 
     ndnwifi.start()
-    info("Starting NFD")
+    info("Starting NFD...\n")
     sleep(2)
     AppManager(ndnwifi, ndnwifi.net.stations, Nfd)
 
-    info("Starting pingserver...")
+    info("Starting pingserver...\n")
     NDNPing.startPingServer(b, "/example")
     faceID = Nfdc.createFace(a, b.IP())
     Nfdc.registerRoute(a, "/example", faceID)
 
-    info("Starting ping...")
+    info("Starting ping...\n")
     NDNPing.ping(a, "/example", nPings=10)
 
     sleep(10)
