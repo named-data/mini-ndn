@@ -21,10 +21,13 @@
 # along with Mini-NDN, e.g., in COPYING.md file.
 # If not, see <http://www.gnu.org/licenses/>.
 
+import subprocess
 from minindn.util import getPopen
 from typing import Union, Optional
 
 class Application(object):
+    process: subprocess.Popen
+
     def __init__(self, node):
         self.node = node
         self.process = None
@@ -48,7 +51,11 @@ class Application(object):
 
     def stop(self):
         if self.process is not None:
-            self.process.kill()
+            try:
+                self.process.terminate()
+                self.process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                self.process.kill()
             self.process = None
         if self.logfile is not None:
             self.logfile.close()
