@@ -411,7 +411,7 @@ class MinindnAdhoc(MinindnWifi):
                         continue
                     key = param.split('=')[0]
                     value = param.split('=')[1]
-                    if key in ['range']:
+                    if key in ['range', 'min_v', 'max_v']:
                         value = int(value)
                     params[key] = value
             # ip6 address for each station using id

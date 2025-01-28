@@ -1,6 +1,6 @@
 # -*- Mode:bash; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2022, The University of Memphis,
+# Copyright (C) 2015-2025, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -33,6 +33,7 @@ DNF_PKGS=(
   boost-devel
   ca-certificates
   gcc-c++
+  gpsd
   libpcap-devel
   openssl-devel
   python3-pip

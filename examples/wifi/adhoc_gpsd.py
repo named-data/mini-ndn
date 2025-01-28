@@ -27,11 +27,9 @@ from minindn.wifi.minindnwifi import MinindnAdhoc
 from minindn.util import MiniNDNWifiCLI
 from minindn.apps.app_manager import AppManager
 from minindn.apps.nfd import Nfd
-from minindn.helpers.nfdc import Nfdc
-from minindn.helpers.ndnping import NDNPing
-
-# This experiment uses the topology defined in adhoc-topology.conf and is intended to be a basic
-# test case where we see if two nodes can send interests to each other.
+from minindn.apps.gpsd import Gpsd
+# This experiment uses the topology defined in adhoc-topology.conf and
+# is intended to test whether app Gpsd can work with Mini-NDN.
 def runExperiment():
     setLogLevel('info')
 
@@ -42,25 +40,23 @@ def runExperiment():
 
     ndnwifi.start()
 
+    info("Starting gpsd\n")
+
+    AppManager(ndnwifi, ndnwifi.net.stations, Gpsd, lat=35.11908, lon=-89.93778, altitude=200, update_interval=0.2)
 
     info("Starting NFD\n")
     AppManager(ndnwifi, ndnwifi.net.stations, Nfd)
 
-    info("Starting pingserver...\n")
-    NDNPing.startPingServer(b, "/example")
+    sleep(1)
 
-    # multicast face for wireless communication
-    multicastFaceId = Nfdc.getFaceId(a, "[01:00:5e:00:17:aa]", None, "ether", 6363)
-    # print(multicastFaceId)
-    Nfdc.registerRoute(a, "/example", multicastFaceId, 100)
-
-    info("Starting ping...\n")
-    NDNPing.ping(a, "/example", nPings=10)
-
-    sleep(10)
+    # run cgps in the Xterm terminal to check gps info
+    for node in [a,b]:
+        node.cmd(f"xterm -T '{node.name}' -e 'cgps' &")
 
     # Start the CLI
     MiniNDNWifiCLI(ndnwifi.net)
+
+    # Stop the network and clean up
     ndnwifi.stop()
     ndnwifi.cleanUp()
 

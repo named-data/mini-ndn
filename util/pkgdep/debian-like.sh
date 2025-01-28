@@ -1,6 +1,6 @@
 # -*- Mode:bash; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2021, The University of Memphis,
+# Copyright (C) 2015-2025, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -26,6 +26,7 @@ APT_PKGS=(
   build-essential
   ca-certificates
   git
+  gpsd
   libboost-atomic-dev
   libboost-chrono-dev
   libboost-date-time-dev
