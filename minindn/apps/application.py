@@ -22,6 +22,7 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 from minindn.util import getPopen
+from typing import Union, Optional
 
 class Application(object):
     def __init__(self, node):
@@ -34,11 +35,14 @@ class Application(object):
         self.logDir = '{}/log'.format(self.homeDir)
         self.node.cmd('mkdir -p {}'.format(self.logDir))
 
-    def start(self, command, logfile, envDict=None):
+    def start(self, command: Union[str, list], logfile: Optional[str]=None, envDict: Optional[dict]=None) -> None:
         if self.process is None:
-            self.logfile = open('{}/{}'.format(self.logDir, logfile), 'w')
             if isinstance(command, str):
                 command = command.split()
+            if not logfile:
+                self.process = getPopen(self.node, command, envDict)
+                return
+            self.logfile = open('{}/{}'.format(self.logDir, logfile), 'w')
             self.process = getPopen(self.node, command, envDict,
                                     stdout=self.logfile, stderr=self.logfile)
 
