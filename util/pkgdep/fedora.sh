@@ -33,7 +33,6 @@ DNF_PKGS=(
   boost-devel
   ca-certificates
   gcc-c++
-  gpsd
   libpcap-devel
   openssl-devel
   python3-pip

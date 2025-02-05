@@ -26,7 +26,6 @@ APT_PKGS=(
   build-essential
   ca-certificates
   git
-  gpsd
   libboost-atomic-dev
   libboost-chrono-dev
   libboost-date-time-dev

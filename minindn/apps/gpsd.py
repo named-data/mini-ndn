@@ -25,9 +25,13 @@ import threading
 import math
 import time
 import datetime
+from subprocess import TimeoutExpired, DEVNULL
 from typing import Optional, Tuple
 
+from mininet.log import error
+
 from minindn.apps.application import Application
+from minindn.util import getPopen
 
 
 class Gpsd(Application):
@@ -222,6 +226,19 @@ class Gpsd(Application):
         """
         Start a thread to periodically send GPS data for the node.
         """
+        try:
+            gpsd_present = getPopen(self.node, "gpsd -V", stdout=DEVNULL, stderr=DEVNULL).wait(timeout=5)
+            nc_present = getPopen(self.node, "nc -h", stdout=DEVNULL, stderr=DEVNULL).wait(timeout=5)
+            if gpsd_present > 0:
+                error("The application is currently missing gpsd as a dependency. This must be installed manually.\n")
+            elif nc_present > 0:
+                error("The application is currently missing netcat as a dependency. This must be installed manually.\n")
+            if (gpsd_present + nc_present) > 0:
+                raise RuntimeError("Missing dependency for gpsd helper")
+        except TimeoutExpired as e:
+            error("The application is unable to validate if you have all required dependencies for gpsd.\n")
+            raise e
+
         Application.start(self, command="gpsd -n udp://127.0.0.1:7150")
 
         self.location_thread = threading.Thread(target=self.__feedGPStoGPSD, args=(self.node,))

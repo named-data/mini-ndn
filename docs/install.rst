@@ -240,3 +240,11 @@ Currently, the compatible versions include:
 - ``2024-08``: ndn-cxx 0.9.0, NFD 24.07, NLSR 24.08, PSync 0.5.0,
   ndn-tools 24.07, and compatible versions of ndn-traffic-generator
   and infoedit.
+
+Using gpsd (Experimental)
+----------------
+
+The gpsd application included currently is based on in-progress work and
+is not treated as part of the main dependencies. To use it, install the
+`gpsd` and `nc` (netcat) from your package manager, if not already present,
+to enable the functionality.
