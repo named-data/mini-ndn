@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2021, The University of Memphis,
+# Copyright (C) 2015-2025, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -227,12 +227,15 @@ class Minindn(object):
 
         return topo
 
-    def start(self):
+    def start(self) -> None:
         self.net.start()
         time.sleep(3)
 
-    def stop(self):
-        for cleanup in self.cleanups:
+    def stop(self) -> None:
+        # We stop applications in the reversal of insertion order, which will
+        # implicitly prevent applications dependent on others closing early
+        # from errors (see: NLSR and NFD)
+        for cleanup in reversed(self.cleanups):
             cleanup()
         self.net.stop()
 
