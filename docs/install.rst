@@ -17,8 +17,8 @@ You must have sudo privileges to install and run Mini-NDN.
 Using Docker
 ------------
 
-You can use the nightly build from GitHub package registry
-::
+You can use the nightly build from GitHub package registry::
+
     docker run -m 4g --cpus=4 -it --privileged \
             -v /lib/modules:/lib/modules \
             ghcr.io/named-data/mini-ndn:master bash
@@ -42,9 +42,10 @@ The provided Dockerfile can be used to build an image from scratch. To build wit
 
 Additional recommendations
 --------------------------
+
 - It is recommended to set reasonable constraints on memory (`-m`) and CPU cores (`--cpus`), especially on less
   powerful or non-dedicated systems.
-- `--privileged` is mandatory for underlying `Mininet <http://mininet.org/>`_ to utilize the virtual switch
+- `--privileged` is mandatory for underlying `Mininet <https://mininet.org/>`__ to utilize the virtual switch
 - The root directory on `run` is `/mini-ndn`, which contains the installation and examples.
 - The GUI may not work for now due to docker and xterm setup issues and is independent from Mini-NDN.
   If you intend to run the GUI, pass `-e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix` to the `docker run` command.
@@ -67,7 +68,7 @@ Mini-NDN has the following dependencies:
 - `NDN Essential Tools (ndn-tools) <https://github.com/named-data/ndn-tools>`_
 - `NDN Traffic Generator <https://github.com/named-data/ndn-traffic-generator>`_
 - `infoedit <https://github.com/NDN-Routing/infoedit>`_
-- `Mininet <http://mininet.org/>`_
+- `Mininet <https://mininet.org/>`_
 - `Mininet-WiFi <https://mininet-wifi.github.io/>`_ (optional)
 
 To install Mini-NDN and its dependencies, clone this repository and run:

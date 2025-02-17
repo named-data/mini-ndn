@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2020, The University of Memphis,
+# Copyright (C) 2015-2025, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -43,8 +43,7 @@ def getSafeName(namePrefix):
     :param namePrefix: name of the prefix
     """
     # remove redundant "/"es, multiple "/"es are an invalid representation for empty name component
-    # https://named-data.net/doc/NDN-packet-spec/current/changelog.html#version-0-3
-    namePrefix= "/" + ("/".join(filter(None, namePrefix.split("/"))))
+    namePrefix = "/" + "/".join(filter(None, namePrefix.split("/")))
     return quote(namePrefix, safe='/')
 
 def ssh(login, cmd):
