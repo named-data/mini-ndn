@@ -1,8 +1,15 @@
+# Backup files
+*~
+*.bak
+*.orig
+*.rej
+
 # Python
 build
 dist
 Mini_NDN.egg-info
-*.pyc
+__pycache__/
+*.py[cod]
 
 # Docs
 docs/html
@@ -10,9 +17,17 @@ docs/latex
 docs/_build
 
 # Misc
-.DS_Store
-dl
+dl/
 *.apconf
 
 # Vagrant
-.vagrant
+.vagrant/
+
+# Visual Studio Code
+.vscode/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*

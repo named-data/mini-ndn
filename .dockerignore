@@ -1,1 +1,18 @@
+# Compiled python code
+**/__pycache__/
+**/*.py[cod]
+
+# Vagrant
+.vagrant/
+
+# Visual Studio Code
+.vscode/
+
+# macOS
+**/.DS_Store
+**/.AppleDouble
+**/.LSOverride
+**/._*
+
+# Other
 Dockerfile
