@@ -20,7 +20,8 @@ If you would like to become a contributor to the official repository, please fol
 * Philipp Moll <https://github.com/phylib>
 * Eric Newberry <https://ericnewberry.com>
 * Varun Patil <https://github.com/pulsejet>
-* Md Ashiqur Rahman (Mini-NDN Docker support) <marahman@email.arizona.edu>
+* Davide Pesavento <https://github.com/Pesa>
+* Md Ashiqur Rahman <https://ashiqrahman.com>
 * Junxiao Shi <https://cs.arizona.edu/~shijunxiao>
 * Jeff Thompson <https://remap.ucla.edu/jeff-thompson>
 * Yucheng Zhang <https://peterskycloud.wixsite.com/yzportfolio>

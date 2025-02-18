@@ -19,9 +19,9 @@ Using Docker
 
 You can use the nightly build from GitHub package registry::
 
-    docker run -m 4g --cpus=4 -it --privileged \
-            -v /lib/modules:/lib/modules \
-            ghcr.io/named-data/mini-ndn:master bash
+    docker run -it --cpus=4 --memory=4g --privileged \
+        -v /lib/modules:/lib/modules \
+        ghcr.io/named-data/mini-ndn:master
 
 NOTE: This nightly build is only currently supported for x86_64. ARM64 support
 (i.e. Apple silicon Macs) will be added in the future.
@@ -30,33 +30,35 @@ Building your own Docker image
 ------------------------------
 
 The provided Dockerfile can be used to build an image from scratch. To build with the Dockerfile:
+
   - Clone the repository and type::
 
         docker build -t minindn .
 
   - You can then access the container through shell with::
 
-        docker run -m 4g --cpus=4 -it --privileged \
+        docker run -it --cpus=4 --memory=4g --privileged \
             -v /lib/modules:/lib/modules \
-            minindn bin/bash
+            minindn
 
 Additional recommendations
 --------------------------
 
-- It is recommended to set reasonable constraints on memory (`-m`) and CPU cores (`--cpus`), especially on less
-  powerful or non-dedicated systems.
-- `--privileged` is mandatory for underlying `Mininet <https://mininet.org/>`__ to utilize the virtual switch
-- The root directory on `run` is `/mini-ndn`, which contains the installation and examples.
-- The GUI may not work for now due to docker and xterm setup issues and is independent from Mini-NDN.
-  If you intend to run the GUI, pass `-e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix` to the `docker run` command.
+- It is recommended to set reasonable constraints on memory (``--memory``) and CPU cores (``--cpus``),
+  especially on less powerful or non-dedicated systems.
+- ``--privileged`` is mandatory for Mininet to utilize the virtual switch.
+- The container working directory is ``/mini-ndn``, which contains the installation and examples.
+- The GUI may not work due to docker and xterm setup issues and is independent from Mini-NDN. If you intend
+  to run the GUI, pass ``-e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix`` to the ``docker run`` command.
 
 Using Vagrantfile
 -----------------
 
-With Vagrant installed, simply do ``vagrant up`` which will bring up an Ubuntu 18.04 virtual machine
+With Vagrant installed, simply do ``vagrant up`` which will bring up an Ubuntu 20.04 virtual machine
 and install Mini-NDN and all its dependencies on it. Please make sure to tweak the CPU core count
-(default 4 cores) and RAM (default 4GB) according to your needs before doing vagrant up. Mini-NDN
-can be found in /home/vagrant/mini-ndn which is a symlink to /vagrant if Vagrantfile was used from within mini-ndn cloned on the host. Otherwise it is an actual clone of mini-ndn.
+(default 4 cores) and RAM (default 4GB) according to your needs before doing ``vagrant up``. Mini-NDN
+can be found in ``/home/vagrant/mini-ndn`` which is a symlink to ``/vagrant`` if Vagrantfile was used
+from within mini-ndn cloned on the host. Otherwise it is an actual clone of mini-ndn.
 
 Using install.sh
 ----------------
@@ -81,7 +83,7 @@ The script accepts various command line flags.
 Some notable flags are:
 
 - ``-y`` skips interactive confirmation before installation.
-- ``--ppa`` prefers installing NDN software from `named-data PPA <https://launchpad.net/~named-data/+archive/ubuntu/ppa>`_.
+- ``--ppa`` prefers installing NDN software from the `named-data PPA <https://launchpad.net/~named-data/+archive/ubuntu/ppa>`__.
   This shortens installation time by downloading binary packages, but is only available on Ubuntu.
 - ``--source`` prefers installing NDN software from source code.
 - ``--use-existing`` will only install dependencies not already in the executable path.
@@ -167,7 +169,7 @@ Mini-NDN uses ndn-cxx, NFD, NLSR, and ndn-tools.
 
 In cases where using NDN security is not important to the results, it is recommended
 to use the dummy keychain patch for ndn-cxx to disable it for improved scalability.
-This patch is located at `util/patches/ndn-cxx-dummy-keychain.patch.`
+This patch is located at ``util/patches/ndn-cxx-dummy-keychain.patch``.
 
 Note that all three of these can be installed from the Named Data PPA.
 Instructions for setting it up can be found in the NFD installation
@@ -175,10 +177,9 @@ instructions. Note that PPA and installs from source **cannot** be
 mixed. You must completely remove PPA installs from the system if switching
 to source and vice-versa.
 
-For PPA installs, if you are using a custom nfd.conf file in an experiment, you should
-place it in /usr/local/etc/ndn/ rather than /etc/ndn/. This is to avoid
-a bug from the default configuration file for the PPA, which is
-incompatible with Mini-NDN.
+For PPA installs, if you are using a custom ``nfd.conf`` file in an experiment, you should
+place it in ``/usr/local/etc/ndn/`` rather than ``/etc/ndn/``. This is to avoid a bug with
+the default configuration file for the PPA, which is incompatible with Mini-NDN.
 
 Infoedit
 ________
@@ -243,9 +244,9 @@ Currently, the compatible versions include:
   and infoedit.
 
 Using gpsd (Experimental)
-----------------
+-------------------------
 
 The gpsd application included currently is based on in-progress work and
-is not treated as part of the main dependencies. To use it, install the
-`gpsd` and `nc` (netcat) from your package manager, if not already present,
+is not treated as part of the main dependencies. To use it, install ``gpsd``
+and ``nc`` (netcat) from your package manager, if not already present,
 to enable the functionality.
