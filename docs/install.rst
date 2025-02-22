@@ -17,14 +17,12 @@ You must have sudo privileges to install and run Mini-NDN.
 Using Docker
 ------------
 
-You can use the nightly build from GitHub package registry::
+You can use the latest image from `GitHub Container Registry
+<https://github.com/named-data/mini-ndn/pkgs/container/mini-ndn>`__::
 
     docker run -it --cpus=4 --memory=4g --privileged \
         -v /lib/modules:/lib/modules \
-        ghcr.io/named-data/mini-ndn:master
-
-NOTE: This nightly build is only currently supported for x86_64. ARM64 support
-(i.e. Apple silicon Macs) will be added in the future.
+        ghcr.io/named-data/mini-ndn
 
 Building your own Docker image
 ------------------------------
