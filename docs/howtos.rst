@@ -2,26 +2,26 @@ Howtos
 ======
 
 Connect Mini-NDN nodes to an outside network
----------------------------------------------
+--------------------------------------------
 
 Mini-NDN nodes can be connected to an outside network indirectly by
 running NFD on the local machine:
 
-::
+.. code-block:: none
 
     (Mini-NDN node) ------ (NFD running on the host machine where Mini-NDN is running) ------- (External Network)
 
 Add a node in root namespace
 ____________________________
 
-For this simple example, we can use a single node topology with node 'a'
+For this simple example, we can use a single node topology with node 'a'.
 
 If we want node 'a' to connect to the host machine, we need to add a
 "root" node which has a link with node "a."
 
 Then the following code can be used:
 
-.. code:: python
+.. code-block:: python
 
     topo = Topo()
     root = topo.addHost('root', inNamespace=False)
@@ -29,17 +29,16 @@ Then the following code can be used:
     topo.addLink(root, a, delay='10ms')
 
     ndn = Minindn(topo=topo)
-
     ...
 
 Configuration
 _____________
 
-Run Mini-NDN with the above code and issue ifconfig on the local
+Run Mini-NDN with the above code and issue ``ifconfig`` on the local
 machine to confirm the addition of the interface. You should be able to
 locate "root-eth0":
 
-::
+.. code-block:: none
 
     root-eth0 Link encap:Ethernet  HWaddr 3e:eb:77:d2:6f:1f
               inet addr:1.0.0.9  Bcast:1.0.0.11  Mask:255.255.255.252
@@ -51,9 +50,9 @@ locate "root-eth0":
               RX bytes:2667 (2.6 KB)  TX bytes:2797 (2.7 KB)
 
 To make the IP address associated with this interface persistent, add
-the following line to /etc/network/interfaces and reboot your machine:
+the following line to ``/etc/network/interfaces`` and reboot your machine:
 
-::
+.. code-block:: none
 
     iface root-eth0 inet manual
 
@@ -62,15 +61,15 @@ ________________
 
 After rebooting, run Mini-NDN and issue the following command:
 
-::
+.. code-block:: none
 
     mini-ndn>net
     a a-eth0:b-eth0 a-eth1:c-eth0 a-eth2:root-eth0
 
-Node "a" is connected to "root-eth0". Now issue "ifconfig a-eth2" on
+Node "a" is connected to "root-eth0". Now issue ``ifconfig a-eth2`` on
 node "a":
 
-::
+.. code-block:: none
 
     mini-ndn>a ifconfig a-eth2
     a-eth2    Link encap:Ethernet  HWaddr fa:76:d4:86:d3:ba
@@ -79,7 +78,7 @@ node "a":
 As learned from the previous step, the IP address of root-eth0 is
 1.0.0.9.
 
-::
+.. code-block:: none
 
     mini-ndn>a ping 1.0.0.9
     PING 1.0.0.9 (1.0.0.9) 56(84) bytes of data.
@@ -88,7 +87,7 @@ As learned from the previous step, the IP address of root-eth0 is
 
 The host machine will also be able to ping node "a":
 
-::
+.. code-block:: none
 
     VirtualBox:~$ ping 1.0.0.10
     PING 1.0.0.10 (1.0.0.10) 56(84) bytes of data.
@@ -99,15 +98,15 @@ ___________________________________________
 
 Start NFD on the local machine by using:
 
-::
+.. code-block:: sh
 
     sudo nfd
 
-The "nfd-start" script cannot be used, since the script allows only one
+The ``nfd-start`` script cannot be used, since the script allows only one
 instance of NFD at a time. The NFD processes running on the Mini-NDN
-nodes will prevent the "nfd-start" script from working.
+nodes will prevent the ``nfd-start`` script from working.
 
-Now, using "nfdc register", we can register a route from node "a" in
+Now, using ``nfdc register``, we can register a route from node "a" in
 Mini-NDN to the NFD process on the host machine and from the host
 machine to an external machine.
 
@@ -115,11 +114,11 @@ Also, if the local machine has a public IP, Mini-NDN nodes can be
 reached via external machines.
 
 Generate NDN testbed topology
-___________________________________________
+_____________________________
 
-Visit the  `NDN Play testbed <https://play.ndn.today/?testbed=1>`_
-page and utilize the `MiniNDN Config` button after setting loss
+Visit the `NDN Play testbed <https://play.ndn.today/?testbed=1>`__
+page and utilize the "MiniNDN Config" button after setting loss
 and latency parameters. This will export an up to date topology
 modeled on the testbed. We also provide a topology at
-`topologies/testbed.conf`, which is based on a sample from 2020
+``topologies/testbed.conf``, which is based on a sample from 2020
 which has latencies based on measurements from that configuration.

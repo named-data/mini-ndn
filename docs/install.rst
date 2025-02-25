@@ -18,7 +18,9 @@ Using Docker
 ------------
 
 You can use the latest image from `GitHub Container Registry
-<https://github.com/named-data/mini-ndn/pkgs/container/mini-ndn>`__::
+<https://github.com/named-data/mini-ndn/pkgs/container/mini-ndn>`__:
+
+.. code-block:: sh
 
     docker run -it --cpus=4 --memory=4g --privileged \
         -v /lib/modules:/lib/modules \
@@ -29,11 +31,15 @@ Building your own Docker image
 
 The provided Dockerfile can be used to build an image from scratch. To build with the Dockerfile:
 
-  - Clone the repository and type::
+- Clone the repository and type:
+
+  .. code-block:: sh
 
         docker build -t minindn .
 
-  - You can then access the container through shell with::
+- You can then access the container through shell with:
+
+  .. code-block:: sh
 
         docker run -it --cpus=4 --memory=4g --privileged \
             -v /lib/modules:/lib/modules \
@@ -73,7 +79,7 @@ Mini-NDN has the following dependencies:
 
 To install Mini-NDN and its dependencies, clone this repository and run:
 
-::
+.. code-block:: sh
 
     ./install.sh
 
@@ -94,7 +100,7 @@ Some notable flags are:
 
 You can see all command line flags by running:
 
-::
+.. code-block:: sh
 
     ./install.sh -h
 
@@ -118,20 +124,20 @@ _______
 
 Mini-NDN is based on Mininet. To install Mininet:
 
-::
+.. code-block:: sh
 
     git clone --depth 1 https://github.com/mininet/mininet.git
 
 After Mininet source is on your system, run the following command to
 install Mininet core dependencies and Open vSwitch:
 
-::
+.. code-block:: sh
 
     ./util/install.sh -nv
 
 To check if Mininet is working correctly, run this test:
 
-::
+.. code-block:: sh
 
     sudo mn --test pingall
 
@@ -185,7 +191,7 @@ ________
 Infoedit is used to edit configuration files for NFD and NLSR.
 To install infoedit:
 
-::
+.. code-block:: sh
 
     git clone --depth 1 https://github.com/NDN-Routing/infoedit
     cd infoedit
@@ -198,7 +204,7 @@ Verification
 You can execute the following example to bring up the Mini-NDN command line
 with NFD and NLSR running on each node:
 
-::
+.. code-block:: sh
 
     sudo python examples/mnndn.py
 
@@ -224,16 +230,15 @@ dependencies from source.
 
 You can install the most recent release using:
 
-::
+.. code-block:: sh
 
     ./install.sh --source --release=current
 
 You can also select a specified release using:
 
-::
+.. code-block:: sh
 
     ./install.sh --source --release=[chosen version]
-
 
 Currently, the compatible versions include:
 

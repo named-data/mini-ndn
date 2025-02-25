@@ -30,8 +30,8 @@ If you would like to become a contributor to the official repository, please fol
 Technical Advisors
 ------------------
 
-* Lan Wang <http://www.cs.memphis.edu/~lanwang>
-* Beichuan Zhang <http://cs.arizona.edu/~bzhang>
+* Lan Wang <https://www.cs.memphis.edu/~lanwang/>
+* Beichuan Zhang <https://www2.cs.arizona.edu/~bzhang/>
 
 
 The Mini-CCNx team

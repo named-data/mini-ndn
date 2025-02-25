@@ -6,12 +6,12 @@ Configuration
 
 Mini-NDN uses a configuration file describing the topology and its parameters to setup a network.
 
-The [nodes] section:
+**The [nodes] section**
 
-At the bare minimum, the node section describes the nodes present in the
-topology.
+At the bare minimum, the ``nodes`` section describes the nodes present in the
+topology, e.g.:
 
-::
+.. code-block:: cfg
 
     [nodes]
     a: key1=value1 key2=value2
@@ -19,36 +19,35 @@ topology.
 
 Any key and value passed here is accessible in Mini-NDN as:
 
-::
+.. code-block:: python
 
     ndn = Minindn(...)
-    value = ndn.net.hosts[0].params['params'].get('key1', "defaultValue")
+    value = ndn.net.hosts[0].params['params'].get('key1', 'defaultValue')
 
 One can specify log levels for each node's NFD and NLSR using this key-value system:
 
-::
+.. code-block:: cfg
 
     [nodes]
     a: nfd-log-level=DEBUG nlsr-log-level=DEBUG
     b: nfd-log-level=INFO
 
-To specify a log level for certain modules of NFD, the following line can be added to `nfd.py`:
+To specify a log level for certain modules of NFD, the following line can be added to ``nfd.py``:
 
-::
+.. code-block:: python
 
    node.cmd('infoedit -f {} -s log.Forwarder -v {}'.format(self.confFile, 'INFO'))
 
-This will turn on FORWARDER logging to INFO for all nodes.
+This will turn on Forwarder logging to INFO for all nodes.
 
-.. Todo: Add switch section
+.. todo::
+    Document [switches] section
 
-The [links] section:
+**The [links] section**
 
-The links section describes the links in the topology.
+The ``links`` section describes the links in the topology, e.g.:
 
-::
-
-    e.g.)
+.. code-block:: cfg
 
     [links]
     a:b delay=10ms
@@ -56,16 +55,16 @@ The links section describes the links in the topology.
 This would create a link between a and b. 'b:a' would also result in the
 same. The following parameters can be configured for a node:
 
--  delay : Delay parameter is a required parameter which defines the
+-  ``delay`` : Delay parameter is a required parameter which defines the
    delay of the link (1-1000ms)
 
--  bw : Bandwidth of a link (<1-1000> Mbps)
+-  ``bw`` : Bandwidth of a link (<1-1000> Mbps)
 
--  loss : Percentage of packet loss (<1-100>)
+-  ``loss`` : Percentage of packet loss (<1-100>)
 
-Example configuration file
+Example configuration file:
 
-::
+.. code-block:: cfg
 
     [nodes]
     a:
@@ -73,14 +72,14 @@ Example configuration file
     [links]
     a:b delay=10ms bw=100
 
-See ``ndn_utils/topologies`` for more sample files
+See the ``topologies`` folder for more sample files.
 
-Sample
-------
+Example
+-------
 
 Sample experiment may written as follows:
 
-.. code:: python
+.. code-block:: python
 
     from mininet.log import setLogLevel, info
 
@@ -128,30 +127,31 @@ Users may look at how the NFD and NLSR applications are written as a sub class o
 in the ``minindn/apps`` folder. Or users may choose to directly run their application on nodes
 such as ndnpingserver is run in ``minindn/helpers/experiment.py``.
 
-**Note:** A certain log-level can be set-up for all the NFD or NLSR nodes at once by passing it as an argument during the startup.
+**Note:** A certain log level can be configured for all the NFD or NLSR nodes at once by passing it as an argument during startup, e.g.:
 
-``nfds = AppManager(self.ndn, self.ndn.net.hosts, Nfd, logLevel='DEBUG')`` (same for NLSR)
+.. code-block:: python
+
+    nfds = AppManager(self.ndn, self.ndn.net.hosts, Nfd, logLevel='DEBUG')
 
 Execution
 ---------
 
-To run Mini-NDN with the default topology,
-``ndn_utils/topologies/default-topology.conf``, type:
+To run Mini-NDN with the default topology, ``topologies/default-topology.conf``, type:
 
-::
+.. code-block:: sh
 
     sudo python examples/minindn.py
 
 To run Mini-NDN with a topology file, provide the filename as the first
 argument:
 
-::
+.. code-block:: sh
 
     sudo python examples/minindn.py my-topology.conf
 
 After Mini-NDN is installed, users can run examples from anywhere with python directly as follows:
 
-::
+.. code-block:: sh
 
     sudo python /path/to/myexample.py
 
@@ -163,59 +163,63 @@ _____________
 During set up, the list of nodes in the network will be listed as they
 are initialized:
 
-::
+.. code-block:: none
 
     *** Adding hosts:
     a b c d
 
 After set up, the command-line interface (CLI) will display a prompt.
 
-::
+.. code-block:: none
 
     mini-ndn>
 
 To interact with a node, first type the node's name and then the command
 to be executed:
 
-::
+.. code-block:: sh
 
     mini-ndn> a echo "Hello, world!"
     Hello, world!
 
 To see the status of the forwarder on the node:
 
-::
+.. code-block:: sh
 
     mini-ndn> a nfdc status report
 
 To see the status of routing on the node:
 
-::
+.. code-block:: sh
 
     mini-ndn> a nlsrc status
 
-To exit Mini-NDN, type ``quit`` in the CLI or use ``ctrl + D``:
+To exit Mini-NDN, type ``quit`` in the CLI or use :kbd:`Ctrl-d`:
 
-::
+.. code-block:: sh
 
     mini-ndn> quit
 
-``Ctrl + C`` is used to quit an application run in the foreground of the command line.
+:kbd:`Ctrl-c` is used to quit an application run in the foreground of the command line.
 
 For a more in depth explanation of the CLI, please see the `Mininet
-Walkthrough <http://mininet.org/walkthrough/>`__.
+Walkthrough <https://mininet.org/walkthrough/>`__.
 
 To run NDN commands from the outside the command line user can also open a new terminal
-and export the HOME folder of a node ``export HOME=/tmp/minindn/a && cd ~``
+and export the HOME folder of a node:
+
+.. code-block:: sh
+
+    export HOME=/tmp/minindn/a && cd ~
 
 Working Directory Structure
 ---------------------------
 
-Currently Mini-NDN uses /tmp/minindn as the working directory if not
-specified otherwise by using the option --work-dir.
+Currently Mini-NDN uses ``/tmp/minindn`` as the working directory if not
+specified otherwise by using the option ``--work-dir``.
 
-Each node is given a HOME directory under /tmp/minindn/<node-name> where
-<node-name> is the name of the node specified in the [nodes] section of
+Each node is given a HOME directory under ``/tmp/minindn/<node-name>`` where
+``<node-name>`` is the name of the node specified in the ``[nodes]`` section of
 the conf file.
 
 NFD
@@ -256,11 +260,13 @@ Routing Options
 
 Link State Routing (NLSR)
 _________________________
-By default, Mini-NDN uses `NLSR <https://github.com/named-data/NLSR>`__ for route management i.e route computation, route installation and so on. Additionally, the command line utility ``nlsrc`` can be used to advertise and withdraw prefixes and route status.
 
+By default, Mini-NDN uses `NLSR <https://github.com/named-data/NLSR>`__ for route management, i.e., route computation, route installation, etc.
+Additionally, the command-line utility ``nlsrc`` can be used to advertise and withdraw prefixes and route status.
 
 NDN Routing Helper
-____________________
+__________________
+
 Computes link-state or hyperbolic route/s from a given minindn topology and installs them in the FIB. The major benefit of the routing helper is to eliminate the overhead of NLSR when using larger topology. See ``examples/static_routing_experiment.py`` on how to use the helper class.
 
 **IMPORTANT:** NLSR and NDN Routing Helper are mutually exclusive, meaning you can only use one at a time, not both.

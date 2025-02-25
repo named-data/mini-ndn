@@ -1,7 +1,6 @@
 # Configuration file for the Sphinx documentation builder.
 #
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
+# For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 # -- Path setup --------------------------------------------------------------
@@ -17,21 +16,28 @@ from datetime import datetime
 from minindn import __version__
 
 # -- Project information -----------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Mini-NDN'
 copyright = '2015-{}, Mini-NDN. This research is partially supported by NSF.'.format(datetime.now().year)
 author = 'Mini-NDN'
 
-# The full version, including alpha/beta/rc tags
-release = __version__
+# The short X.Y version.
 version = __version__
 
+# The full version, including alpha/beta/rc tags.
+release = __version__
+
+
 # -- General configuration ---------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx.ext.extlinks',
+    'sphinx.ext.todo',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -44,6 +50,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 
 # -- Options for HTML output -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
@@ -59,3 +66,10 @@ html_static_path = ['_static']
 # https://github.com/readthedocs/readthedocs.org/issues/2569
 # https://stackoverflow.com/questions/56336234/build-fail-sphinx-error-contents-rst-not-found
 master_doc = 'index'
+
+
+# -- Misc options ------------------------------------------------------------
+
+extlinks = {
+    'issue': ('https://redmine.named-data.net/issues/%s', 'issue #%s'),
+}
