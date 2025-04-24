@@ -212,6 +212,65 @@ and export the HOME folder of a node:
 
     export HOME=/tmp/minindn/a && cd ~
 
+GUI Interface
+--------------
+Mini-NDN provides an optional browser-based GUI interface via `NDN-Play <https://github.com/pulsejet/ndn-play>`__.
+
+An example can be found at ``examples/ndn_play_demo.py``. To start the server, add the following to your Mininet script.
+This will print the URL of the server.
+
+.. code-block:: python
+
+    from minindn.minindn_play.server import PlayServer
+
+    if __name__ == '__main__':
+        # placeholder
+        PlayServer(net).start() # starts the server and blocks
+
+If running remotely, you must make sure to forward the port 8765 to the local
+machine where the browser is running (this port is used by the websocket server). Remember that Mini-NDN runs with superuser
+privileges, so do this judiciously.
+
+Wireshark Visualization
+_______________________
+
+MiniNDN stores the ``hosts.params['params']['homeDir']`` variable for all hosts, used to identify the home directory of the
+nodes. The wireshark dump must be stored in ``shark.log`` in the ``<node-home>/log`` directory for each node. Using the app
+manager, this can be done as,
+
+.. code-block:: python
+
+    from minindn.apps.app_manager import AppManager
+    from minindn.apps.tshark import Tshark
+
+    if __name__ == '__main__':
+        # placeholder
+        ndn.initParams(ndn.net.hosts)
+        sharks = AppManager(ndn, ndn.net.hosts, Tshark, singleLogFile=True)
+
+Once setup, the dump will be visible for each node and the TLV inspector will show each packet on double-clicking it in the GUI.
+If this fails to function, we recommending following the troubleshooting steps for the `NDN Wireshark Dissector
+<https://github.com/named-data/ndn-tools/blob/master/tools/dissect-wireshark/README.md>`__ before filing an issue.
+
+Log Monitor
+___________
+
+The log monitor periodically captures the output of one or more log files on each node and shows the events on the topology
+visually by changing the color of the node. In the following example, the `log/my_app.log` at each host will be monitored
+every `200ms`, for all lines (matching the regex `.*`).
+
+.. code-block:: python
+
+    from minindn.minindn_play.monitor import LogMonitor
+
+    if __name__ == '__main__':
+        ...
+
+        server = PlayServer(net)
+        server.add_monitor(LogMonitor(net.hosts, "log/my_app.log", interval=0.2, regex_filter=".*"))
+        server.start()
+
+
 Working Directory Structure
 ---------------------------
 

@@ -304,6 +304,10 @@ $SUDO ldconfig
 DESTDIR=/usr/local/etc/mini-ndn
 $SUDO install -d -m0755 "$DESTDIR"
 find topologies/ -name '*.conf' | xargs $SUDO install -m0644 -t "$DESTDIR/"
+
+echo "Installing Python dependencies"
+$SUDO $PYTHON -m pip install -r requirements.txt
+
 $SUDO $PYTHON setup.py develop
 
 echo 'MiniNDN installation completed successfully'

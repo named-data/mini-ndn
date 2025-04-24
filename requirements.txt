@@ -1,4 +1,6 @@
+igraph
 joblib
-python-igraph
+msgpack==1.*
 setuptools
 tqdm
+websockets==15.*

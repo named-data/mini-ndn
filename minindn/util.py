@@ -21,16 +21,18 @@
 # along with Mini-NDN, e.g., in COPYING.md file.
 # If not, see <http://www.gnu.org/licenses/>.
 
+import re
 import sys
 from os.path import isfile
-from subprocess import call
+from subprocess import call, PIPE
+
 from six.moves.urllib.parse import quote
 
 from mininet.cli import CLI
-
 from mininet.log import error
+from mininet.node import Host
+from mininet.net import Mininet
 
-import re
 
 sshbase = ['ssh', '-q', '-t', '-i/home/mininet/.ssh/id_rsa']
 scpbase = ['scp', '-i', '/home/mininet/.ssh/id_rsa']
@@ -57,19 +59,20 @@ def scp(*args):
     rcmd = scpbase + tmp
     call(rcmd, stdout=devnull, stderr=devnull)
 
-def copyExistentFile(node, fileList, destination):
+def copyExistentFile(host, fileList, destination):
     for f in fileList:
         if isfile(f):
-            node.cmd('cp {} {}'.format(f, destination))
+            host.cmd('cp {} {}'.format(f, destination))
             break
     if not isfile(destination):
         fileName = destination.split('/')[-1]
         raise IOError('{} not found in expected directory.'.format(fileName))
 
-def popenGetEnv(node, envDict=None):
+def popenGetEnv(host, envDict=None):
+    '''Helper method to set environment variables for Popen on nodes'''
     env = {}
-    homeDir = node.params['params']['homeDir']
-    printenv = node.popen('printenv'.split(), cwd=homeDir).communicate()[0].decode('utf-8')
+    homeDir = host.params['params']['homeDir']
+    printenv = host.popen('printenv'.split(), cwd=homeDir).communicate()[0].decode('utf-8')
     for var in printenv.split('\n'):
         if var == '':
             break
@@ -84,6 +87,7 @@ def popenGetEnv(node, envDict=None):
     return env
 
 def getPopen(host, cmd, envDict=None, **params):
+    '''Return Popen object for process on node with correctly set environmental variables'''
     return host.popen(cmd, cwd=host.params['params']['homeDir'],
                       env=popenGetEnv(host, envDict), **params)
 
@@ -105,13 +109,46 @@ class MiniNDNCLI(CLI):
 
 try:
     from mn_wifi.cli import CLI as CLI_wifi
-
+    from mn_wifi.node import Station as mn_wifi_station
+    HAS_WIFI = True
     class MiniNDNWifiCLI(CLI_wifi):
         prompt = 'mini-ndn-wifi> '
         def __init__(self, mininet, stdin=sys.stdin, script=None):
             CLI_wifi.__init__(self, mininet, stdin, script)
 
 except ImportError:
+    HAS_WIFI = False
     class MiniNDNWifiCLI:
         def __init__(self):
             raise ImportError('Mininet-WiFi is not installed')
+
+def is_valid_hostid(net: Mininet, host_id: str):
+    """Check if a hostId is a host"""
+    if host_id not in net:
+        return False
+
+    if not isinstance(net[host_id], Host) and \
+        (HAS_WIFI and not isinstance(net[host_id], mn_wifi_station)):
+        return False
+
+    return True
+
+def run_popen(host, cmd):
+    """Helper to run command on node asynchronously and get output (blocking)"""
+    process = getPopen(host, cmd, stdout=PIPE)
+    return process.communicate()[0]
+
+def run_popen_readline(host, cmd):
+    """Helper to run command on node asynchronously and get output line by line (blocking)"""
+    process = getPopen(host, cmd, stdout=PIPE)
+    while True:
+        line: bytes = process.stdout.readline()
+        if not line:
+            break
+        yield line
+
+def host_home(host) -> str | None:
+    """Get home directory for host"""
+    if 'params' not in host.params or 'homeDir' not in host.params['params']:
+        return None
+    return host.params['params']['homeDir']
