@@ -1,18 +1,34 @@
-# Mini-NDN in [VirtualBox](https://www.virtualbox.org/) using [vagrant](https://www.vagrantup.com/).
+# Mini-NDN in [VirtualBox](https://www.virtualbox.org/) using [vagrant](https://www.vagrantup.com/)
 
 ### [RECOMMENDED] Mini-NDN Vagrant Box
 
-We have a Mini-NDN pre-installed in a vagrant box. The box can be found [here](https://app.vagrantup.com/sdulal/boxes/mini-ndn). For suggested Mini-NDN resource allocation,
-Here's an example [`Vagrantfile`](https://gerrit.named-data.net/c/mini-ndn/+/6426/18/vagrant/Vagrantfile):
+We provide a Vagrant box with Mini-NDN pre-installed. The box can be found
+[here](https://portal.cloud.hashicorp.com/vagrant/discover/netlab-memphis-minindn).
+For suggested Mini-NDN resource allocation, here's an example [`Vagrantfile`](Vagrantfile) using VirtualBox:
 ```ruby
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
 Vagrant.configure("2") do |config|
-  config.vm.box = "sdulal/mini-ndn"
+  config.vm.box = "netlab-memphis-minindn/minindn-0.7.0"
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "4096"
     vb.cpus = "4"
     vb.name = "mini-ndn-box"
+  end
+end
+```
+----
+
+For those on ARM64 MacOS devices, you can instead use our provided VMWare image.
+You will need the [Vagrant VMWare Utility](https://developer.hashicorp.com/vagrant/docs/providers/vmware/installation)
+installed. You can then initialize the Vagrant box using `vagrant up --provider vmware_desktop`
+
+This provider is not as well supported and may encounter minor issues.
+
+```ruby
+Vagrant.configure("2") do |config|
+  config.vm.box = "netlab-memphis-minindn/minindn-0.7.0"
+  config.vm.provider "vmware_desktop" do |vb|
+    vb.memory = "4096"
+    vb.cpus = "4"
   end
 end
 ```
@@ -26,10 +42,8 @@ end
 * To create and start fresh virtual machine:
   * Create a file called "Vagrantfile" with this basic setup:
     ```ruby
-    # -*- mode: ruby -*-
-    # vi: set ft=ruby :
     Vagrant.configure("2") do |config|
-      config.vm.box = "bento/ubuntu-20.04"
+      config.vm.box = "bento/ubuntu-22.04"
       config.disksize.size = '40GB'
       config.vm.provider "virtualbox" do |vb|
         vb.memory = 4096
@@ -47,7 +61,7 @@ end
     ```bash
     git clone https://github.com/named-data/mini-ndn.git
     cd mini-ndn
-    ./install.sh --source
+    ./install.sh
     ```
 * To test mini-ndn:
     * while still in the `mini-ndn` directory, enter
@@ -56,7 +70,7 @@ end
       ```
     * If it worked, You will see the Mini-NDN CLI. Enter `exit` to close the CLI.
 
-(Additional optional "not really needed" steps)
+(Recommended steps for distribution)
 * To clean and export vm as Vagrant Box:
     * while in vm, enter these to clean:
       ```bash

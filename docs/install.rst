@@ -58,11 +58,12 @@ Additional recommendations
 Using Vagrantfile
 -----------------
 
-With Vagrant installed, simply do ``vagrant up`` which will bring up an Ubuntu 20.04 virtual machine
-and install Mini-NDN and all its dependencies on it. Please make sure to tweak the CPU core count
-(default 4 cores) and RAM (default 4GB) according to your needs before doing ``vagrant up``. Mini-NDN
-can be found in ``/home/vagrant/mini-ndn`` which is a symlink to ``/vagrant`` if Vagrantfile was used
-from within mini-ndn cloned on the host. Otherwise it is an actual clone of mini-ndn.
+With Vagrant installed, call ``vagrant up`` from a shell in the ``vagrant`` directory which will bring up
+an Ubuntu 22.04 virtual machine with Mini-NDN and all its dependencies installed on it. Please make sure to
+tweak the CPU core count (default 4 cores) and RAM (default 4GB) according to your needs before doing
+``vagrant up``. Mini-NDN can be found in ``/home/vagrant/mini-ndn``. A README with more information can also
+be found at ``vagrant/README.md``
+`(link to README on Github) <https://github.com/named-data/mini-ndn/blob/master/vagrant/README.md>`__.
 
 Using install.sh
 ----------------
