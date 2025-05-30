@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2019, The University of Memphis,
+# Copyright (C) 2015-2025, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -22,14 +22,34 @@
 # If not, see <http://www.gnu.org/licenses/>.
 import json
 import os
+from shlex import quote
+from typing import List, Optional, Tuple, Union
+
+from mininet.clean import sh
+from mininet.log import debug
+from mininet.node import Node
 
 from minindn.apps.application import Application
 from minindn.util import copyExistentFile
 from minindn.minindn import Minindn
 
 class Nfd(Application):
-    def __init__(self, node, logLevel='NONE', csSize=65536,
-                 csPolicy='lru', csUnsolicitedPolicy='drop-all'):
+    def __init__(self, node: Node, logLevel: str = 'NONE', csSize: int = 65536,
+                 csPolicy: str = 'lru', csUnsolicitedPolicy: str = 'drop-all',
+                 infoeditChanges: Optional[List[Union[Tuple[str, str], Tuple[str, str, str]]]] = None):
+        """
+        Set up NFD application through wrapper on node. These arguments are directly from nfd.conf,
+        so please reference that documentation for more information.
+
+        :param node: Mininet or Mininet-Wifi node object
+        :param logLevel: NFD log level set as default (default  "NONE")
+        :param csSize: ContentStore size in packets (default 65536)
+        :param csPolicy: ContentStore replacement policy (default "lru")
+        :param csUnsolicitedPolicy: Policy for handling unsolicited data (default "drop-all")
+        :param infoeditChanges: Commands passed to infoedit other than the most commonly used arguments.
+               These either expect (key, value) (using the `section` command) or otherwise
+               (key, value, put|section|delete).
+        """
         Application.__init__(self, node)
         self.logLevel = node.params['params'].get('nfd-log-level', logLevel)
 
@@ -76,6 +96,25 @@ class Nfd(Application):
 
         # Remove the intermediate JSON file
         os.remove("{}/temp_nfd_conf.json".format(self.homeDir))
+
+        self.infocmd = 'infoedit -f nfd.conf'
+        # Apply custom infoedit changes
+        # EXPECTED FORMAT: [<section>, <key>] OR [<section>, <key>, <operation>]
+        # Default behavior will replace all values for section with key
+        # Deletion only works for unique keys
+        INFOEDIT_COMMANDS = {"put": "-p", "delete": "-d", "section": "-s"}
+        if infoeditChanges:
+            for infoeditChange in infoeditChanges:
+                command = "-s"
+                if len(infoeditChange) > 2:
+                    if infoeditChange[2] == "delete":
+                        debug(f'{self.infocmd} -d {quote(infoeditChange[0])}\n')
+                        debug(self.node.cmd(f'{self.infocmd} -d {quote(infoeditChange[0])}\n'))
+                        continue
+                    else:
+                        command = INFOEDIT_COMMANDS[infoeditChange[2]]
+                debug(f'{self.infocmd} {command} {quote(infoeditChange[0])} -v {quote(infoeditChange[1])}\n')
+                debug(self.node.cmd(f'{self.infocmd} {command} {quote(infoeditChange[0])} -v {quote(infoeditChange[1])}\n'))
 
         if not Minindn.ndnSecurityDisabled:
             # Generate key and install cert for /localhost/operator to be used by NFD

@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2021, The University of Memphis,
+# Copyright (C) 2015-2025, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -21,13 +21,16 @@
 # along with Mini-NDN, e.g., in COPYING.md file.
 # If not, see <http://www.gnu.org/licenses/>.
 
+import os
+from shlex import quote
 import shutil
-import os, sys
+import sys
+from typing import Dict, List, Optional, Tuple, Union
 
 from mininet.clean import sh
 from mininet.examples.cluster import RemoteMixin
-from mininet.log import warn
-from mininet.node import Switch
+from mininet.log import debug, warn
+from mininet.node import Node, Switch
 
 from minindn.apps.application import Application
 from minindn.util import scp, copyExistentFile, MACToEther
@@ -40,8 +43,32 @@ class Nlsr(Application):
     ROUTING_DRY_RUN = 'dry'
     SYNC_PSYNC = 'psync'
 
-    def __init__(self, node, logLevel='NONE', security=False, sync=SYNC_PSYNC,
-                 faceType=Nfdc.PROTOCOL_UDP, nFaces=3, routingType=ROUTING_LINK_STATE, faceDict=None):
+    def __init__(self, node: Node, logLevel: str ='NONE', security: bool = False, sync: str = SYNC_PSYNC,
+                 faceType: str = Nfdc.PROTOCOL_UDP, nFaces: int = 3, routingType: str = ROUTING_LINK_STATE,
+                 faceDict: Optional[Dict[Node, List[Tuple[str, str, str]]]] = None,
+                 infoeditChanges: Optional[List[Union[Tuple[str, str], Tuple[str, str, str]]]] = None):
+        """
+        Set NLSR NFD application through wrapper on node. Most arguments are directly from nlsr.conf,
+        so please reference that documentation for more information.
+
+        :param node: Mininet or Mininet-Wifi node object
+        :param logLevel: NLSR log level set as default (default  "NONE")
+        :param security: Whether or not to set up signing and packet validation.
+               NDN security features are typically disabled in Mini-NDN for performance (default false)
+        :param sync: What sync to use with NLSR. PSync is the only one tested, but ndn-svs or chronosync
+               may be specified manually (default "psync")
+        :param faceType: What protocol to use to create for faces to neighbors during setup.
+               UDP faces are typically used in Mini-NDN (default "udp")
+        :param nFaces: Number of faces to maintain for each prefix after routing calculations (default 3)
+        :param routingType: Whether to use link state or hyperbolic routing. The latter requires additional setup and
+               is not recommended for novice users.
+        :param faceDict: If not creating faces via the included helper, this contains information on faces
+               to use as neighbors. This is helpful for running NLSR in any case where direct links between NDN routers
+               are not present in the topology (adhoc or infrastructure wifi, networks using IP switches or routers, etc).
+        :param infoeditChanges: Commands passed to infoedit other than the most commonly used arguments.
+               These either expect (key, value) (using the `section` command) or otherwise
+               (key, value, put|section|delete).
+        """
         Application.__init__(self, node)
         try:
             from mn_wifi.node import Node_wifi
@@ -73,6 +100,7 @@ class Nlsr(Application):
         self.infocmd = 'infoedit -f nlsr.conf'
         # Expected format- node : tuple (node name, IP, cost)
         self.faceDict = faceDict
+        self.infoeditManualChanges = infoeditChanges
 
         self.parameters = self.node.params['params']
 
@@ -116,11 +144,11 @@ class Nlsr(Application):
                 Nfdc.createFace(self.node, location, self.faceType, isPermanent=True)
 
     @staticmethod
-    def createKey(host, name, outputFile):
+    def createKey(host: Node, name: str, outputFile: Union[str, bytes, os.PathLike]):
         host.cmd('ndnsec-key-gen {} > {}'.format(name, outputFile))
 
     @staticmethod
-    def createCertificate(host, signer, keyFile, outputFile):
+    def createCertificate(host: Node, signer: str, keyFile: str, outputFile: Union[str, bytes, os.PathLike] ):
         host.cmd('ndnsec-cert-gen -s {} -r {} > {}'.format(signer, keyFile, outputFile))
 
     def createKeysAndCertificates(self):
@@ -204,6 +232,8 @@ class Nlsr(Application):
         self.__editFibSection()
         self.__editAdvertisingSection()
         self.__editSecuritySection()
+        if self.infoeditManualChanges:
+            self.__editCustom()
 
     def __editGeneralSection(self):
 
@@ -297,3 +327,20 @@ class Nlsr(Application):
             self.node.cmd('{} -p security.cert-to-publish -v security/site.cert'.format(self.infocmd))
             self.node.cmd('{} -p security.cert-to-publish -v security/op.cert'.format(self.infocmd))
             self.node.cmd('{} -p security.cert-to-publish -v security/router.cert'.format(self.infocmd))
+
+    def __editCustom(self):
+        # EXPECTED FORMAT: [<section>, <key>] OR [<section>, <key>, <operation>]
+        # Default behavior will replace all values for section with key
+        # Deletion only works for unique keys
+        INFOEDIT_COMMANDS = {"put": "-p", "delete": "-d", "section": "-s"}
+        for infoeditChange in self.infoeditManualChanges:
+            command = "-s"
+            if len(infoeditChange) > 2:
+                if infoeditChange[2] == "delete":
+                    debug(f'{self.infocmd} -d {quote(infoeditChange[0])}\n')
+                    debug(self.node.cmd(f'{self.infocmd} -d {quote(infoeditChange[0])}\n'))
+                    continue
+                else:
+                    command = INFOEDIT_COMMANDS[infoeditChange[2]]
+            debug(f'{self.infocmd} {command} {quote(infoeditChange[0])} -v {quote(infoeditChange[1])}\n')
+            debug(self.node.cmd(f'{self.infocmd} {command} {quote(infoeditChange[0])} -v {quote(infoeditChange[1])}\n'))
