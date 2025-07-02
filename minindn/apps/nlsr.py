@@ -309,8 +309,8 @@ class Nlsr(Application):
 
     def __editAdvertisingSection(self):
 
-        self.node.cmd('{} -d advertising.prefix'.format(self.infocmd))
-        self.node.cmd('{} -s advertising.prefix -v {}{}-site/{}'
+        self.node.cmd('{} -d advertising'.format(self.infocmd))
+        self.node.cmd('{} -s advertising.{}{}-site/{} -v 0'
                       .format(self.infocmd, self.network, self.node.name, self.node.name))
 
     def __editSecuritySection(self):

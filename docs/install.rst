@@ -6,13 +6,15 @@ Prerequisites
 
 Mini-NDN is officially supported on the following Linux distributions:
 
-- Ubuntu 20.04
 - Ubuntu 22.04 (recommended)
-- Ubuntu 24.04
 - Debian 11 (WiFi scenario does not work)
 - Fedora 33 (WiFi scenario does not work)
 
 You must have sudo privileges to install and run Mini-NDN.
+
+Ubuntu 20.04 LTS is no longer supported as of v0.8.0, but users may still use the v0.7.0 release.
+
+Ubuntu 24.04 LTS is not currently supported due to issues with required libraries no longer being updated.
 
 Using Docker
 ------------
