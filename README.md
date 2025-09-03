@@ -17,7 +17,7 @@ The first release of Mini-NDN is developed by members of the NSF-sponsored NDN p
 For more details, please refer to [`AUTHORS.rst`](AUTHORS.rst).
 Bug reports and feedback are highly appreciated and can be made through our
 [Redmine site](https://redmine.named-data.net/projects/mini-ndn) and the
-[mini-ndn mailing list](https://www.lists.cs.ucla.edu/mailman/listinfo/mini-ndn).
+[mini-ndn mailing list](https://www.lists.cs.ucla.edu/mailman/listinfo/mini-ndn) (please subscribe before sending email).
 
 Mini-NDN is open to contribution from the public.
 If you are new to the NDN software community and intend to contribute to the codebase, please read our
