@@ -93,6 +93,12 @@ class MinindnWifi(Minindn):
         nodes = self.net.stations + self.net.hosts + self.net.cars
         self.initParams(nodes)
 
+        if link == wmediumd and not noTopo:
+            if "wmediumd_mode" not in mininetParams:
+                info("No wmediumd mode specified in constructor, range will not be restricted (interference mode is recommended)\n")
+            else:
+                self.processWmediumd(self.topoFile)
+
         try:
             process = Popen(['ndnsec-get-default', '-k'], stdout=PIPE, stderr=PIPE)
             output, error = process.communicate()
@@ -269,6 +275,28 @@ class MinindnWifi(Minindn):
 
         except configparser.NoSectionError:
             debug("Mobility section is optional\n")
+
+    def processWmediumd(self, topoFile):
+        config = configparser.ConfigParser(delimiters=' ')
+        config.read(topoFile)
+
+        try:
+            debug("Wmediumd\n")
+            items = config.items('wmediumd')
+            if len(items) == 0:
+                return
+            params = {}
+            for param in items[0][1].split(' '):
+                if param == "_":
+                    continue
+                key = param.split('=')[0]
+                value = param.split('=')[1]
+                params[key] = value
+            params = self.convert_params(params)
+            self.net.setPropagationModel(model=params["propagation_model"], exp=params["propagation_exponent"])
+
+        except configparser.NoSectionError:
+            debug("Wmediumd section is optional\n")
 
     def startMobility(self, max_x=1000, max_y=1000, plot=True, **kwargs):
         """ Method to run a basic mobility setup on your net"""

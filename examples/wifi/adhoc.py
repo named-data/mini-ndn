@@ -29,6 +29,8 @@ from minindn.apps.app_manager import AppManager
 from minindn.apps.nfd import Nfd
 from minindn.helpers.nfdc import Nfdc
 from minindn.helpers.ndnping import NDNPing
+from mn_wifi.link import wmediumd
+from mn_wifi.wmediumdConnector import interference
 
 # This experiment uses the topology defined in adhoc-topology.conf and is intended to be a basic
 # test case where we see if two nodes can send interests to each other.
@@ -36,7 +38,9 @@ def runExperiment():
     setLogLevel('info')
 
     info("Starting network\n")
-    ndnwifi = MinindnAdhoc()
+    # Wmediumd is used to simulate signal propagation, and is needed to apply range in adhoc
+    # scenarios. The specific propagation model used is specified in topologies/wifi/adhoc-topology.conf
+    ndnwifi = MinindnAdhoc(link=wmediumd, wmediumd_mode=interference)
     a = ndnwifi.net["sta1"]
     b = ndnwifi.net["sta2"]
 
